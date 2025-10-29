@@ -9,6 +9,7 @@ import Match from "./pages/Match";
 import Chats from "./pages/Chats";
 import ChatDetail from "./pages/ChatDetail";
 import Discover from "./pages/Discover";
+import CommunityDetail from "./pages/CommunityDetail";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/chats" element={<Chats />} />
           <Route path="/chat/:id" element={<ChatDetail />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/community-detail" element={<CommunityDetail />} />
           <Route path="/profile" element={<Profile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

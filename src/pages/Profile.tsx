@@ -1,18 +1,29 @@
+import { useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Edit, MapPin, Calendar } from "lucide-react";
+import avatarPlaceholder from "@/assets/avatar-placeholder.png";
 
 const Profile = () => {
+  // This represents whether we're viewing our own profile or someone else's
+  const [isOwnProfile] = useState(true);
+
   const userProfile = {
     name: "John",
     age: 36,
-    location: "San Francisco, CA",
+    city: "San Francisco",
+    province: "CA",
     bio: "Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.",
-    stage: "School Age Kids",
+    stages: ["Early School Age (5–8)", "Pre-Teen (9–12)"],
     interests: ["Cooking", "Fitness", "Outdoors", "Tech"],
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"
+    avatar: avatarPlaceholder,
+    stats: {
+      connections: 12,
+      communities: 4,
+      events: 8
+    }
   };
 
   return (
@@ -41,14 +52,16 @@ const Profile = () => {
             </h2>
             <div className="flex items-center justify-center gap-1 text-muted-foreground mt-1">
               <MapPin className="w-4 h-4" />
-              <span>{userProfile.location}</span>
+              <span>{userProfile.city}, {userProfile.province}</span>
             </div>
           </div>
 
-          <Button className="rounded-full bg-gradient-gold">
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Profile
-          </Button>
+          {isOwnProfile && (
+            <Button className="rounded-full bg-gradient-gold">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
+          )}
         </div>
 
         <div className="bg-card rounded-lg p-6 space-y-4 shadow-md">
@@ -57,9 +70,16 @@ const Profile = () => {
             <p className="text-muted-foreground leading-relaxed">{userProfile.bio}</p>
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">{userProfile.stage}</span>
+          <div>
+            <h3 className="font-semibold text-foreground mb-2">Fatherhood Stage</h3>
+            <div className="flex flex-wrap gap-2">
+              {userProfile.stages.map((stage) => (
+                <Badge key={stage} variant="secondary" className="rounded-full">
+                  <Calendar className="w-3 h-3 mr-1" />
+                  {stage}
+                </Badge>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -74,27 +94,37 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="bg-card rounded-lg p-6 shadow-md">
-          <h3 className="font-semibold text-foreground mb-4">Stats</h3>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-heading font-semibold text-primary">12</p>
-              <p className="text-sm text-muted-foreground">Connections</p>
+        {isOwnProfile && (
+          <>
+            <div className="bg-card rounded-lg p-6 shadow-md">
+              <h3 className="font-semibold text-foreground mb-4">My Stats</h3>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-2xl font-heading font-semibold text-primary">
+                    {userProfile.stats.connections}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Connections</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-heading font-semibold text-primary">
+                    {userProfile.stats.communities}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Communities</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-heading font-semibold text-primary">
+                    {userProfile.stats.events}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Events</p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-heading font-semibold text-primary">4</p>
-              <p className="text-sm text-muted-foreground">Communities</p>
-            </div>
-            <div>
-              <p className="text-2xl font-heading font-semibold text-primary">8</p>
-              <p className="text-sm text-muted-foreground">Events</p>
-            </div>
-          </div>
-        </div>
 
-        <Button variant="outline" className="w-full rounded-full">
-          Share Profile
-        </Button>
+            <Button variant="outline" className="w-full rounded-full">
+              Share Profile
+            </Button>
+          </>
+        )}
       </div>
 
       <BottomNav />

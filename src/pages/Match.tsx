@@ -2,6 +2,7 @@ import { useState } from "react";
 import ProfileCard from "@/components/ProfileCard";
 import BottomNav from "@/components/BottomNav";
 import { useToast } from "@/hooks/use-toast";
+import avatarPlaceholder from "@/assets/avatar-placeholder.png";
 
 // Mock data
 const profiles = [
@@ -11,9 +12,9 @@ const profiles = [
     age: 35,
     location: "Portland, OR",
     bio: "Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.",
-    stage: "School Age Kids",
+    stage: "School Age (5–8)",
     interests: ["Outdoors", "Cooking", "Sports"],
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=800&fit=crop"
+    imageUrl: avatarPlaceholder
   },
   {
     id: 2,
@@ -21,9 +22,9 @@ const profiles = [
     age: 42,
     location: "Austin, TX",
     bio: "Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.",
-    stage: "Teenagers",
+    stage: "Teenager (13–18)",
     interests: ["Gaming", "Tech", "DIY"],
-    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&h=800&fit=crop"
+    imageUrl: avatarPlaceholder
   },
   {
     id: 3,
@@ -31,9 +32,9 @@ const profiles = [
     age: 38,
     location: "Seattle, WA",
     bio: "Music lover and amateur photographer. My toddlers keep me busy but I'd love to connect with dads in the area for playdates.",
-    stage: "Toddler Years",
+    stage: "Toddler (1–4)",
     interests: ["Music", "Photography", "Art"],
-    imageUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&h=800&fit=crop"
+    imageUrl: avatarPlaceholder
   }
 ];
 

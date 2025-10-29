@@ -10,8 +10,8 @@ All colors MUST be HSL.
   :root {
     /* Next Level Dads Design System - Warm, Modern, Cozy */
     
-    /* Base Colors - Soft Beige Base */
-    --background: 35 40% 95%;  /* #F8F3ED soft beige */
+    /* Base Colors - Soft Neutral Beige from Flyer */
+    --background: 35 37% 90%;  /* #EFE8DC soft neutral beige */
     --foreground: 30 30% 25%;  /* #5C4631 rich brown */
 
     /* Card Colors - Warm, Tactile Feel */
@@ -51,7 +51,7 @@ All colors MUST be HSL.
     --radius: 1rem;
 
     /* Gradients */
-    --gradient-warm: linear-gradient(135deg, hsl(35 40% 95%) 0%, hsl(35 25% 88%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(35 37% 90%) 0%, hsl(35 30% 85%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(40 60% 57%) 0%, hsl(38 55% 50%) 100%);
     
     /* Shadows - Soft, Tactile Depth */

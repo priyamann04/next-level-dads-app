@@ -16,19 +16,29 @@ const ProfileSetup = () => {
   const [formData, setFormData] = useState({
     name: "",
     age: "",
-    location: "",
+    city: "",
+    province: "",
+    country: "",
     bio: "",
-    stage: "",
+    stages: [] as string[],
     interests: [] as string[],
   });
 
   const interestOptions = [
-    "Sports", "Cooking", "Outdoors", "Gaming", "Music", "Reading",
-    "DIY", "Fitness", "Photography", "Travel", "Tech", "Art"
+    "Sports", "Cooking", "Outdoors", "Fitness", "Gaming", "Music", "Reading", 
+    "Travel", "Tech", "DIY", "Photography", "Art", "Cars", "Parenting", 
+    "Mental Wellness", "Movies", "Coffee", "Home Projects", "Volunteering", 
+    "Board Games", "Faith", "Entrepreneurship", "Pets", "Gardening", 
+    "Podcasts", "Finance", "Writing", "Add your own"
   ];
 
   const stageOptions = [
-    "New Dad", "Toddler Years", "School Age", "Teenagers", "Adult Children"
+    { label: "New Dad (0–1)", value: "New Dad (0–1)" },
+    { label: "Toddler (1–4)", value: "Toddler (1–4)" },
+    { label: "Early School Age (5–8)", value: "Early School Age (5–8)" },
+    { label: "Pre-Teen (9–12)", value: "Pre-Teen (9–12)" },
+    { label: "Teenager (13–18)", value: "Teenager (13–18)" },
+    { label: "Adult Children (18+)", value: "Adult Children (18+)" }
   ];
 
   const toggleInterest = (interest: string) => {
@@ -37,6 +47,15 @@ const ProfileSetup = () => {
       interests: prev.interests.includes(interest)
         ? prev.interests.filter(i => i !== interest)
         : [...prev.interests, interest]
+    }));
+  };
+
+  const toggleStage = (stage: string) => {
+    setFormData(prev => ({
+      ...prev,
+      stages: prev.stages.includes(stage)
+        ? prev.stages.filter(s => s !== stage)
+        : [...prev.stages, stage]
     }));
   };
 
@@ -111,12 +130,34 @@ const ProfileSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="location">Location</Label>
+                <Label htmlFor="city">City</Label>
                 <Input
-                  id="location"
-                  placeholder="City, State"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  id="city"
+                  placeholder="Your city"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  className="rounded-lg"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="province">Province</Label>
+                <Input
+                  id="province"
+                  placeholder="Your province"
+                  value={formData.province}
+                  onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                  className="rounded-lg"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country">Country (optional)</Label>
+                <Input
+                  id="country"
+                  placeholder="Your country"
+                  value={formData.country}
+                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                   className="rounded-lg"
                 />
               </div>
@@ -148,16 +189,16 @@ const ProfileSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Fatherhood Stage</Label>
+                <Label>Fatherhood Stage (Select all that apply)</Label>
                 <div className="flex flex-wrap gap-2">
                   {stageOptions.map((stage) => (
                     <Badge
-                      key={stage}
-                      variant={formData.stage === stage ? "default" : "outline"}
+                      key={stage.value}
+                      variant={formData.stages.includes(stage.value) ? "default" : "outline"}
                       className="cursor-pointer rounded-full"
-                      onClick={() => setFormData({ ...formData, stage })}
+                      onClick={() => toggleStage(stage.value)}
                     >
-                      {stage}
+                      {stage.label}
                     </Badge>
                   ))}
                 </div>

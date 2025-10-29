@@ -54,7 +54,7 @@ const Welcome = () => {
       </div>
       
       <div className="text-center pb-8 px-6 text-xs text-muted-foreground">
-        <p>Building genuine connections for modern fathers</p>
+        <p>Building genuine connections for fathers</p>
       </div>
     </div>
   );

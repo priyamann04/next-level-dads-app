@@ -52,13 +52,13 @@ const ProfileCard = ({
           <span>{stage}</span>
         </div>
         
-        <div className="flex flex-wrap gap-2">
-          {interests.map((interest) => (
-            <Badge key={interest} variant="secondary" className="rounded-full">
-              {interest}
-            </Badge>
-          ))}
-        </div>
+          <div className="flex flex-wrap gap-2">
+            {interests.map((interest) => (
+              <Badge key={interest} variant="soft" className="rounded-full">
+                {interest}
+              </Badge>
+            ))}
+          </div>
       </div>
       
       <div className="flex gap-4 p-6 pt-0">

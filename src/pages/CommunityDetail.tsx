@@ -18,10 +18,10 @@ const CommunityDetail = () => {
   };
 
   const members = [
-    { id: 1, name: "Mike", age: 35, bio: "Love hiking and cooking", avatar: avatarPlaceholder },
-    { id: 2, name: "David", age: 42, bio: "Tech dad, gaming enthusiast", avatar: avatarPlaceholder },
-    { id: 3, name: "James", age: 38, bio: "Music lover and photographer", avatar: avatarPlaceholder },
-    { id: 4, name: "Steve", age: 40, bio: "Outdoor adventure seeker", avatar: avatarPlaceholder },
+    { id: 1, name: "Mike", age: 35, bio: "Love hiking and cooking", childrenAges: "Dad of 2 kids, ages 5 and 9", avatar: avatarPlaceholder },
+    { id: 2, name: "David", age: 42, bio: "Tech dad, gaming enthusiast", childrenAges: "Dad of 3 kids, ages 7, 10, and 14", avatar: avatarPlaceholder },
+    { id: 3, name: "James", age: 38, bio: "Music lover and photographer", childrenAges: "Dad of 1 kid, age 3", avatar: avatarPlaceholder },
+    { id: 4, name: "Steve", age: 40, bio: "Outdoor adventure seeker", childrenAges: "Dad of 2 kids, ages 6 and 8", avatar: avatarPlaceholder },
   ];
 
   const handleConnect = (name: string) => {
@@ -54,23 +54,31 @@ const CommunityDetail = () => {
         </h2>
         <div className="space-y-3">
           {members.map((member) => (
-            <Card key={member.id}>
+            <Card 
+              key={member.id} 
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => navigate(`/profile/${member.id}`)}
+            >
               <CardContent className="p-4 flex items-center gap-4">
                 <Avatar className="w-12 h-12">
                   <AvatarImage src={member.avatar} alt={member.name} />
                   <AvatarFallback>{member.name[0]}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground">
                     {member.name}, {member.age}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{member.bio}</p>
+                  <p className="text-xs text-muted-foreground">{member.childrenAges}</p>
+                  <p className="text-sm text-muted-foreground truncate">{member.bio}</p>
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="rounded-full"
-                  onClick={() => handleConnect(member.name)}
+                  className="rounded-full shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConnect(member.name);
+                  }}
                 >
                   <MessageCircle className="w-4 h-4" />
                 </Button>

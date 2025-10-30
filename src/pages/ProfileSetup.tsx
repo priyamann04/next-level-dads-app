@@ -29,7 +29,7 @@ const ProfileSetup = () => {
     "Travel", "Tech", "DIY", "Photography", "Art", "Cars", "Parenting", 
     "Mental Wellness", "Movies", "Coffee", "Home Projects", "Volunteering", 
     "Board Games", "Faith", "Entrepreneurship", "Pets", "Gardening", 
-    "Podcasts", "Finance", "Writing", "Add your own"
+    "Podcasts", "Finance", "Writing"
   ];
 
   const stageOptions = [
@@ -150,17 +150,6 @@ const ProfileSetup = () => {
                   className="rounded-lg"
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country">Country (optional)</Label>
-                <Input
-                  id="country"
-                  placeholder="Your country"
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className="rounded-lg"
-                />
-              </div>
             </div>
           </div>
         )}
@@ -194,7 +183,7 @@ const ProfileSetup = () => {
                   {stageOptions.map((stage) => (
                     <Badge
                       key={stage.value}
-                      variant={formData.stages.includes(stage.value) ? "default" : "outline"}
+                      variant={formData.stages.includes(stage.value) ? "default" : "soft"}
                       className="cursor-pointer rounded-full"
                       onClick={() => toggleStage(stage.value)}
                     >
@@ -222,7 +211,7 @@ const ProfileSetup = () => {
               {interestOptions.map((interest) => (
                 <Badge
                   key={interest}
-                  variant={formData.interests.includes(interest) ? "default" : "outline"}
+                  variant={formData.interests.includes(interest) ? "default" : "soft"}
                   className="cursor-pointer rounded-full"
                   onClick={() => toggleInterest(interest)}
                 >

@@ -74,7 +74,7 @@ const Profile = () => {
             <h3 className="font-semibold text-foreground mb-2">Fatherhood Stage</h3>
             <div className="flex flex-wrap gap-2">
               {userProfile.stages.map((stage) => (
-                <Badge key={stage} variant="secondary" className="rounded-full">
+                <Badge key={stage} variant="soft" className="rounded-full">
                   <Calendar className="w-3 h-3 mr-1" />
                   {stage}
                 </Badge>
@@ -86,7 +86,7 @@ const Profile = () => {
             <h3 className="font-semibold text-foreground mb-3">Interests</h3>
             <div className="flex flex-wrap gap-2">
               {userProfile.interests.map((interest) => (
-                <Badge key={interest} variant="secondary" className="rounded-full">
+                <Badge key={interest} variant="soft" className="rounded-full">
                   {interest}
                 </Badge>
               ))}

@@ -18,11 +18,13 @@ const ProfileSetup = () => {
     age: "",
     city: "",
     province: "",
-    country: "",
     bio: "",
     stages: [] as string[],
     interests: [] as string[],
   });
+
+  const [customInterest, setCustomInterest] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const interestOptions = [
     "Sports", "Cooking", "Outdoors", "Fitness", "Gaming", "Music", "Reading", 
@@ -33,11 +35,11 @@ const ProfileSetup = () => {
   ];
 
   const stageOptions = [
-    { label: "New Dad (0–1)", value: "New Dad (0–1)" },
-    { label: "Toddler (1–4)", value: "Toddler (1–4)" },
-    { label: "Early School Age (5–8)", value: "Early School Age (5–8)" },
-    { label: "Pre-Teen (9–12)", value: "Pre-Teen (9–12)" },
-    { label: "Teenager (13–18)", value: "Teenager (13–18)" },
+    { label: "New Dad (0–1 years)", value: "New Dad (0–1 years)" },
+    { label: "Toddler Years (2–4 years)", value: "Toddler Years (2–4 years)" },
+    { label: "School Age (5–8 years)", value: "School Age (5–8 years)" },
+    { label: "Pre-Teen (9–12 years)", value: "Pre-Teen (9–12 years)" },
+    { label: "Teenager (13–17 years)", value: "Teenager (13–17 years)" },
     { label: "Adult Children (18+)", value: "Adult Children (18+)" }
   ];
 
@@ -57,6 +59,17 @@ const ProfileSetup = () => {
         ? prev.stages.filter(s => s !== stage)
         : [...prev.stages, stage]
     }));
+  };
+
+  const handleAddCustomInterest = () => {
+    if (customInterest.trim() && !formData.interests.includes(customInterest.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        interests: [...prev.interests, customInterest.trim()]
+      }));
+      setCustomInterest("");
+      setShowCustomInput(false);
+    }
   };
 
   const handleNext = () => {
@@ -218,6 +231,42 @@ const ProfileSetup = () => {
                   {interest}
                 </Badge>
               ))}
+              {formData.interests.filter(i => !interestOptions.includes(i)).map((interest) => (
+                <Badge
+                  key={interest}
+                  variant="default"
+                  className="cursor-pointer rounded-full bg-gradient-gold"
+                >
+                  {interest}
+                </Badge>
+              ))}
+              {!showCustomInput ? (
+                <Badge
+                  variant="outline"
+                  className="cursor-pointer rounded-full"
+                  onClick={() => setShowCustomInput(true)}
+                >
+                  + Add your own
+                </Badge>
+              ) : (
+                <div className="flex gap-2 w-full">
+                  <Input
+                    placeholder="Type your interest..."
+                    value={customInterest}
+                    onChange={(e) => setCustomInterest(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddCustomInterest()}
+                    className="rounded-lg"
+                    autoFocus
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleAddCustomInterest}
+                    className="rounded-full"
+                  >
+                    Add
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         )}

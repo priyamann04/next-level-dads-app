@@ -11,7 +11,7 @@ const Welcome = () => {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-8 animate-fade-in">
           <div className="flex justify-center mb-8">
-            <img src={logo} alt="Next Level Dads" className="h-24 w-auto" />
+            <img src={logo} alt="Next Level Dads" className="h-36 w-auto" />
           </div>
           
           <div className="rounded-lg overflow-hidden shadow-lg mb-8">

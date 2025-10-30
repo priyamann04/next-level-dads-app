@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChatMessage from "@/components/ChatMessage";
-import avatarPlaceholder from "@/assets/avatar-placeholder.png";
+import avatarLight1 from "@/assets/avatar-light-1.png";
 
 const mockMessages = [
   {
@@ -62,7 +62,7 @@ const ChatDetail = () => {
           </button>
           
           <Avatar className="w-10 h-10">
-            <AvatarImage src={avatarPlaceholder} />
+            <AvatarImage src={avatarLight1} />
             <AvatarFallback>M</AvatarFallback>
           </Avatar>
           

@@ -2,7 +2,10 @@ import { useState } from "react";
 import ProfileCard from "@/components/ProfileCard";
 import BottomNav from "@/components/BottomNav";
 import { useToast } from "@/hooks/use-toast";
-import avatarPlaceholder from "@/assets/avatar-placeholder.png";
+import avatarLight1 from "@/assets/avatar-light-1.png";
+import avatarMedium1 from "@/assets/avatar-medium-1.png";
+import avatarDark1 from "@/assets/avatar-dark-1.png";
+import avatarMedium2 from "@/assets/avatar-medium-2.png";
 
 // Mock data
 const profiles = [
@@ -12,9 +15,9 @@ const profiles = [
     age: 35,
     location: "Portland, OR",
     bio: "Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.",
-    stage: "School Age (5–8)",
+    stage: "School Age (5–8 years)",
     interests: ["Outdoors", "Cooking", "Sports"],
-    imageUrl: avatarPlaceholder
+    imageUrl: avatarLight1
   },
   {
     id: 2,
@@ -22,9 +25,9 @@ const profiles = [
     age: 42,
     location: "Austin, TX",
     bio: "Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.",
-    stage: "Teenager (13–18)",
+    stage: "Teenager (13–17 years)",
     interests: ["Gaming", "Tech", "DIY"],
-    imageUrl: avatarPlaceholder
+    imageUrl: avatarMedium1
   },
   {
     id: 3,
@@ -32,9 +35,19 @@ const profiles = [
     age: 38,
     location: "Seattle, WA",
     bio: "Music lover and amateur photographer. My toddlers keep me busy but I'd love to connect with dads in the area for playdates.",
-    stage: "Toddler (1–4)",
+    stage: "Toddler Years (2–4 years)",
     interests: ["Music", "Photography", "Art"],
-    imageUrl: avatarPlaceholder
+    imageUrl: avatarDark1
+  },
+  {
+    id: 4,
+    name: "Steve",
+    age: 40,
+    location: "Denver, CO",
+    bio: "Outdoor adventure seeker and sports enthusiast. Let's grab a beer and swap parenting stories!",
+    stage: "School Age (5–8 years)",
+    interests: ["Outdoors", "Sports", "Travel"],
+    imageUrl: avatarMedium2
   }
 ];
 

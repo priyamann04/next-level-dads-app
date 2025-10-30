@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Edit, MapPin, Calendar } from "lucide-react";
-import avatarPlaceholder from "@/assets/avatar-placeholder.png";
+import avatarLight1 from "@/assets/avatar-light-1.png";
 
 const Profile = () => {
   // This represents whether we're viewing our own profile or someone else's
@@ -16,9 +16,9 @@ const Profile = () => {
     city: "San Francisco",
     province: "CA",
     bio: "Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.",
-    stages: ["Early School Age (5–8)", "Pre-Teen (9–12)"],
+    stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)"],
     interests: ["Cooking", "Fitness", "Outdoors", "Tech"],
-    avatar: avatarPlaceholder,
+    avatar: avatarLight1,
     stats: {
       connections: 12,
       communities: 4,

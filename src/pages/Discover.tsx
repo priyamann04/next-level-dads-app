@@ -131,14 +131,46 @@ const Discover = () => {
           </TabsList>
 
           <TabsContent value="communities" className="space-y-4 animate-fade-in">
-            {communities.map((community) => (
-              <div key={community.id} onClick={() => navigate("/community-detail")} className="cursor-pointer">
-                <CommunityCard
-                  {...community}
-                  onJoin={() => handleJoin(community.title)}
-                />
-              </div>
-            ))}
+            <div className="space-y-3 mb-6">
+              <h3 className="text-lg font-heading font-semibold text-foreground">Your Groups</h3>
+              <Card 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate("/group-chat/private")}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-foreground">Weekend Outdoor Adventures</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="soft" className="rounded-full text-xs">Private Group</Badge>
+                        <span className="text-xs text-muted-foreground">3 members</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="text-lg font-heading font-semibold text-foreground">Discover Communities</h3>
+              {communities.map((community) => (
+                <div key={community.id} onClick={() => navigate("/community-detail")} className="cursor-pointer">
+                  <CommunityCard
+                    {...community}
+                    onJoin={() => handleJoin(community.title)}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-6">
+              <Button 
+                className="w-full rounded-full bg-gradient-gold"
+                onClick={() => navigate("/group-chat/public")}
+              >
+                Join Public Groups
+              </Button>
+            </div>
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4 animate-fade-in">

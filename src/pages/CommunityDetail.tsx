@@ -4,7 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import avatarPlaceholder from "@/assets/avatar-placeholder.png";
+import avatarLight1 from "@/assets/avatar-light-1.png";
+import avatarMedium1 from "@/assets/avatar-medium-1.png";
+import avatarDark1 from "@/assets/avatar-dark-1.png";
+import avatarMedium2 from "@/assets/avatar-medium-2.png";
 
 const CommunityDetail = () => {
   const navigate = useNavigate();
@@ -18,10 +21,10 @@ const CommunityDetail = () => {
   };
 
   const members = [
-    { id: 1, name: "Mike", age: 35, bio: "Love hiking and cooking", childrenAges: "Dad of 2 kids, ages 5 and 9", avatar: avatarPlaceholder },
-    { id: 2, name: "David", age: 42, bio: "Tech dad, gaming enthusiast", childrenAges: "Dad of 3 kids, ages 7, 10, and 14", avatar: avatarPlaceholder },
-    { id: 3, name: "James", age: 38, bio: "Music lover and photographer", childrenAges: "Dad of 1 kid, age 3", avatar: avatarPlaceholder },
-    { id: 4, name: "Steve", age: 40, bio: "Outdoor adventure seeker", childrenAges: "Dad of 2 kids, ages 6 and 8", avatar: avatarPlaceholder },
+    { id: 1, name: "Mike", age: 35, bio: "Love hiking and cooking", childrenAges: "Dad of 2 kids, ages 5 and 9", avatar: avatarLight1 },
+    { id: 2, name: "David", age: 42, bio: "Tech dad, gaming enthusiast", childrenAges: "Dad of 3 kids, ages 7, 10, and 14", avatar: avatarMedium1 },
+    { id: 3, name: "James", age: 38, bio: "Music lover and photographer", childrenAges: "Dad of 1 kid, age 3", avatar: avatarDark1 },
+    { id: 4, name: "Steve", age: 40, bio: "Outdoor adventure seeker", childrenAges: "Dad of 2 kids, ages 6 and 8", avatar: avatarMedium2 },
   ];
 
   const handleConnect = (name: string) => {

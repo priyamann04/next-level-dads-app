@@ -4,7 +4,9 @@ import BottomNav from "@/components/BottomNav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import avatarPlaceholder from "@/assets/avatar-placeholder.png";
+import avatarLight1 from "@/assets/avatar-light-1.png";
+import avatarMedium1 from "@/assets/avatar-medium-1.png";
+import avatarDark1 from "@/assets/avatar-dark-1.png";
 
 const mockChats = [
   {
@@ -13,7 +15,7 @@ const mockChats = [
     lastMessage: "That sounds great! Let's plan for Saturday.",
     timestamp: "2m ago",
     unread: 2,
-    avatar: avatarPlaceholder
+    avatar: avatarLight1
   },
   {
     id: 2,
@@ -21,7 +23,7 @@ const mockChats = [
     lastMessage: "Thanks for the advice about the school situation!",
     timestamp: "1h ago",
     unread: 0,
-    avatar: avatarPlaceholder
+    avatar: avatarMedium1
   },
   {
     id: 3,
@@ -29,7 +31,7 @@ const mockChats = [
     lastMessage: "The kids had a great time at the playdate",
     timestamp: "3h ago",
     unread: 0,
-    avatar: avatarPlaceholder
+    avatar: avatarDark1
   }
 ];
 

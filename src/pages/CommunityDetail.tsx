@@ -21,10 +21,10 @@ const CommunityDetail = () => {
   };
 
   const members = [
-    { id: 1, name: "Mike", age: 35, bio: "Love hiking and cooking", childrenAges: "Dad of 2 kids, ages 5 and 9", avatar: avatarLight1 },
-    { id: 2, name: "David", age: 42, bio: "Tech dad, gaming enthusiast", childrenAges: "Dad of 3 kids, ages 7, 10, and 14", avatar: avatarMedium1 },
-    { id: 3, name: "James", age: 38, bio: "Music lover and photographer", childrenAges: "Dad of 1 kid, age 3", avatar: avatarDark1 },
-    { id: 4, name: "Steve", age: 40, bio: "Outdoor adventure seeker", childrenAges: "Dad of 2 kids, ages 6 and 8", avatar: avatarMedium2 },
+    { id: 1, name: "Mike", age: 35, location: "Vancouver, BC", bio: "Love hiking and cooking", childrenAges: "Dad of 2 kids, ages 5 and 9", avatar: avatarLight1 },
+    { id: 2, name: "David", age: 42, location: "Calgary, AB", bio: "Tech dad, gaming enthusiast", childrenAges: "Dad of 3 kids, ages 7, 10, and 14", avatar: avatarMedium1 },
+    { id: 3, name: "James", age: 38, location: "Halifax, NS", bio: "Music lover and photographer", childrenAges: "Dad of 1 kid, age 3", avatar: avatarDark1 },
+    { id: 4, name: "Steve", age: 40, location: "Montréal, QC", bio: "Outdoor adventure seeker", childrenAges: "Dad of 2 kids, ages 6 and 8", avatar: avatarMedium2 },
   ];
 
   const handleConnect = (name: string) => {

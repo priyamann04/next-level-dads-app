@@ -9,8 +9,8 @@ const Welcome = () => {
   return (
     <div className="min-h-screen bg-gradient-warm flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md space-y-8 animate-fade-in">
-          <div className="flex justify-center mb-8">
+        <div className="w-full max-w-md space-y-6 animate-fade-in">
+          <div className="flex justify-center mt-4 mb-10">
             <img src={logo} alt="Next Level Dads" className="h-72 w-auto" />
           </div>
           

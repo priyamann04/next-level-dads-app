@@ -35,7 +35,7 @@ const Welcome = () => {
             <Button
               size="lg"
               className="w-full rounded-full bg-gradient-gold font-semibold text-base"
-              onClick={() => navigate("/setup")}
+              onClick={() => navigate("/auth")}
             >
               Get Started
             </Button>
@@ -43,7 +43,7 @@ const Welcome = () => {
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
               <button
-                onClick={() => navigate("/match")}
+                onClick={() => navigate("/auth")}
                 className="text-primary font-medium underline"
               >
                 Sign In

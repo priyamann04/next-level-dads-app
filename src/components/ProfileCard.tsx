@@ -61,11 +61,11 @@ const ProfileCard = ({
           </div>
       </div>
       
-      <div className="flex gap-4 p-6 pt-0">
+      <div className="flex gap-4 p-6 pt-0 pb-safe">
         <Button
           variant="outline"
           size="lg"
-          className="flex-1 rounded-full border-2"
+          className="flex-1 rounded-full border-2 min-h-[48px]"
           onClick={onSkip}
         >
           <X className="w-5 h-5 mr-2" />
@@ -73,7 +73,7 @@ const ProfileCard = ({
         </Button>
         <Button
           size="lg"
-          className="flex-1 rounded-full bg-gradient-gold"
+          className="flex-1 rounded-full bg-gradient-gold min-h-[48px]"
           onClick={onConnect}
         >
           <Heart className="w-5 h-5 mr-2" />

@@ -45,7 +45,10 @@ const CommunityDetail = () => {
             {community.title}
           </h1>
           <p className="text-muted-foreground mb-4">{community.description}</p>
-          <Button className="w-full rounded-full bg-gradient-gold">
+          <Button 
+            className="w-full rounded-full bg-gradient-gold"
+            onClick={() => navigate("/group-chat/public")}
+          >
             Join Community
           </Button>
         </div>

@@ -94,8 +94,8 @@ const Match = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-md mx-auto px-6 py-8">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="max-w-md mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="mb-6">
           <h1 className="text-2xl font-heading font-semibold text-foreground mb-2">
             Discover Connections

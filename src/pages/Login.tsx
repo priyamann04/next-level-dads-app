@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
-const Auth = () => {
+const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -11,29 +11,14 @@ const Auth = () => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Check if user has completed onboarding
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', session.user.id)
-          .single();
-
-        if (profile?.onboarding_completed) {
-          navigate('/discover');
-        } else {
-          navigate('/setup');
-        }
+        navigate('/discover');
       }
     };
 
     checkAuth();
   }, [navigate]);
 
-  const handleContinue = () => {
-    navigate('/setup');
-  };
-
-  const handlePreviewApp = () => {
+  const handleLogin = () => {
     navigate('/discover');
   };
 
@@ -52,7 +37,7 @@ const Auth = () => {
 
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-semibold" style={{ color: '#2D2D2D' }}>
-            Create your account
+            Log in
           </h1>
         </div>
 
@@ -61,7 +46,7 @@ const Auth = () => {
             size="lg"
             className="w-full rounded-full font-semibold"
             style={{ backgroundColor: '#D8A24A', color: '#FFFFFF' }}
-            onClick={handleContinue}
+            onClick={handleLogin}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -81,31 +66,21 @@ const Auth = () => {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Sign up with Google
+            Log in with Google
           </Button>
 
           <Button
             size="lg"
             className="w-full rounded-full font-semibold"
             style={{ backgroundColor: '#D8A24A', color: '#FFFFFF' }}
-            onClick={handleContinue}
+            onClick={handleLogin}
           >
-            Create account with email
+            Log in with Email
           </Button>
-        </div>
-
-        <div className="text-center">
-          <button
-            onClick={handlePreviewApp}
-            className="text-sm underline hover:no-underline"
-            style={{ color: '#8B7355' }}
-          >
-            Preview App
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default Auth;
+export default Login;

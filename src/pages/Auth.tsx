@@ -2,8 +2,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import logo from "@/assets/logo.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -31,40 +29,23 @@ const Auth = () => {
     checkAuth();
   }, [navigate]);
 
-  const handleGoogleSignIn = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/setup`,
-        },
-      });
+  const handleContinue = () => {
+    navigate('/setup');
+  };
 
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in with Google');
-      console.error('Google sign in error:', error);
-    }
+  const handlePreviewApp = () => {
+    navigate('/discover');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5 flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ backgroundColor: '#EFE8DC' }}>
       <div className="w-full max-w-md space-y-8 animate-fade-in">
-        <div className="flex flex-col items-center space-y-4">
-          <img src={logo} alt="Dad Tribe" className="w-24 h-24 mb-4" />
-          <h1 className="text-3xl font-heading font-semibold text-foreground text-center">
-            Welcome to Dad Tribe
-          </h1>
-          <p className="text-muted-foreground text-center">
-            Find friendship, community, and belonging
-          </p>
-        </div>
-
         <div className="space-y-4">
           <Button
             size="lg"
-            className="w-full rounded-full bg-gradient-gold font-semibold"
-            onClick={handleGoogleSignIn}
+            className="w-full rounded-full font-semibold"
+            style={{ backgroundColor: '#D8A24A', color: '#FFFFFF' }}
+            onClick={handleContinue}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -86,11 +67,26 @@ const Auth = () => {
             </svg>
             Continue with Google
           </Button>
+
+          <Button
+            size="lg"
+            className="w-full rounded-full font-semibold"
+            style={{ backgroundColor: '#D8A24A', color: '#FFFFFF' }}
+            onClick={handleContinue}
+          >
+            Continue with Email
+          </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground text-center">
-          By continuing, you agree to our Terms of Service and Privacy Policy
-        </p>
+        <div className="text-center">
+          <button
+            onClick={handlePreviewApp}
+            className="text-sm underline hover:no-underline"
+            style={{ color: '#8B7355' }}
+          >
+            Preview App
+          </button>
+        </div>
       </div>
     </div>
   );

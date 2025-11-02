@@ -25,6 +25,10 @@ export type Database = {
           interests: string[]
           name: string
           notifications_email: boolean
+          notifications_events: boolean
+          notifications_matches: boolean
+          notifications_mentions: boolean
+          notifications_messages: boolean
           notifications_push: boolean
           onboarding_completed: boolean
           phone: string
@@ -41,6 +45,10 @@ export type Database = {
           interests?: string[]
           name: string
           notifications_email?: boolean
+          notifications_events?: boolean
+          notifications_matches?: boolean
+          notifications_mentions?: boolean
+          notifications_messages?: boolean
           notifications_push?: boolean
           onboarding_completed?: boolean
           phone: string
@@ -57,6 +65,10 @@ export type Database = {
           interests?: string[]
           name?: string
           notifications_email?: boolean
+          notifications_events?: boolean
+          notifications_matches?: boolean
+          notifications_mentions?: boolean
+          notifications_messages?: boolean
           notifications_push?: boolean
           onboarding_completed?: boolean
           phone?: string

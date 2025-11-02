@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +12,7 @@ import avatarMedium2 from "@/assets/avatar-medium-2.png";
 
 const Profile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   // If no ID in URL, we're viewing our own profile
   const isOwnProfile = !id;
 
@@ -83,7 +84,12 @@ const Profile = () => {
           <h1 className="text-2xl font-heading font-semibold text-foreground">
             Profile
           </h1>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="rounded-full"
+            onClick={() => navigate("/settings")}
+          >
             <Settings className="w-5 h-5" />
           </Button>
         </div>
@@ -147,7 +153,7 @@ const Profile = () => {
         {isOwnProfile && (
           <>
             <div className="bg-card rounded-lg p-6 shadow-md">
-              <h3 className="font-semibold text-foreground mb-4">My Stats</h3>
+              <h3 className="font-semibold text-foreground mb-4">Your Activity</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-heading font-semibold text-primary">

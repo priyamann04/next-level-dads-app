@@ -4,8 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Welcome from "./pages/Welcome";
-import Auth from "./pages/Auth";
-import Login from "./pages/Login";
 import ProfileSetup from "./pages/ProfileSetup";
 import Match from "./pages/Match";
 import Chats from "./pages/Chats";
@@ -15,7 +13,6 @@ import CommunityDetail from "./pages/CommunityDetail";
 import GroupChat from "./pages/GroupChat";
 import GroupMembers from "./pages/GroupMembers";
 import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,8 +25,6 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Welcome />} />
-          <Route path="/signup" element={<Auth />} />
-          <Route path="/login" element={<Login />} />
           <Route path="/setup" element={<ProfileSetup />} />
           <Route path="/match" element={<Match />} />
           <Route path="/chats" element={<Chats />} />
@@ -40,7 +35,6 @@ const App = () => (
           <Route path="/group-members/:id" element={<GroupMembers />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

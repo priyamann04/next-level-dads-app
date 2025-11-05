@@ -191,10 +191,37 @@ const Discover = () => {
 
       <div className="max-w-md mx-auto px-6 py-6">
         <Tabs defaultValue="dads" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="dads">Dads</TabsTrigger>
-            <TabsTrigger value="communities">Communities</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3" style={{ backgroundColor: '#EFE8DC' }}>
+            <TabsTrigger 
+              value="dads"
+              style={{ 
+                borderBottom: '2px solid transparent',
+                color: '#D8A24A'
+              }}
+              className="data-[state=active]:border-b-2"
+            >
+              Dads
+            </TabsTrigger>
+            <TabsTrigger 
+              value="communities"
+              style={{ 
+                borderBottom: '2px solid transparent',
+                color: '#D8A24A'
+              }}
+              className="data-[state=active]:border-b-2"
+            >
+              Communities
+            </TabsTrigger>
+            <TabsTrigger 
+              value="events"
+              style={{ 
+                borderBottom: '2px solid transparent',
+                color: '#D8A24A'
+              }}
+              className="data-[state=active]:border-b-2"
+            >
+              Events
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dads" className="space-y-4 animate-fade-in">

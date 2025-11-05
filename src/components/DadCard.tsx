@@ -1,4 +1,5 @@
-import { MapPin, User } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
@@ -26,33 +27,39 @@ const DadCard = ({
   avatarUrl,
   onConnect,
 }: DadCardProps) => {
+  const [isRequested, setIsRequested] = useState(false);
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+  
+  const handleConnect = () => {
+    setIsRequested(true);
+    onConnect();
+  };
   
   return (
     <Card className="overflow-hidden shadow-md">
-      <CardContent className="p-6 space-y-4">
-        <div className="flex items-start gap-4">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start gap-3">
           {avatarUrl ? (
             <img 
               src={avatarUrl} 
               alt={name}
-              className="w-16 h-16 rounded-full object-cover"
+              className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
             />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-lg">
+            <div className="w-20 h-20 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-lg flex-shrink-0">
               {initials}
             </div>
           )}
           
-          <div className="flex-1">
-            <h3 className="text-lg font-heading font-semibold text-foreground">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base font-heading font-semibold text-foreground">
               {name}, {age}
             </h3>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-              <MapPin className="w-4 h-4" />
+            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+              <MapPin className="w-3 h-3" />
               <span>{city}, {province}</span>
             </div>
-            <Badge variant="soft" className="rounded-full mt-2 text-xs">
+            <Badge variant="soft" className="rounded-full mt-1.5 text-xs">
               {stage}
             </Badge>
           </div>
@@ -62,26 +69,26 @@ const DadCard = ({
           {bio}
         </p>
         
-        <div>
-          <p className="text-xs text-muted-foreground mb-2">INTERESTS</p>
-          <div className="flex flex-wrap gap-2">
-            {interests.map((interest) => (
-              <Badge 
-                key={interest} 
-                variant="outline" 
-                className="rounded-full text-xs"
-              >
-                {interest}
-              </Badge>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-1.5">
+          {interests.map((interest) => (
+            <Badge 
+              key={interest} 
+              variant="outline" 
+              className="rounded-full text-xs"
+              style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
+            >
+              {interest}
+            </Badge>
+          ))}
         </div>
         
         <Button
-          className="w-full rounded-full bg-gradient-gold font-semibold"
-          onClick={onConnect}
+          className="w-full rounded-full font-semibold"
+          style={{ backgroundColor: isRequested ? '#9ca3af' : '#D8A24A' }}
+          onClick={handleConnect}
+          disabled={isRequested}
         >
-          Connect
+          {isRequested ? 'Requested ✓' : 'Connect'}
         </Button>
       </CardContent>
     </Card>

@@ -8,19 +8,19 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ backgroundColor: '#EFE8DC' }}>
-      <div className="w-full max-w-md space-y-6 animate-fade-in text-center">
-        <div className="flex justify-center mb-6">
-          <img src={logo} alt="Next Level Dads" className="h-24 w-auto" />
+      <div className="w-full max-w-md space-y-6 animate-fade-in text-center px-6">
+        <div className="flex justify-center mb-4">
+          <img src={logo} alt="Next Level Dads" className="h-32 w-auto" />
         </div>
         
-        <div className="space-y-3">
-          <p className="text-lg font-medium" style={{ color: '#D8A24A' }}>
-            Empowering Fathers. Strengthening Families.
+        <div className="space-y-4">
+          <p className="text-xl font-medium leading-snug" style={{ color: '#D8A24A' }}>
+            Empowering Fathers.<br />
+            Strengthening Families.
           </p>
           
-          <p className="text-foreground leading-relaxed px-4">
-            Connect with fathers to find friendship, community, and belonging.<br />
-            One connection at a time.
+          <p className="text-foreground leading-relaxed text-base">
+            Connect with fathers to find friendship, community, and belonging. One connection at a time.
           </p>
         </div>
         

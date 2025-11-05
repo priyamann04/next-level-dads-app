@@ -2,12 +2,64 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import CommunityCard from "@/components/CommunityCard";
+import DadCard from "@/components/DadCard";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, DollarSign } from "lucide-react";
+import { Calendar, MapPin, DollarSign, RefreshCw } from "lucide-react";
+import avatarLight1 from "@/assets/avatar-light-1.png";
+import avatarMedium1 from "@/assets/avatar-medium-1.png";
+import avatarDark1 from "@/assets/avatar-dark-1.png";
+import avatarMedium2 from "@/assets/avatar-medium-2.png";
+
+const dads = [
+  {
+    id: 1,
+    name: "James Martinez",
+    age: 32,
+    city: "Vancouver",
+    province: "BC",
+    stage: "Toddler (2-3 yrs)",
+    bio: "Weekend warrior dad who loves trail running and teaching my little one about nature.",
+    interests: ["Fitness", "Cooking", "Outdoors"],
+    avatarUrl: avatarLight1
+  },
+  {
+    id: 2,
+    name: "David Chen",
+    age: 38,
+    city: "Toronto",
+    province: "ON",
+    stage: "Elementary (6-12 yrs)",
+    bio: "Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.",
+    interests: ["Tech", "Sports", "Gaming"],
+    avatarUrl: avatarMedium1
+  },
+  {
+    id: 3,
+    name: "Marcus Johnson",
+    age: 35,
+    city: "Calgary",
+    province: "AB",
+    stage: "Preschool (4-5 yrs)",
+    bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
+    interests: ["Music", "Photography", "Art"],
+    avatarUrl: avatarDark1
+  },
+  {
+    id: 4,
+    name: "Steve Williams",
+    age: 40,
+    city: "Montréal",
+    province: "QC",
+    stage: "Teen (13-17 yrs)",
+    bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
+    interests: ["Outdoors", "Sports", "Travel"],
+    avatarUrl: avatarMedium2
+  }
+];
 
 const communities = [
   {
@@ -102,6 +154,20 @@ const Discover = () => {
     });
   };
 
+  const handleConnect = (name: string) => {
+    toast({
+      title: "Connection sent! 🎉",
+      description: `Your connection request was sent to ${name}.`,
+    });
+  };
+
+  const handleRefresh = () => {
+    toast({
+      title: "Refreshed",
+      description: "Loading new connections...",
+    });
+  };
+
   const filteredEvents = events.filter((event) => {
     const matchesType = eventFilter === "all" || event.type.toLowerCase() === eventFilter;
     const matchesPrice = priceFilter === "all" || 
@@ -124,11 +190,35 @@ const Discover = () => {
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6">
-        <Tabs defaultValue="communities" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="dads" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="dads">Dads</TabsTrigger>
             <TabsTrigger value="communities">Communities</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dads" className="space-y-4 animate-fade-in">
+            <div className="space-y-4">
+              {dads.map((dad) => (
+                <DadCard
+                  key={dad.id}
+                  {...dad}
+                  onConnect={() => handleConnect(dad.name)}
+                />
+              ))}
+            </div>
+            
+            <div className="pt-4">
+              <Button
+                variant="outline"
+                className="w-full rounded-full"
+                onClick={handleRefresh}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+          </TabsContent>
 
           <TabsContent value="communities" className="space-y-4 animate-fade-in">
             <div className="space-y-3 mb-6">

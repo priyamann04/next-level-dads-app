@@ -11,7 +11,7 @@ import { ArrowLeft } from "lucide-react";
 const ProfileSetup = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const totalSteps = 3;
+  const totalSteps = 4;
   
   const [formData, setFormData] = useState({
     name: "",
@@ -35,12 +35,13 @@ const ProfileSetup = () => {
   ];
 
   const stageOptions = [
-    { label: "New Dad (0–1 years)", value: "New Dad (0–1 years)" },
-    { label: "Toddler Years (2–4 years)", value: "Toddler Years (2–4 years)" },
-    { label: "School Age (5–8 years)", value: "School Age (5–8 years)" },
-    { label: "Pre-Teen (9–12 years)", value: "Pre-Teen (9–12 years)" },
-    { label: "Teenager (13–17 years)", value: "Teenager (13–17 years)" },
-    { label: "Adult Children (18+)", value: "Adult Children (18+)" }
+    { label: "Expecting (pregnant/adopting)", value: "Expecting" },
+    { label: "Newborn (0–1 year)", value: "Newborn (0–1 year)" },
+    { label: "Toddler (2–3 years)", value: "Toddler (2–3 years)" },
+    { label: "Preschool (4–5 years)", value: "Preschool (4–5 years)" },
+    { label: "Elementary (6–12 years)", value: "Elementary (6–12 years)" },
+    { label: "Teen (13–17 years)", value: "Teen (13–17 years)" },
+    { label: "Adult (18+ years)", value: "Adult (18+ years)" }
   ];
 
   const toggleInterest = (interest: string) => {
@@ -76,7 +77,7 @@ const ProfileSetup = () => {
     if (step < totalSteps) {
       setStep(step + 1);
     } else {
-      navigate("/match");
+      navigate("/discover");
     }
   };
 
@@ -123,7 +124,7 @@ const ProfileSetup = () => {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  placeholder="Your first name"
+                  placeholder="Your name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="rounded-lg"
@@ -183,11 +184,20 @@ const ProfileSetup = () => {
                 <Label htmlFor="bio">About You</Label>
                 <Textarea
                   id="bio"
-                  placeholder="Tell us a bit about yourself, your interests, and what you're looking for in a friendship..."
+                  placeholder="Love hiking with my kids and exploring new coffee shops."
                   value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 120) {
+                      setFormData({ ...formData, bio: e.target.value });
+                    }
+                  }}
                   className="rounded-lg min-h-32"
+                  maxLength={120}
+                  required
                 />
+                <div className="text-xs text-muted-foreground text-right">
+                  {formData.bio.length}/120
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -267,6 +277,31 @@ const ProfileSetup = () => {
                   </Button>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-heading font-semibold text-foreground">
+                Add a Photo (Optional)
+              </h2>
+              <p className="text-muted-foreground">
+                Help other dads recognize you
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-32 h-32 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-muted-foreground text-sm">No photo</span>
+              </div>
+              <Button
+                variant="outline"
+                className="rounded-full"
+              >
+                Upload Photo
+              </Button>
             </div>
           </div>
         )}

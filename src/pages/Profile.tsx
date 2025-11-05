@@ -147,7 +147,7 @@ const Profile = () => {
         {isOwnProfile && (
           <>
             <div className="bg-card rounded-lg p-6 shadow-md">
-              <h3 className="font-semibold text-foreground mb-4">My Stats</h3>
+              <h3 className="font-semibold text-foreground mb-4">My Activity</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-2xl font-heading font-semibold text-primary">

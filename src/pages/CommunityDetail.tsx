@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,38 +10,100 @@ import avatarDark1 from "@/assets/avatar-dark-1.png";
 
 const CommunityDetail = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [isInterested, setIsInterested] = useState(false);
 
-  const community = {
-    title: "Saturday Coffee Dads",
-    description: "Weekly Saturday morning meetups at local coffee shops. Share stories, swap advice, and build lasting friendships.",
-    memberCount: 42,
-    nextEvent: "Sat 9am"
+  const communitiesData: Record<string, any> = {
+    "1": {
+      title: "Saturday Coffee Dads",
+      description: "Weekly Saturday morning meetups at local coffee shops. Share stories, swap advice, and build lasting friendships.",
+      memberCount: 42,
+      nextEvent: "Sat 9am"
+    },
+    "2": {
+      title: "Outdoor Adventure Dads",
+      description: "For dads who love hiking, camping, and exploring nature with their kids. Monthly outdoor excursions.",
+      memberCount: 67,
+      nextEvent: "Next Sun"
+    },
+    "3": {
+      title: "Tech & Gaming Dads",
+      description: "Connect over technology, gaming, and teaching kids to code. Virtual meetups and gaming sessions.",
+      memberCount: 89,
+      nextEvent: null
+    },
+    "4": {
+      title: "New Dads Support",
+      description: "Just starting your fatherhood journey? Connect with other new dads navigating the early years together.",
+      memberCount: 53,
+      nextEvent: "Thu 7pm"
+    },
+    "5": {
+      title: "Sports & Fitness Dads",
+      description: "Stay active together! Organize pickup games, workout sessions, and teach kids about sports.",
+      memberCount: 78,
+      nextEvent: "Sat 10am"
+    },
+    "6": {
+      title: "Creative Dads",
+      description: "For fathers who love art, music, photography, and creative pursuits. Share projects and inspire each other.",
+      memberCount: 34,
+      nextEvent: null
+    }
   };
 
-  const members = [
-    {
-      id: 1,
-      name: "Michael Thompson",
-      stage: "Toddler (2-3 years)",
-      bio: "Love getting outside with my boys and exploring new parks.",
-      avatarUrl: avatarLight1
-    },
-    {
-      id: 2,
-      name: "Robert Chen",
-      stage: "Elementary (6-12 years)",
-      bio: "Tech guy who loves cooking and weekend adventures.",
-      avatarUrl: avatarMedium1
-    },
-    {
-      id: 3,
-      name: "Anthony Williams",
-      stage: "Preschool (4-5 years)",
-      bio: "Fitness enthusiast and amateur photographer.",
-      avatarUrl: avatarDark1
-    },
-  ];
+  const community = communitiesData[id || "1"] || communitiesData["1"];
+
+  const membersData: Record<string, any[]> = {
+    "1": [
+      {
+        id: 1,
+        name: "Michael Thompson",
+        age: 34,
+        stage: "Toddler (2-3 years)",
+        bio: "Love getting outside with my boys and exploring new parks.",
+        avatarUrl: avatarLight1
+      },
+      {
+        id: 2,
+        name: "Robert Chen",
+        age: 39,
+        stage: "Elementary (6-12 years)",
+        bio: "Tech guy who loves cooking and weekend adventures.",
+        avatarUrl: avatarMedium1
+      },
+      {
+        id: 3,
+        name: "Anthony Williams",
+        age: 36,
+        stage: "Preschool (4-5 years)",
+        bio: "Fitness enthusiast and amateur photographer.",
+        avatarUrl: avatarDark1
+      },
+    ],
+    "2": [
+      {
+        id: 4,
+        name: "James Martinez",
+        age: 32,
+        stage: "Toddler (2-3 years)",
+        bio: "Weekend warrior dad who loves trail running.",
+        avatarUrl: avatarLight1
+      },
+    ],
+    "3": [
+      {
+        id: 5,
+        name: "David Chen",
+        age: 38,
+        stage: "Elementary (6-12 years)",
+        bio: "Tech enthusiast and soccer coach.",
+        avatarUrl: avatarMedium1
+      },
+    ]
+  };
+
+  const members = membersData[id || "1"] || membersData["1"];
 
   const handleInterested = () => {
     setIsInterested(!isInterested);
@@ -97,7 +159,7 @@ const CommunityDetail = () => {
             <Card 
               key={member.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/profile/${member.id}`)}
+              onClick={() => navigate(`/profile/${member.id}?from=community&communityId=${id}`)}
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">

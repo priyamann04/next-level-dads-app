@@ -1,17 +1,21 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, MapPin, Calendar } from "lucide-react";
+import { Settings, Edit, MapPin, Calendar, ArrowLeft } from "lucide-react";
 import avatarLight1 from "@/assets/avatar-light-1.png";
 import avatarMedium1 from "@/assets/avatar-medium-1.png";
 import avatarDark1 from "@/assets/avatar-dark-1.png";
 import avatarMedium2 from "@/assets/avatar-medium-2.png";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const from = searchParams.get("from");
+  const communityId = searchParams.get("communityId");
   // If no ID in URL, we're viewing our own profile
   const isOwnProfile = !id;
 
@@ -53,13 +57,13 @@ const Profile = () => {
       avatar: avatarMedium1
     },
     "3": {
-      name: "James",
-      age: 38,
-      city: "Halifax",
-      province: "NS",
-      bio: "Music lover and amateur photographer. My toddlers keep me busy but I'd love to connect with dads in the area for playdates.",
-      stages: ["Toddler (2-3 years)"],
-      interests: ["Music", "Photography", "Art"],
+      name: "Anthony Williams",
+      age: 36,
+      city: "Toronto",
+      province: "ON",
+      bio: "Fitness enthusiast and amateur photographer.",
+      stages: ["Preschool (4-5 years)"],
+      interests: ["Fitness", "Photography", "Art"],
       avatar: avatarDark1
     },
     "4": {
@@ -80,9 +84,21 @@ const Profile = () => {
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-heading font-semibold text-foreground">
-            Profile
-          </h1>
+          <div className="flex items-center gap-4 flex-1">
+            {from === "community" && communityId && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(`/community-detail/${communityId}`)}
+                className="rounded-full"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            )}
+            <h1 className="text-2xl font-heading font-semibold text-foreground">
+              Profile
+            </h1>
+          </div>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Settings className="w-5 h-5" />
           </Button>

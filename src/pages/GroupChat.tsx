@@ -55,7 +55,7 @@ const GroupChat = () => {
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate("/discover")} className="text-muted-foreground">
+            <button onClick={() => navigate("/discover?tab=communities")} className="text-muted-foreground">
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div className="flex-1">

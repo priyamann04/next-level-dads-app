@@ -184,7 +184,7 @@ const Discover = () => {
             Discover
           </h1>
           <p className="text-muted-foreground">
-            Join communities and find your tribe
+            Join communities and find community.
           </p>
         </div>
       </div>
@@ -259,7 +259,7 @@ const Discover = () => {
             <div className="space-y-3">
               <h3 className="text-lg font-heading font-semibold text-foreground">Discover Communities</h3>
               {communities.map((community) => (
-                <div key={community.id} onClick={() => navigate("/community-detail")} className="cursor-pointer">
+                <div key={community.id} onClick={() => navigate(`/community-detail/${community.id}`)} className="cursor-pointer">
                   <CommunityCard
                     {...community}
                     onJoin={() => handleJoin(community.title)}

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChatMessage from "@/components/ChatMessage";
 import avatarLight1 from "@/assets/avatar-light-1.png";
+import avatarMedium1 from "@/assets/avatar-medium-1.png";
+import avatarDark1 from "@/assets/avatar-dark-1.png";
 
 const mockMessages = [
   {
@@ -34,11 +36,19 @@ const mockMessages = [
   }
 ];
 
+const chatData: { [key: string]: { name: string; avatar: string; status: string } } = {
+  "1": { name: "Mike", avatar: avatarLight1, status: "Active now" },
+  "2": { name: "David", avatar: avatarMedium1, status: "Active 5m ago" },
+  "3": { name: "James", avatar: avatarDark1, status: "Active 1h ago" }
+};
+
 const ChatDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(mockMessages);
+  
+  const currentChat = chatData[id || "1"] || chatData["1"];
 
   const handleSend = () => {
     if (message.trim()) {
@@ -62,13 +72,13 @@ const ChatDetail = () => {
           </button>
           
           <Avatar className="w-10 h-10">
-            <AvatarImage src={avatarLight1} />
-            <AvatarFallback>M</AvatarFallback>
+            <AvatarImage src={currentChat.avatar} />
+            <AvatarFallback>{currentChat.name[0]}</AvatarFallback>
           </Avatar>
           
           <div className="flex-1">
-            <h2 className="font-semibold text-foreground">Mike</h2>
-            <p className="text-xs text-muted-foreground">Active now</p>
+            <h2 className="font-semibold text-foreground">{currentChat.name}</h2>
+            <p className="text-xs text-muted-foreground">{currentChat.status}</p>
           </div>
         </div>
       </div>

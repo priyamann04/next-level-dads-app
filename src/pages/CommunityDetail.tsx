@@ -101,10 +101,10 @@ const CommunityDetail = () => {
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <img 
+                   <img 
                     src={member.avatarUrl} 
                     alt={member.name}
-                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                    className="w-16 h-16 rounded-lg object-cover flex-shrink-0 aspect-square"
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-foreground text-base">{member.name}</h4>

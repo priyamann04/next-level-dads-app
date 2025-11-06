@@ -8,12 +8,12 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ backgroundColor: '#EFE8DC' }}>
-      <div className="w-full max-w-md space-y-6 animate-fade-in text-center px-6">
-        <div className="flex justify-center mb-4">
-          <img src={logo} alt="Next Level Dads" className="h-32 w-auto" />
+      <div className="w-full max-w-md space-y-4 animate-fade-in text-center px-6">
+        <div className="flex justify-center mt-8 mb-6">
+          <img src={logo} alt="Next Level Dads" className="h-40 w-auto" />
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p className="text-xl font-medium leading-snug" style={{ color: '#D8A24A' }}>
             Empowering Fathers.<br />
             Strengthening Families.
@@ -24,7 +24,7 @@ const Welcome = () => {
           </p>
         </div>
         
-        <div className="pt-6">
+        <div className="pt-3 space-y-2">
           <Button
             size="lg"
             className="w-full rounded-full font-semibold text-base shadow-md"
@@ -33,6 +33,16 @@ const Welcome = () => {
           >
             Get Started
           </Button>
+          <p className="text-sm text-foreground">
+            Already have an account?{" "}
+            <button 
+              onClick={() => navigate("/login")} 
+              className="font-semibold underline"
+              style={{ color: '#D8A24A' }}
+            >
+              Sign In
+            </button>
+          </p>
         </div>
       </div>
     </div>

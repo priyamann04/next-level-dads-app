@@ -43,10 +43,10 @@ const DadCard = ({
             <img 
               src={avatarUrl} 
               alt={name}
-              className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+              className="w-20 h-20 rounded-lg object-cover flex-shrink-0 aspect-square"
             />
           ) : (
-            <div className="w-20 h-20 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-lg flex-shrink-0">
+            <div className="w-20 h-20 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-lg flex-shrink-0 aspect-square">
               {initials}
             </div>
           )}

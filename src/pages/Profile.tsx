@@ -23,7 +23,7 @@ const Profile = () => {
       city: "Toronto",
       province: "ON",
       bio: "Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.",
-      stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)"],
+      stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
       interests: ["Cooking", "Fitness", "Outdoors", "Tech"],
       avatar: avatarLight1,
       stats: {
@@ -38,7 +38,7 @@ const Profile = () => {
       city: "Vancouver",
       province: "BC",
       bio: "Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.",
-      stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)"],
+      stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
       interests: ["Outdoors", "Cooking", "Sports"],
       avatar: avatarLight1
     },
@@ -48,7 +48,7 @@ const Profile = () => {
       city: "Calgary",
       province: "AB",
       bio: "Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.",
-      stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)", "Teenager (13–17 years)"],
+      stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
       interests: ["Gaming", "Tech", "DIY"],
       avatar: avatarMedium1
     },
@@ -58,7 +58,7 @@ const Profile = () => {
       city: "Halifax",
       province: "NS",
       bio: "Music lover and amateur photographer. My toddlers keep me busy but I'd love to connect with dads in the area for playdates.",
-      stages: ["Toddler Years (2–4 years)"],
+      stages: ["Toddler (2-3 years)"],
       interests: ["Music", "Photography", "Art"],
       avatar: avatarDark1
     },
@@ -68,7 +68,7 @@ const Profile = () => {
       city: "Montréal",
       province: "QC",
       bio: "Outdoor adventure seeker and sports enthusiast. Let's grab a beer and swap parenting stories!",
-      stages: ["School Age (5–8 years)"],
+      stages: ["Elementary (6-12 years)"],
       interests: ["Outdoors", "Sports", "Travel"],
       avatar: avatarMedium2
     }
@@ -91,8 +91,8 @@ const Profile = () => {
 
       <div className="max-w-md mx-auto px-6 py-8 space-y-6 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-4">
-          <Avatar className="w-32 h-32 border-4 border-primary/20">
-            <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
+          <Avatar className="w-32 h-32 border-4 border-primary/20 aspect-square">
+            <AvatarImage src={userProfile.avatar} alt={userProfile.name} className="object-cover" />
             <AvatarFallback className="text-2xl">{userProfile.name[0]}</AvatarFallback>
           </Avatar>
           

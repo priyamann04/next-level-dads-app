@@ -10,7 +10,7 @@ const Welcome = () => {
     <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ backgroundColor: '#EFE8DC' }}>
       <div className="w-full max-w-md space-y-3 animate-fade-in text-center px-6">
         <div className="flex justify-center mt-8">
-          <img src={logo} alt="Next Level Dads" className="h-40 w-auto" />
+          <img src={logo} alt="Next Level Dads" className="h-[560px] w-auto max-w-full" />
         </div>
         
         <div className="space-y-3">

@@ -280,7 +280,7 @@ const Discover = () => {
               <Button
                 variant="outline"
                 className="w-full rounded-full font-semibold"
-                style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
+                style={{ borderColor: '#D8A24A', color: '#000000' }}
                 onClick={() => {}}
               >
                 Host Your Own Event

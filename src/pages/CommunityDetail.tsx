@@ -4,9 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import avatarLight1 from "@/assets/avatar-light-1.png";
-import avatarMedium1 from "@/assets/avatar-medium-1.png";
-import avatarDark1 from "@/assets/avatar-dark-1.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 
 const CommunityDetail = () => {
   const navigate = useNavigate();
@@ -62,7 +60,7 @@ const CommunityDetail = () => {
         age: 34,
         stage: "Toddler (2-3 years)",
         bio: "Love getting outside with my boys and exploring new parks.",
-        avatarUrl: avatarLight1
+        avatarUrl: avatarDefaultGrey
       },
       {
         id: 2,
@@ -70,7 +68,7 @@ const CommunityDetail = () => {
         age: 39,
         stage: "Elementary (6-12 years)",
         bio: "Tech guy who loves cooking and weekend adventures.",
-        avatarUrl: avatarMedium1
+        avatarUrl: avatarDefaultGrey
       },
       {
         id: 3,
@@ -78,7 +76,7 @@ const CommunityDetail = () => {
         age: 36,
         stage: "Preschool (4-5 years)",
         bio: "Fitness enthusiast and amateur photographer.",
-        avatarUrl: avatarDark1
+        avatarUrl: avatarDefaultGrey
       },
     ],
     "2": [
@@ -88,7 +86,7 @@ const CommunityDetail = () => {
         age: 32,
         stage: "Toddler (2-3 years)",
         bio: "Weekend warrior dad who loves trail running.",
-        avatarUrl: avatarLight1
+        avatarUrl: avatarDefaultGrey
       },
     ],
     "3": [
@@ -98,7 +96,7 @@ const CommunityDetail = () => {
         age: 38,
         stage: "Elementary (6-12 years)",
         bio: "Tech enthusiast and soccer coach.",
-        avatarUrl: avatarMedium1
+        avatarUrl: avatarDefaultGrey
       },
     ]
   };

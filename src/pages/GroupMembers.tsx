@@ -5,10 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import avatarLight1 from "@/assets/avatar-light-1.png";
-import avatarMedium1 from "@/assets/avatar-medium-1.png";
-import avatarDark1 from "@/assets/avatar-dark-1.png";
-import avatarMedium2 from "@/assets/avatar-medium-2.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 
 const GroupMembers = () => {
   const navigate = useNavigate();
@@ -30,7 +27,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 2 kids, ages 5 and 9",
           stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)"],
           interests: ["Outdoors", "Cooking", "Fitness"],
-          avatar: avatarLight1 
+          avatar: avatarDefaultGrey
         },
         { 
           id: 2, 
@@ -41,7 +38,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 3 kids, ages 7, 10, and 14",
           stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)", "Teenager (13–17 years)"],
           interests: ["Tech", "Gaming", "Reading"],
-          avatar: avatarMedium1 
+          avatar: avatarDefaultGrey
         },
         { 
           id: 3, 
@@ -52,7 +49,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 1 kid, age 3",
           stages: ["Toddler Years (2–4 years)"],
           interests: ["Music", "Photography", "Art"],
-          avatar: avatarDark1 
+          avatar: avatarDefaultGrey
         },
       ],
     },
@@ -70,7 +67,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 2 kids, ages 5 and 9",
           stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)"],
           interests: ["Outdoors", "Cooking", "Fitness"],
-          avatar: avatarLight1 
+          avatar: avatarDefaultGrey 
         },
         { 
           id: 2, 
@@ -81,7 +78,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 3 kids, ages 7, 10, and 14",
           stages: ["School Age (5–8 years)", "Pre-Teen (9–12 years)", "Teenager (13–17 years)"],
           interests: ["Tech", "Gaming", "Reading"],
-          avatar: avatarMedium1 
+          avatar: avatarDefaultGrey 
         },
         { 
           id: 3, 
@@ -92,7 +89,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 1 kid, age 3",
           stages: ["Toddler Years (2–4 years)"],
           interests: ["Music", "Photography", "Art"],
-          avatar: avatarDark1 
+          avatar: avatarDefaultGrey 
         },
         { 
           id: 4, 
@@ -103,7 +100,7 @@ const GroupMembers = () => {
           childrenAges: "Dad of 2 kids, ages 6 and 8",
           stages: ["School Age (5–8 years)"],
           interests: ["Outdoors", "Sports", "Travel"],
-          avatar: avatarMedium2 
+          avatar: avatarDefaultGrey 
         },
       ],
     },

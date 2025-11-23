@@ -5,9 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChatMessage from "@/components/ChatMessage";
-import avatarLight1 from "@/assets/avatar-light-1.png";
-import avatarMedium1 from "@/assets/avatar-medium-1.png";
-import avatarDark1 from "@/assets/avatar-dark-1.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 
 const mockMessages = [
   {
@@ -37,9 +35,9 @@ const mockMessages = [
 ];
 
 const chatData: { [key: string]: { name: string; avatar: string; status: string } } = {
-  "1": { name: "Mike", avatar: avatarLight1, status: "Active now" },
-  "2": { name: "David", avatar: avatarMedium1, status: "Active 5m ago" },
-  "3": { name: "James", avatar: avatarDark1, status: "Active 1h ago" }
+  "1": { name: "Mike", avatar: avatarDefaultGrey, status: "Active now" },
+  "2": { name: "David", avatar: avatarDefaultGrey, status: "Active 5m ago" },
+  "3": { name: "James", avatar: avatarDefaultGrey, status: "Active 1h ago" }
 };
 
 const ChatDetail = () => {

@@ -4,10 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Users } from "lucide-react";
-import avatarLight1 from "@/assets/avatar-light-1.png";
-import avatarMedium1 from "@/assets/avatar-medium-1.png";
-import avatarDark1 from "@/assets/avatar-dark-1.png";
-import avatarMedium2 from "@/assets/avatar-medium-2.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 
 const GroupChat = () => {
   const navigate = useNavigate();
@@ -19,19 +16,19 @@ const GroupChat = () => {
       title: "Weekend Outdoor Adventures",
       type: "Private Group",
       members: [
-        { id: 1, name: "Mike", avatar: avatarLight1 },
-        { id: 2, name: "David", avatar: avatarMedium1 },
-        { id: 3, name: "James", avatar: avatarDark1 },
+        { id: 1, name: "Mike", avatar: avatarDefaultGrey },
+        { id: 2, name: "David", avatar: avatarDefaultGrey },
+        { id: 3, name: "James", avatar: avatarDefaultGrey },
       ],
     },
     public: {
       title: "Toronto Dads Community",
       type: "Public Group",
       members: [
-        { id: 1, name: "Mike", avatar: avatarLight1 },
-        { id: 2, name: "David", avatar: avatarMedium1 },
-        { id: 3, name: "James", avatar: avatarDark1 },
-        { id: 4, name: "Steve", avatar: avatarMedium2 },
+        { id: 1, name: "Mike", avatar: avatarDefaultGrey },
+        { id: 2, name: "David", avatar: avatarDefaultGrey },
+        { id: 3, name: "James", avatar: avatarDefaultGrey },
+        { id: 4, name: "Steve", avatar: avatarDefaultGrey },
       ],
     },
   };
@@ -39,9 +36,9 @@ const GroupChat = () => {
   const group = id === "private" ? groupData.private : groupData.public;
 
   const messages = [
-    { id: 1, sender: "Mike", text: "Hey everyone! Anyone up for a hike this weekend?", time: "10:30 AM", avatar: avatarLight1 },
+    { id: 1, sender: "Mike", text: "Hey everyone! Anyone up for a hike this weekend?", time: "10:30 AM", avatar: avatarDefaultGrey },
     { id: 2, sender: "You", text: "Sounds great! I'm in. What trail are you thinking?", time: "10:32 AM", isSelf: true },
-    { id: 3, sender: "David", text: "Count me in too! My kids would love it.", time: "10:35 AM", avatar: avatarMedium1 },
+    { id: 3, sender: "David", text: "Count me in too! My kids would love it.", time: "10:35 AM", avatar: avatarDefaultGrey },
   ];
 
   const handleSend = () => {

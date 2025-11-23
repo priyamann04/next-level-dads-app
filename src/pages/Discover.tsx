@@ -279,8 +279,8 @@ const Discover = () => {
             <div className="py-4">
               <Button
                 variant="outline"
-                className="w-full rounded-full font-semibold"
-                style={{ borderColor: '#D8A24A', color: '#000000' }}
+                className="w-full rounded-full font-semibold text-foreground"
+                style={{ borderColor: '#D8A24A' }}
                 onClick={() => {}}
               >
                 Host Your Own Event

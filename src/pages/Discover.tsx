@@ -9,10 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, DollarSign, RefreshCw } from "lucide-react";
-import avatarLight1 from "@/assets/avatar-light-1.png";
-import avatarMedium1 from "@/assets/avatar-medium-1.png";
-import avatarDark1 from "@/assets/avatar-dark-1.png";
-import avatarMedium2 from "@/assets/avatar-medium-2.png";
+import avatarGreyPlaceholder from "@/assets/avatar-grey-placeholder.png";
 
 const dads = [
   {
@@ -24,7 +21,7 @@ const dads = [
     stage: "Toddler (2-3 yrs)",
     bio: "Weekend warrior dad who loves trail running and teaching my little one about nature.",
     interests: ["Fitness", "Cooking", "Outdoors"],
-    avatarUrl: avatarLight1
+    avatarUrl: avatarGreyPlaceholder
   },
   {
     id: 2,
@@ -35,7 +32,7 @@ const dads = [
     stage: "Elementary (6-12 yrs)",
     bio: "Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.",
     interests: ["Tech", "Sports", "Gaming"],
-    avatarUrl: avatarMedium1
+    avatarUrl: avatarGreyPlaceholder
   },
   {
     id: 3,
@@ -46,7 +43,7 @@ const dads = [
     stage: "Preschool (4-5 yrs)",
     bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
     interests: ["Music", "Photography", "Art"],
-    avatarUrl: avatarDark1
+    avatarUrl: avatarGreyPlaceholder
   },
   {
     id: 4,
@@ -57,7 +54,7 @@ const dads = [
     stage: "Teen (13-17 yrs)",
     bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
     interests: ["Outdoors", "Sports", "Travel"],
-    avatarUrl: avatarMedium2
+    avatarUrl: avatarGreyPlaceholder
   }
 ];
 

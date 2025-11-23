@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ConnectionCard from "@/components/ConnectionCard";
+import ConnectionRequestCard from "@/components/ConnectionRequestCard";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
-import avatarPlaceholder from "@/assets/avatar-placeholder.png";
+import avatarGreyPlaceholder from "@/assets/avatar-grey-placeholder.png";
 
 const mockConnections = [
   {
@@ -18,7 +16,8 @@ const mockConnections = [
     city: "Toronto",
     province: "ON",
     childAgeRange: "Toddler (2-3 yrs)",
-    interests: ["Sports", "Outdoors", "Tech"]
+    interests: ["Sports", "Outdoors", "Tech"],
+    avatarUrl: avatarGreyPlaceholder
   },
   {
     id: 2,
@@ -27,7 +26,8 @@ const mockConnections = [
     city: "Vancouver",
     province: "BC",
     childAgeRange: "Elementary (6-12 yrs)",
-    interests: ["Cooking", "Gaming", "Reading"]
+    interests: ["Cooking", "Gaming", "Reading"],
+    avatarUrl: avatarGreyPlaceholder
   },
   {
     id: 3,
@@ -36,7 +36,8 @@ const mockConnections = [
     city: "Calgary",
     province: "AB",
     childAgeRange: "Preschool (4-5 yrs)",
-    interests: ["Music", "Photography", "Fitness"]
+    interests: ["Music", "Photography", "Fitness"],
+    avatarUrl: avatarGreyPlaceholder
   }
 ];
 
@@ -48,7 +49,8 @@ const mockConnectionRequests = [
     city: "Montreal",
     province: "QC",
     childAgeRange: "Infant (0-1 yr)",
-    interests: ["Travel", "Art", "Cooking"]
+    interests: ["Travel", "Art", "Cooking"],
+    avatarUrl: avatarGreyPlaceholder
   }
 ];
 
@@ -59,7 +61,7 @@ const mockChats = [
     lastMessage: "That sounds great! Let's plan for Saturday.",
     timestamp: "2m ago",
     unread: 2,
-    avatar: avatarPlaceholder
+    avatar: avatarGreyPlaceholder
   },
   {
     id: 2,
@@ -67,7 +69,7 @@ const mockChats = [
     lastMessage: "Thanks for the advice about the school situation!",
     timestamp: "1h ago",
     unread: 0,
-    avatar: avatarPlaceholder
+    avatar: avatarGreyPlaceholder
   },
   {
     id: 3,
@@ -75,7 +77,7 @@ const mockChats = [
     lastMessage: "The kids had a great time at the playdate",
     timestamp: "3h ago",
     unread: 0,
-    avatar: avatarPlaceholder
+    avatar: avatarGreyPlaceholder
   }
 ];
 
@@ -118,100 +120,23 @@ const Chats = () => {
             <div className="space-y-3">
               <h3 className="text-lg font-heading font-semibold text-foreground">My Connections</h3>
               {mockConnections.map((connection) => (
-                <Card key={connection.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      <img 
-                        src={avatarPlaceholder} 
-                        alt={connection.name}
-                        className="w-16 h-16 rounded-md object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          {connection.name}, {connection.age}
-                        </h4>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {connection.city}, {connection.province}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {connection.childAgeRange}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {connection.interests.map((interest, index) => (
-                            <Badge 
-                              key={index} 
-                              variant="soft" 
-                              className="rounded-full text-xs"
-                            >
-                              {interest}
-                            </Badge>
-                          ))}
-                        </div>
-                        <Button 
-                          size="sm" 
-                          className="rounded-full w-full"
-                          onClick={() => navigate(`/chat/${connection.id}`)}
-                        >
-                          Chat
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ConnectionCard
+                  key={connection.id}
+                  {...connection}
+                  onChat={() => navigate(`/chat/${connection.id}`)}
+                />
               ))}
             </div>
 
             <div className="space-y-3">
               <h3 className="text-lg font-heading font-semibold text-foreground">Connection Requests</h3>
               {mockConnectionRequests.map((request) => (
-                <Card key={request.id} className="overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      <img 
-                        src={avatarPlaceholder} 
-                        alt={request.name}
-                        className="w-16 h-16 rounded-md object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          {request.name}, {request.age}
-                        </h4>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {request.city}, {request.province}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {request.childAgeRange}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {request.interests.map((interest, index) => (
-                            <Badge 
-                              key={index} 
-                              variant="soft" 
-                              className="rounded-full text-xs"
-                            >
-                              {interest}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            className="rounded-full flex-1"
-                          >
-                            Accept
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="rounded-full flex-1"
-                          >
-                            Ignore
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ConnectionRequestCard
+                  key={request.id}
+                  {...request}
+                  onAccept={() => {}}
+                  onIgnore={() => {}}
+                />
               ))}
             </div>
           </TabsContent>

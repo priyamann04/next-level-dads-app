@@ -6,7 +6,7 @@ import ConnectionRequestCard from "@/components/ConnectionRequestCard";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
-import avatarGreyPlaceholder from "@/assets/avatar-grey-placeholder.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 
 const mockConnections = [
   {
@@ -16,8 +16,9 @@ const mockConnections = [
     city: "Toronto",
     province: "ON",
     childAgeRange: "Toddler (2-3 yrs)",
+    bio: "Love spending time outdoors with my little guy. Always up for a playdate or dad chat over coffee.",
     interests: ["Sports", "Outdoors", "Tech"],
-    avatarUrl: avatarGreyPlaceholder
+    avatarUrl: avatarDefaultGrey
   },
   {
     id: 2,
@@ -26,8 +27,9 @@ const mockConnections = [
     city: "Vancouver",
     province: "BC",
     childAgeRange: "Elementary (6-12 yrs)",
+    bio: "Tech dad who also loves cooking. Looking to connect with other dads for advice and friendship.",
     interests: ["Cooking", "Gaming", "Reading"],
-    avatarUrl: avatarGreyPlaceholder
+    avatarUrl: avatarDefaultGrey
   },
   {
     id: 3,
@@ -36,8 +38,9 @@ const mockConnections = [
     city: "Calgary",
     province: "AB",
     childAgeRange: "Preschool (4-5 yrs)",
+    bio: "Music and photography enthusiast. Would love to connect with creative dads in the area.",
     interests: ["Music", "Photography", "Fitness"],
-    avatarUrl: avatarGreyPlaceholder
+    avatarUrl: avatarDefaultGrey
   }
 ];
 
@@ -49,8 +52,9 @@ const mockConnectionRequests = [
     city: "Montreal",
     province: "QC",
     childAgeRange: "Infant (0-1 yr)",
+    bio: "New dad navigating the early days. Love to travel and explore new experiences with my family.",
     interests: ["Travel", "Art", "Cooking"],
-    avatarUrl: avatarGreyPlaceholder
+    avatarUrl: avatarDefaultGrey
   }
 ];
 
@@ -61,7 +65,7 @@ const mockChats = [
     lastMessage: "That sounds great! Let's plan for Saturday.",
     timestamp: "2m ago",
     unread: 2,
-    avatar: avatarGreyPlaceholder
+    avatar: avatarDefaultGrey
   },
   {
     id: 2,
@@ -69,7 +73,7 @@ const mockChats = [
     lastMessage: "Thanks for the advice about the school situation!",
     timestamp: "1h ago",
     unread: 0,
-    avatar: avatarGreyPlaceholder
+    avatar: avatarDefaultGrey
   },
   {
     id: 3,
@@ -77,7 +81,7 @@ const mockChats = [
     lastMessage: "The kids had a great time at the playdate",
     timestamp: "3h ago",
     unread: 0,
-    avatar: avatarGreyPlaceholder
+    avatar: avatarDefaultGrey
   }
 ];
 

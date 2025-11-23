@@ -9,6 +9,7 @@ interface ConnectionCardProps {
   city: string;
   province: string;
   childAgeRange: string;
+  bio: string;
   interests: string[];
   avatarUrl?: string;
   onChat: () => void;
@@ -20,6 +21,7 @@ const ConnectionCard = ({
   city,
   province,
   childAgeRange,
+  bio,
   interests,
   avatarUrl,
   onChat,
@@ -55,6 +57,10 @@ const ConnectionCard = ({
             </Badge>
           </div>
         </div>
+        
+        <p className="text-foreground text-sm leading-relaxed">
+          {bio}
+        </p>
         
         <div className="flex flex-wrap gap-1.5">
           {interests.map((interest) => (

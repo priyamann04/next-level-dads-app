@@ -8,9 +8,9 @@ const Welcome = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ backgroundColor: '#EFE8DC' }}>
-      <div className="w-full max-w-md space-y-6 animate-fade-in text-center px-6">
-        <div className="flex justify-center mt-8">
-          <img src={logo} alt="Next Level Dads" className="w-[65%] h-auto max-w-md" />
+      <div className="w-full max-w-md space-y-8 animate-fade-in text-center px-6">
+        <div className="flex justify-center mt-12 mb-8">
+          <img src={logo} alt="Next Level Dads" className="w-[95%] h-auto" />
         </div>
         
         <div className="space-y-3">

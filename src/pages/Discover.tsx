@@ -279,7 +279,7 @@ const Discover = () => {
             <div className="py-4">
               <Button
                 variant="outline"
-                className="w-full rounded-full font-semibold text-foreground"
+                className="w-full rounded-full font-semibold text-foreground bg-white"
                 style={{ borderColor: '#D8A24A' }}
                 onClick={() => {}}
               >

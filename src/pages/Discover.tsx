@@ -276,6 +276,14 @@ const Discover = () => {
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4 animate-fade-in">
+            <Button
+              className="w-full rounded-full font-semibold mb-4"
+              style={{ backgroundColor: '#D8A24A' }}
+              onClick={() => {}}
+            >
+              Host Your Own Event
+            </Button>
+            
             <div className="flex gap-2 mb-4 flex-wrap">
               <Badge
                 variant={eventFilter === "all" ? "default" : "outline"}

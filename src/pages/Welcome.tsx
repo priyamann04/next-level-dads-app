@@ -24,7 +24,7 @@ const Welcome = () => {
           </p>
         </div>
         
-        <div className="pt-3 space-y-2">
+        <div className="pt-3">
           <Button
             size="lg"
             className="w-full rounded-full font-semibold text-base shadow-md"
@@ -33,16 +33,6 @@ const Welcome = () => {
           >
             Get Started
           </Button>
-          <p className="text-sm text-foreground">
-            Already have an account?{" "}
-            <button 
-              onClick={() => navigate("/login")} 
-              className="font-semibold underline"
-              style={{ color: '#D8A24A' }}
-            >
-              Sign In
-            </button>
-          </p>
         </div>
       </div>
     </div>

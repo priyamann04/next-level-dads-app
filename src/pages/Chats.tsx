@@ -103,7 +103,7 @@ const Chats = () => {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto px-6 py-6">
         <Tabs defaultValue="connections" className="w-full">
           <TabsList className="w-full grid grid-cols-2 bg-card border-b border-border rounded-none h-12">
             <TabsTrigger 

@@ -5,10 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Edit, MapPin, Calendar, ArrowLeft } from "lucide-react";
-import avatarLight1 from "@/assets/avatar-light-1.png";
-import avatarMedium1 from "@/assets/avatar-medium-1.png";
-import avatarDark1 from "@/assets/avatar-dark-1.png";
-import avatarMedium2 from "@/assets/avatar-medium-2.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -29,7 +26,7 @@ const Profile = () => {
       bio: "Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.",
       stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
       interests: ["Cooking", "Fitness", "Outdoors", "Tech"],
-      avatar: avatarLight1,
+      avatar: avatarDefaultGrey,
       stats: {
         connections: 12,
         communities: 4,
@@ -44,7 +41,7 @@ const Profile = () => {
       bio: "Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.",
       stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
       interests: ["Outdoors", "Cooking", "Sports"],
-      avatar: avatarLight1
+      avatar: avatarDefaultGrey
     },
     "2": {
       name: "David",
@@ -54,7 +51,7 @@ const Profile = () => {
       bio: "Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.",
       stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
       interests: ["Gaming", "Tech", "DIY"],
-      avatar: avatarMedium1
+      avatar: avatarDefaultGrey
     },
     "3": {
       name: "Anthony Williams",
@@ -64,7 +61,7 @@ const Profile = () => {
       bio: "Fitness enthusiast and amateur photographer.",
       stages: ["Preschool (4-5 years)"],
       interests: ["Fitness", "Photography", "Art"],
-      avatar: avatarDark1
+      avatar: avatarDefaultGrey
     },
     "4": {
       name: "Steve",
@@ -74,7 +71,7 @@ const Profile = () => {
       bio: "Outdoor adventure seeker and sports enthusiast. Let's grab a beer and swap parenting stories!",
       stages: ["Elementary (6-12 years)"],
       interests: ["Outdoors", "Sports", "Travel"],
-      avatar: avatarMedium2
+      avatar: avatarDefaultGrey
     }
   };
 
@@ -107,10 +104,9 @@ const Profile = () => {
 
       <div className="max-w-md mx-auto px-6 py-8 space-y-6 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-4">
-          <Avatar className="w-32 h-32 border-4 border-primary/20 aspect-square">
-            <AvatarImage src={userProfile.avatar} alt={userProfile.name} className="object-cover" />
-            <AvatarFallback className="text-2xl">{userProfile.name[0]}</AvatarFallback>
-          </Avatar>
+          <div className="w-32 h-32 rounded-lg overflow-hidden border-4 border-primary/20">
+            <img src={userProfile.avatar} alt={userProfile.name} className="w-full h-full object-cover" />
+          </div>
           
           <div>
             <h2 className="text-2xl font-heading font-semibold text-foreground">

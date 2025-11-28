@@ -24,7 +24,7 @@ const Welcome = () => {
           </p>
         </div>
         
-        <div className="pt-3">
+        <div className="pt-3 space-y-3">
           <Button
             size="lg"
             className="w-full rounded-full font-semibold text-base shadow-md"
@@ -32,6 +32,14 @@ const Welcome = () => {
             onClick={() => navigate("/setup")}
           >
             Get Started
+          </Button>
+          <Button
+            size="lg"
+            variant="ghost"
+            className="w-full rounded-full font-semibold text-base text-muted-foreground hover:text-foreground"
+            onClick={() => navigate("/discover")}
+          >
+            Skip
           </Button>
         </div>
       </div>

@@ -133,7 +133,7 @@ const Profile = () => {
           </div>
 
           <div>
-            <h3 className="font-semibold text-foreground mb-2">Fatherhood Stage</h3>
+            <h3 className="font-semibold text-foreground mb-2">Children's Age</h3>
             <div className="flex flex-wrap gap-2">
               {userProfile.stages.map((stage) => (
                 <Badge key={stage} variant="soft" className="rounded-full">

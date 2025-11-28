@@ -102,6 +102,14 @@ const ProfileSetup = () => {
             <span className="text-sm font-medium text-muted-foreground">
               Step {step} of {totalSteps}
             </span>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate("/discover")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Skip
+            </Button>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
@@ -201,7 +209,7 @@ const ProfileSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Fatherhood Stage (Select all that apply)</Label>
+                <Label>Children's Age (Select all that apply)</Label>
                 <div className="flex flex-wrap gap-2">
                   {stageOptions.map((stage) => (
                     <Badge

@@ -182,13 +182,13 @@ const Profile = () => {
               </div>
             </div>
 
-            <Button variant="outline" className="w-full rounded-full">
+            <Button variant="outline" className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground">
               Share Profile
             </Button>
 
             <Button 
               variant="outline" 
-              className="w-full rounded-full text-destructive hover:bg-primary hover:text-primary-foreground hover:border-primary"
+              className="w-full rounded-full border-2 border-destructive text-destructive hover:bg-primary hover:text-primary-foreground hover:border-primary"
               onClick={() => navigate("/welcome")}
             >
               <LogOut className="w-4 h-4 mr-2" />

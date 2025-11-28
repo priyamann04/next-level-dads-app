@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, MapPin, Users as UsersIcon } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -62,61 +63,74 @@ const Groups = () => {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-6 py-6 space-y-8">
-        {/* My Communities Section */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-heading font-semibold text-foreground">My Communities</h3>
-          {myCommunities.map((community) => (
-            <Card 
-              key={community.id}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/community-detail/${community.id}`)}
+      <div className="max-w-md mx-auto px-6 py-6">
+        <Tabs defaultValue="communities" className="w-full">
+          <TabsList className="w-full grid grid-cols-2 bg-card border-b border-border rounded-none h-12">
+            <TabsTrigger 
+              value="communities" 
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
             >
-              <CardContent className="p-4 space-y-2">
-                <h4 className="font-semibold text-foreground">{community.title}</h4>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {community.description}
-                </p>
-                <div className="flex items-center gap-2 pt-1">
-                  <UsersIcon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    {community.memberCount} members
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              Communities
+            </TabsTrigger>
+            <TabsTrigger 
+              value="events" 
+              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            >
+              Events
+            </TabsTrigger>
+          </TabsList>
 
-        {/* My Events Section */}
-        <div className="space-y-3">
-          <h3 className="text-lg font-heading font-semibold text-foreground">My Events</h3>
-          {myEvents.map((event) => (
-            <Card key={event.id} className="overflow-hidden shadow-md">
-              <CardContent className="p-6 space-y-3">
-                <h3 className="text-lg font-heading font-semibold text-foreground">
-                  {event.title}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>{event.date}</span>
+          <TabsContent value="communities" className="space-y-3 animate-fade-in">
+            {myCommunities.map((community) => (
+              <Card 
+                key={community.id}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/community-detail/${community.id}`)}
+              >
+                <CardContent className="p-4 space-y-2">
+                  <h4 className="font-semibold text-foreground">{community.title}</h4>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {community.description}
+                  </p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <UsersIcon className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">
+                      {community.memberCount} members
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    <span>{event.location}</span>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          <TabsContent value="events" className="space-y-4 animate-fade-in">
+            {myEvents.map((event) => (
+              <Card key={event.id} className="overflow-hidden shadow-md">
+                <CardContent className="p-6 space-y-3">
+                  <h3 className="text-lg font-heading font-semibold text-foreground">
+                    {event.title}
+                  </h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="w-4 h-4" />
+                      <span>{event.location}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 pt-2">
-                  <Badge variant="soft" className="rounded-full text-xs">Registered</Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {event.attending} attending
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <Badge variant="soft" className="rounded-full text-xs">Registered</Badge>
+                    <span className="text-sm text-muted-foreground">
+                      {event.attending} attending
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <BottomNav />

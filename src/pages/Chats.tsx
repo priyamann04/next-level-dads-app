@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search } from "lucide-react";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
+import logo from "@/assets/logo.png";
 
 const mockConnections = [
   {
@@ -96,8 +97,9 @@ const Chats = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border">
-        <div className="max-w-md mx-auto px-6 py-6">
-          <h1 className="text-2xl font-heading font-semibold text-foreground mb-2">
+        <div className="max-w-md mx-auto px-6 py-6 flex items-center gap-4">
+          <img src={logo} alt="Next Level Dads" className="h-8" />
+          <h1 className="text-2xl font-heading font-semibold text-foreground">
             Chats
           </h1>
         </div>

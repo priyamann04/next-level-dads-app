@@ -4,8 +4,9 @@ import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Edit, MapPin, Calendar, ArrowLeft, LogOut } from "lucide-react";
+import { Edit, MapPin, Calendar, ArrowLeft, LogOut } from "lucide-react";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
+import logo from "@/assets/logo.png";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -82,6 +83,7 @@ const Profile = () => {
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
+            <img src={logo} alt="Next Level Dads" className="h-8" />
             {from === "community" && communityId && (
               <Button
                 variant="ghost"
@@ -96,9 +98,6 @@ const Profile = () => {
               Profile
             </h1>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Settings className="w-5 h-5" />
-          </Button>
         </div>
       </div>
 

@@ -9,6 +9,7 @@ import Match from "./pages/Match";
 import Chats from "./pages/Chats";
 import ChatDetail from "./pages/ChatDetail";
 import Discover from "./pages/Discover";
+import Groups from "./pages/Groups";
 import CommunityDetail from "./pages/CommunityDetail";
 import GroupChat from "./pages/GroupChat";
 import GroupMembers from "./pages/GroupMembers";
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/chats" element={<Chats />} />
           <Route path="/chat/:id" element={<ChatDetail />} />
           <Route path="/discover" element={<Discover />} />
+          <Route path="/groups" element={<Groups />} />
           <Route path="/community-detail/:id" element={<CommunityDetail />} />
           <Route path="/group-chat/:id" element={<GroupChat />} />
           <Route path="/group-members/:id" element={<GroupMembers />} />

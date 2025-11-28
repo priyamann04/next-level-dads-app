@@ -170,7 +170,7 @@ const GroupMembers = () => {
                 </div>
                 <div className="space-y-2">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1">Stages:</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">Children's Age:</p>
                     <div className="flex flex-wrap gap-1">
                       {member.stages.map((stage) => (
                         <Badge key={stage} variant="soft" className="rounded-full text-xs">

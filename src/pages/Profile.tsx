@@ -187,8 +187,8 @@ const Profile = () => {
             </Button>
 
             <Button 
-              variant="destructive" 
-              className="w-full rounded-full"
+              variant="outline" 
+              className="w-full rounded-full text-destructive hover:bg-primary hover:text-primary-foreground hover:border-primary"
               onClick={() => navigate("/welcome")}
             >
               <LogOut className="w-4 h-4 mr-2" />

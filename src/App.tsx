@@ -2,10 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Welcome from "./pages/Welcome";
-import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
 import Match from "./pages/Match";
 import Chats from "./pages/Chats";
@@ -19,44 +17,28 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  return user ? <>{children}</> : <Navigate to="/auth" replace />;
-};
-
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  return user ? <Navigate to="/discover" replace /> : <>{children}</>;
-};
-
-const AppRoutes = () => (
-  <Routes>
-    <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
-    <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-    <Route path="/setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
-    <Route path="/match" element={<ProtectedRoute><Match /></ProtectedRoute>} />
-    <Route path="/chats" element={<ProtectedRoute><Chats /></ProtectedRoute>} />
-    <Route path="/chat/:id" element={<ProtectedRoute><ChatDetail /></ProtectedRoute>} />
-    <Route path="/discover" element={<ProtectedRoute><Discover /></ProtectedRoute>} />
-    <Route path="/community-detail/:id" element={<ProtectedRoute><CommunityDetail /></ProtectedRoute>} />
-    <Route path="/group-chat/:id" element={<ProtectedRoute><GroupChat /></ProtectedRoute>} />
-    <Route path="/group-members/:id" element={<ProtectedRoute><GroupMembers /></ProtectedRoute>} />
-    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-    <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-    <Route path="*" element={<NotFound />} />
-  </Routes>
-);
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
+        <Routes>
+          <Route path="/" element={<Discover />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/setup" element={<ProfileSetup />} />
+          <Route path="/match" element={<Match />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/chat/:id" element={<ChatDetail />} />
+          <Route path="/discover" element={<Discover />} />
+          <Route path="/community-detail/:id" element={<CommunityDetail />} />
+          <Route path="/group-chat/:id" element={<GroupChat />} />
+          <Route path="/group-members/:id" element={<GroupMembers />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/:id" element={<Profile />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

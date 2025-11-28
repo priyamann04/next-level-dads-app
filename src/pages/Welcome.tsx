@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import heroImage from "@/assets/welcome-hero.jpg";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -26,8 +27,9 @@ const Welcome = () => {
         <div className="pt-3 space-y-3">
           <Button
             size="lg"
-            className="w-full rounded-full font-semibold text-base shadow-md bg-gradient-gold"
-            onClick={() => navigate("/auth")}
+            className="w-full rounded-full font-semibold text-base shadow-md"
+            style={{ backgroundColor: '#D8A24A' }}
+            onClick={() => navigate("/setup")}
           >
             Get Started
           </Button>
@@ -35,9 +37,9 @@ const Welcome = () => {
             size="lg"
             variant="ghost"
             className="w-full rounded-full font-semibold text-base text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/auth")}
+            onClick={() => navigate("/discover")}
           >
-            Log In
+            Skip
           </Button>
         </div>
       </div>

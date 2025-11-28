@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, DollarSign, RefreshCw } from "lucide-react";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
+import logo from "@/assets/logo.png";
 
 const dads = [
   {
@@ -176,13 +177,16 @@ const Discover = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border">
-        <div className="max-w-md mx-auto px-6 py-6">
-          <h1 className="text-2xl font-heading font-semibold text-foreground mb-2">
-            Discover
-          </h1>
-          <p className="text-muted-foreground">
-            Join communities and find community.
-          </p>
+        <div className="max-w-md mx-auto px-6 py-6 flex items-center gap-4">
+          <img src={logo} alt="Next Level Dads" className="h-8" />
+          <div>
+            <h1 className="text-2xl font-heading font-semibold text-foreground">
+              Discover
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              Join communities and find community.
+            </p>
+          </div>
         </div>
       </div>
 

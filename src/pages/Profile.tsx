@@ -6,8 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Settings, Edit, MapPin, Calendar, ArrowLeft, LogOut } from "lucide-react";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -15,19 +13,8 @@ const Profile = () => {
   const [searchParams] = useSearchParams();
   const from = searchParams.get("from");
   const communityId = searchParams.get("communityId");
-  const { signOut } = useAuth();
-  const { toast } = useToast();
   // If no ID in URL, we're viewing our own profile
   const isOwnProfile = !id;
-
-  const handleLogout = async () => {
-    await signOut();
-    toast({
-      title: "Logged out",
-      description: "You've been successfully logged out.",
-    });
-    navigate("/");
-  };
 
   // Mock profiles data
   const profiles: { [key: string]: any } = {
@@ -202,7 +189,7 @@ const Profile = () => {
             <Button 
               variant="destructive" 
               className="w-full rounded-full"
-              onClick={handleLogout}
+              onClick={() => navigate("/welcome")}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Log Out

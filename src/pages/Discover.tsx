@@ -28,7 +28,7 @@ const dads = [
     age: 32,
     city: "Vancouver",
     province: "BC",
-    stage: "Toddler (2-3 yrs)",
+    stage: "Toddler (2–3 years)",
     bio: "Weekend warrior dad who loves trail running and teaching my little one about nature.",
     interests: ["Fitness", "Cooking", "Outdoors"],
     avatarUrl: avatarDefaultGrey
@@ -39,7 +39,7 @@ const dads = [
     age: 38,
     city: "Toronto",
     province: "ON",
-    stage: "Elementary (6-12 yrs)",
+    stage: "Elementary (6–12 years)",
     bio: "Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.",
     interests: ["Tech", "Sports", "Gaming"],
     avatarUrl: avatarDefaultGrey
@@ -50,7 +50,7 @@ const dads = [
     age: 35,
     city: "Calgary",
     province: "AB",
-    stage: "Preschool (4-5 yrs)",
+    stage: "Preschool (4–5 years)",
     bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
     interests: ["Music", "Photography", "Art"],
     avatarUrl: avatarDefaultGrey
@@ -61,7 +61,7 @@ const dads = [
     age: 40,
     city: "Montréal",
     province: "QC",
-    stage: "Teen (13-17 yrs)",
+    stage: "Teen (13–17 years)",
     bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
     interests: ["Outdoors", "Sports", "Travel"],
     avatarUrl: avatarDefaultGrey
@@ -184,8 +184,24 @@ const Discover = () => {
   };
 
   // Extract unique values for filters
-  const childrenAges = ["all", ...Array.from(new Set(dads.map(d => d.stage)))];
-  const allInterests = ["all", ...Array.from(new Set(dads.flatMap(d => d.interests)))];
+  const stageOptions = [
+    "Expecting",
+    "Newborn (0–1 year)",
+    "Toddler (2–3 years)",
+    "Preschool (4–5 years)",
+    "Elementary (6–12 years)",
+    "Teen (13–17 years)",
+    "Adult (18+ years)"
+  ];
+  
+  const interestOptions = [
+    "Sports", "Cooking", "Outdoors", "Fitness", "Gaming", "Music", "Reading", 
+    "Travel", "Tech", "DIY", "Photography", "Art", "Cars", "Parenting", 
+    "Mental Wellness", "Movies", "Coffee", "Home Projects", "Volunteering", 
+    "Board Games", "Faith", "Entrepreneurship", "Pets", "Gardening", 
+    "Podcasts", "Finance", "Writing"
+  ];
+  
   const provinces = ["all", ...Array.from(new Set(dads.map(d => d.province)))];
   const ageRanges = ["all", "Under 30", "30-35", "36-40", "Over 40"];
 
@@ -279,14 +295,21 @@ const Discover = () => {
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground">Children's Age</h3>
                       <div className="flex gap-2 flex-wrap">
-                        {childrenAges.map((age) => (
+                        <Badge
+                          variant={childrenAgeFilter === "all" ? "default" : "outline"}
+                          className="cursor-pointer rounded-full"
+                          onClick={() => setChildrenAgeFilter("all")}
+                        >
+                          All Ages
+                        </Badge>
+                        {stageOptions.map((stage) => (
                           <Badge
-                            key={age}
-                            variant={childrenAgeFilter === age ? "default" : "outline"}
+                            key={stage}
+                            variant={childrenAgeFilter === stage ? "default" : "outline"}
                             className="cursor-pointer rounded-full"
-                            onClick={() => setChildrenAgeFilter(age)}
+                            onClick={() => setChildrenAgeFilter(stage)}
                           >
-                            {age === "all" ? "All Ages" : age}
+                            {stage}
                           </Badge>
                         ))}
                       </div>
@@ -295,14 +318,21 @@ const Discover = () => {
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground">Interests</h3>
                       <div className="flex gap-2 flex-wrap">
-                        {allInterests.map((interest) => (
+                        <Badge
+                          variant={interestFilter === "all" ? "default" : "outline"}
+                          className="cursor-pointer rounded-full"
+                          onClick={() => setInterestFilter("all")}
+                        >
+                          All Interests
+                        </Badge>
+                        {interestOptions.map((interest) => (
                           <Badge
                             key={interest}
                             variant={interestFilter === interest ? "default" : "outline"}
                             className="cursor-pointer rounded-full"
                             onClick={() => setInterestFilter(interest)}
                           >
-                            {interest === "all" ? "All Interests" : interest}
+                            {interest}
                           </Badge>
                         ))}
                       </div>

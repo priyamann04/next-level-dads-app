@@ -140,6 +140,12 @@ const Discover = () => {
   const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
   const [communitySearchQuery, setCommunitySearchQuery] = useState("");
   const [eventSearchQuery, setEventSearchQuery] = useState("");
+  
+  // Dad filters
+  const [childrenAgeFilter, setChildrenAgeFilter] = useState<string>("all");
+  const [interestFilter, setInterestFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [dadAgeFilter, setDadAgeFilter] = useState<string>("all");
 
   const handleJoin = (title: string) => {
     toast({
@@ -168,6 +174,27 @@ const Discover = () => {
       description: "Loading new connections...",
     });
   };
+
+  // Extract unique values for filters
+  const childrenAges = ["all", ...Array.from(new Set(dads.map(d => d.stage)))];
+  const allInterests = ["all", ...Array.from(new Set(dads.flatMap(d => d.interests)))];
+  const provinces = ["all", ...Array.from(new Set(dads.map(d => d.province)))];
+  const ageRanges = ["all", "Under 30", "30-35", "36-40", "Over 40"];
+
+  // Filter dads based on selected filters
+  const filteredDads = dads.filter((dad) => {
+    const matchesChildrenAge = childrenAgeFilter === "all" || dad.stage === childrenAgeFilter;
+    const matchesInterest = interestFilter === "all" || dad.interests.includes(interestFilter);
+    const matchesLocation = locationFilter === "all" || dad.province === locationFilter;
+    
+    let matchesAge = true;
+    if (dadAgeFilter === "Under 30") matchesAge = dad.age < 30;
+    else if (dadAgeFilter === "30-35") matchesAge = dad.age >= 30 && dad.age <= 35;
+    else if (dadAgeFilter === "36-40") matchesAge = dad.age >= 36 && dad.age <= 40;
+    else if (dadAgeFilter === "Over 40") matchesAge = dad.age > 40;
+    
+    return matchesChildrenAge && matchesInterest && matchesLocation && matchesAge;
+  });
 
   const filteredCommunities = communities.filter((community) =>
     community.title.toLowerCase().includes(communitySearchQuery.toLowerCase()) ||
@@ -224,14 +251,84 @@ const Discover = () => {
         </TabsList>
 
           <TabsContent value="dads" className="space-y-4 animate-fade-in">
+            <div className="space-y-3 mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Children's Age</h3>
+              <div className="flex gap-2 flex-wrap">
+                {childrenAges.map((age) => (
+                  <Badge
+                    key={age}
+                    variant={childrenAgeFilter === age ? "default" : "outline"}
+                    className="cursor-pointer rounded-full"
+                    onClick={() => setChildrenAgeFilter(age)}
+                  >
+                    {age === "all" ? "All Ages" : age}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Interests</h3>
+              <div className="flex gap-2 flex-wrap">
+                {allInterests.map((interest) => (
+                  <Badge
+                    key={interest}
+                    variant={interestFilter === interest ? "default" : "outline"}
+                    className="cursor-pointer rounded-full"
+                    onClick={() => setInterestFilter(interest)}
+                  >
+                    {interest === "all" ? "All Interests" : interest}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Location</h3>
+              <div className="flex gap-2 flex-wrap">
+                {provinces.map((province) => (
+                  <Badge
+                    key={province}
+                    variant={locationFilter === province ? "default" : "outline"}
+                    className="cursor-pointer rounded-full"
+                    onClick={() => setLocationFilter(province)}
+                  >
+                    {province === "all" ? "All Locations" : province}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              <h3 className="text-sm font-semibold text-foreground">Dad's Age</h3>
+              <div className="flex gap-2 flex-wrap">
+                {ageRanges.map((range) => (
+                  <Badge
+                    key={range}
+                    variant={dadAgeFilter === range ? "default" : "outline"}
+                    className="cursor-pointer rounded-full"
+                    onClick={() => setDadAgeFilter(range)}
+                  >
+                    {range === "all" ? "All Ages" : range}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-4">
-              {dads.map((dad) => (
-                <DadCard
-                  key={dad.id}
-                  {...dad}
-                  onConnect={() => handleConnect(dad.name)}
-                />
-              ))}
+              {filteredDads.length > 0 ? (
+                filteredDads.map((dad) => (
+                  <DadCard
+                    key={dad.id}
+                    {...dad}
+                    onConnect={() => handleConnect(dad.name)}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No dads match your filters</p>
+                </div>
+              )}
             </div>
             
             <div className="pt-4">

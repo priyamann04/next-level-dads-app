@@ -77,6 +77,7 @@ const Profile = () => {
   };
 
   const userProfile = isOwnProfile ? profiles["own"] : profiles[id || "1"];
+  const pendingRequestsCount = 3; // Mock pending requests
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -118,12 +119,55 @@ const Profile = () => {
           </div>
 
           {isOwnProfile && (
-            <Button className="rounded-full bg-gradient-gold">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
+            <div className="flex gap-3 w-full max-w-sm">
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
+                onClick={() => navigate("/discover")}
+              >
+                Connections
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1 rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground relative"
+                onClick={() => navigate("/discover")}
+              >
+                Requests
+                {pendingRequestsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center">
+                    {pendingRequestsCount}
+                  </span>
+                )}
+              </Button>
+            </div>
           )}
         </div>
+
+        {isOwnProfile && (
+          <div className="bg-card rounded-lg p-6 shadow-md">
+            <h3 className="font-semibold text-foreground mb-4">My Activity</h3>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-heading font-semibold text-primary">
+                  {userProfile.stats.connections}
+                </p>
+                <p className="text-sm text-muted-foreground">Connections</p>
+              </div>
+              <div>
+                <p className="text-2xl font-heading font-semibold text-primary">
+                  {userProfile.stats.communities}
+                </p>
+                <p className="text-sm text-muted-foreground">Communities</p>
+              </div>
+              <div>
+                <p className="text-2xl font-heading font-semibold text-primary">
+                  {userProfile.stats.events}
+                </p>
+                <p className="text-sm text-muted-foreground">Events</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="bg-card rounded-lg p-6 space-y-4 shadow-md">
           <div>
@@ -157,29 +201,10 @@ const Profile = () => {
 
         {isOwnProfile && (
           <>
-            <div className="bg-card rounded-lg p-6 shadow-md">
-              <h3 className="font-semibold text-foreground mb-4">My Activity</h3>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-2xl font-heading font-semibold text-primary">
-                    {userProfile.stats.connections}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Connections</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-heading font-semibold text-primary">
-                    {userProfile.stats.communities}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Communities</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-heading font-semibold text-primary">
-                    {userProfile.stats.events}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Events</p>
-                </div>
-              </div>
-            </div>
+            <Button className="w-full rounded-full bg-gradient-gold">
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Profile
+            </Button>
 
             <Button variant="outline" className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground">
               Share Profile

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Users } from "lucide-react";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import logo from "@/assets/logo.png";
 
@@ -13,7 +13,17 @@ const mockChats = [
     lastMessage: "That sounds great! Let's plan for Saturday.",
     timestamp: "2m ago",
     unread: 2,
-    avatar: avatarDefaultGrey
+    avatar: avatarDefaultGrey,
+    isGroup: false
+  },
+  {
+    id: "group-1",
+    name: "Toronto Dads Meetup",
+    lastMessage: "Alex: Anyone free for coffee this weekend?",
+    timestamp: "45m ago",
+    unread: 5,
+    avatar: avatarDefaultGrey,
+    isGroup: true
   },
   {
     id: 2,
@@ -21,7 +31,8 @@ const mockChats = [
     lastMessage: "Thanks for the advice about the school situation!",
     timestamp: "1h ago",
     unread: 0,
-    avatar: avatarDefaultGrey
+    avatar: avatarDefaultGrey,
+    isGroup: false
   },
   {
     id: 3,
@@ -29,7 +40,8 @@ const mockChats = [
     lastMessage: "The kids had a great time at the playdate",
     timestamp: "3h ago",
     unread: 0,
-    avatar: avatarDefaultGrey
+    avatar: avatarDefaultGrey,
+    isGroup: false
   }
 ];
 
@@ -72,11 +84,18 @@ const Chats = () => {
                 className="px-6 py-4 hover:bg-muted/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <img 
-                    src={chat.avatar} 
-                    alt={chat.name}
-                    className="w-14 h-14 rounded-md object-cover"
-                  />
+                  <div className="relative">
+                    <img 
+                      src={chat.avatar} 
+                      alt={chat.name}
+                      className="w-14 h-14 rounded-md object-cover"
+                    />
+                    {chat.isGroup && (
+                      <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1">
+                        <Users className="w-3 h-3 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">

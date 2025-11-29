@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, DollarSign, RefreshCw } from "lucide-react";
+import { Calendar, MapPin, DollarSign, RefreshCw, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import logo from "@/assets/logo.png";
 
@@ -137,6 +138,8 @@ const Discover = () => {
   const navigate = useNavigate();
   const [eventFilter, setEventFilter] = useState<"all" | "virtual" | "local">("all");
   const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
+  const [communitySearchQuery, setCommunitySearchQuery] = useState("");
+  const [eventSearchQuery, setEventSearchQuery] = useState("");
 
   const handleJoin = (title: string) => {
     toast({
@@ -166,12 +169,19 @@ const Discover = () => {
     });
   };
 
+  const filteredCommunities = communities.filter((community) =>
+    community.title.toLowerCase().includes(communitySearchQuery.toLowerCase()) ||
+    community.description.toLowerCase().includes(communitySearchQuery.toLowerCase())
+  );
+
   const filteredEvents = events.filter((event) => {
     const matchesType = eventFilter === "all" || event.type.toLowerCase() === eventFilter;
     const matchesPrice = priceFilter === "all" || 
       (priceFilter === "free" && event.price === "Free") ||
       (priceFilter === "paid" && event.price !== "Free");
-    return matchesType && matchesPrice;
+    const matchesSearch = event.title.toLowerCase().includes(eventSearchQuery.toLowerCase()) ||
+      event.location.toLowerCase().includes(eventSearchQuery.toLowerCase());
+    return matchesType && matchesPrice && matchesSearch;
   });
 
   return (
@@ -237,49 +247,45 @@ const Discover = () => {
           </TabsContent>
 
           <TabsContent value="communities" className="space-y-4 animate-fade-in">
-            <div className="space-y-3 mb-6">
-              <h3 className="text-lg font-heading font-semibold text-foreground">Your Groups</h3>
-              <Card 
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate("/group-chat/private")}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-foreground">Weekend Outdoor Adventures</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="soft" className="rounded-full text-xs">Private Group</Badge>
-                        <span className="text-xs text-muted-foreground">3 members</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                placeholder="Search communities..."
+                value={communitySearchQuery}
+                onChange={(e) => setCommunitySearchQuery(e.target.value)}
+                className="pl-10 rounded-full"
+              />
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-lg font-heading font-semibold text-foreground">Discover Communities</h3>
-              {communities.map((community) => (
-                <div key={community.id} onClick={() => navigate(`/community-detail/${community.id}`)} className="cursor-pointer">
-                  <CommunityCard
-                    {...community}
-                    onJoin={() => handleJoin(community.title)}
-                  />
+              {filteredCommunities.length > 0 ? (
+                filteredCommunities.map((community) => (
+                  <div key={community.id} onClick={() => navigate(`/community-detail/${community.id}`)} className="cursor-pointer">
+                    <CommunityCard
+                      {...community}
+                      onJoin={() => handleJoin(community.title)}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No communities found</p>
                 </div>
-              ))}
-            </div>
-
-            <div className="pt-6">
-              <Button 
-                className="w-full rounded-full bg-gradient-gold"
-                onClick={() => navigate("/group-chat/public")}
-              >
-                Join Public Groups
-              </Button>
+              )}
             </div>
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4 animate-fade-in">
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Input
+                placeholder="Search events..."
+                value={eventSearchQuery}
+                onChange={(e) => setEventSearchQuery(e.target.value)}
+                className="pl-10 rounded-full"
+              />
+            </div>
+
             <div className="py-4">
               <Button
                 variant="outline"

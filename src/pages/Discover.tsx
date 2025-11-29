@@ -8,8 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, DollarSign, RefreshCw, Search } from "lucide-react";
+import { Calendar, MapPin, DollarSign, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import logo from "@/assets/logo.png";
 
@@ -251,68 +259,104 @@ const Discover = () => {
         </TabsList>
 
           <TabsContent value="dads" className="space-y-4 animate-fade-in">
-            <div className="space-y-3 mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Children's Age</h3>
-              <div className="flex gap-2 flex-wrap">
-                {childrenAges.map((age) => (
-                  <Badge
-                    key={age}
-                    variant={childrenAgeFilter === age ? "default" : "outline"}
-                    className="cursor-pointer rounded-full"
-                    onClick={() => setChildrenAgeFilter(age)}
-                  >
-                    {age === "all" ? "All Ages" : age}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+            <div className="flex justify-end mb-4">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="rounded-full">
+                    <SlidersHorizontal className="w-4 h-4 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Filter Dads</SheetTitle>
+                    <SheetDescription>
+                      Refine your search to find the perfect connections
+                    </SheetDescription>
+                  </SheetHeader>
+                  
+                  <div className="mt-6 space-y-6">
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground">Children's Age</h3>
+                      <div className="flex gap-2 flex-wrap">
+                        {childrenAges.map((age) => (
+                          <Badge
+                            key={age}
+                            variant={childrenAgeFilter === age ? "default" : "outline"}
+                            className="cursor-pointer rounded-full"
+                            onClick={() => setChildrenAgeFilter(age)}
+                          >
+                            {age === "all" ? "All Ages" : age}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
 
-            <div className="space-y-3 mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Interests</h3>
-              <div className="flex gap-2 flex-wrap">
-                {allInterests.map((interest) => (
-                  <Badge
-                    key={interest}
-                    variant={interestFilter === interest ? "default" : "outline"}
-                    className="cursor-pointer rounded-full"
-                    onClick={() => setInterestFilter(interest)}
-                  >
-                    {interest === "all" ? "All Interests" : interest}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground">Interests</h3>
+                      <div className="flex gap-2 flex-wrap">
+                        {allInterests.map((interest) => (
+                          <Badge
+                            key={interest}
+                            variant={interestFilter === interest ? "default" : "outline"}
+                            className="cursor-pointer rounded-full"
+                            onClick={() => setInterestFilter(interest)}
+                          >
+                            {interest === "all" ? "All Interests" : interest}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
 
-            <div className="space-y-3 mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Location</h3>
-              <div className="flex gap-2 flex-wrap">
-                {provinces.map((province) => (
-                  <Badge
-                    key={province}
-                    variant={locationFilter === province ? "default" : "outline"}
-                    className="cursor-pointer rounded-full"
-                    onClick={() => setLocationFilter(province)}
-                  >
-                    {province === "all" ? "All Locations" : province}
-                  </Badge>
-                ))}
-              </div>
-            </div>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground">Location</h3>
+                      <div className="flex gap-2 flex-wrap">
+                        {provinces.map((province) => (
+                          <Badge
+                            key={province}
+                            variant={locationFilter === province ? "default" : "outline"}
+                            className="cursor-pointer rounded-full"
+                            onClick={() => setLocationFilter(province)}
+                          >
+                            {province === "all" ? "All Locations" : province}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
 
-            <div className="space-y-3 mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Dad's Age</h3>
-              <div className="flex gap-2 flex-wrap">
-                {ageRanges.map((range) => (
-                  <Badge
-                    key={range}
-                    variant={dadAgeFilter === range ? "default" : "outline"}
-                    className="cursor-pointer rounded-full"
-                    onClick={() => setDadAgeFilter(range)}
-                  >
-                    {range === "all" ? "All Ages" : range}
-                  </Badge>
-                ))}
-              </div>
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground">Dad's Age</h3>
+                      <div className="flex gap-2 flex-wrap">
+                        {ageRanges.map((range) => (
+                          <Badge
+                            key={range}
+                            variant={dadAgeFilter === range ? "default" : "outline"}
+                            className="cursor-pointer rounded-full"
+                            onClick={() => setDadAgeFilter(range)}
+                          >
+                            {range === "all" ? "All Ages" : range}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-4">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setChildrenAgeFilter("all");
+                          setInterestFilter("all");
+                          setLocationFilter("all");
+                          setDadAgeFilter("all");
+                        }}
+                      >
+                        Clear All Filters
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
 
             <div className="space-y-4">

@@ -201,7 +201,7 @@ const Profile = () => {
 
         {isOwnProfile && (
           <>
-            <Button className="w-full rounded-full bg-gradient-gold">
+            <Button variant="outline" className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground">
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>

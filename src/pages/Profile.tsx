@@ -123,14 +123,14 @@ const Profile = () => {
               <Button 
                 variant="outline" 
                 className="flex-1 rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
-                onClick={() => navigate("/discover")}
+                onClick={() => navigate("/connections")}
               >
                 Connections
               </Button>
               <Button 
                 variant="outline" 
                 className="flex-1 rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground relative"
-                onClick={() => navigate("/discover")}
+                onClick={() => navigate("/requests")}
               >
                 Requests
                 {pendingRequestsCount > 0 && (

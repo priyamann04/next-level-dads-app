@@ -8,7 +8,6 @@ interface CommunityCardProps {
   memberCount: number;
   nextEvent?: string;
   onJoin: () => void;
-  onClick?: () => void;
 }
 
 const CommunityCard = ({
@@ -17,10 +16,9 @@ const CommunityCard = ({
   memberCount,
   nextEvent,
   onJoin,
-  onClick,
 }: CommunityCardProps) => {
   return (
-    <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={onClick}>
+    <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
       <CardContent className="p-6 space-y-4">
         <div>
           <h3 className="text-lg font-heading font-semibold text-foreground mb-2">
@@ -48,10 +46,7 @@ const CommunityCard = ({
         <Button
           className="w-full rounded-full"
           variant="outline"
-          onClick={(e) => {
-            e.stopPropagation();
-            onJoin();
-          }}
+          onClick={onJoin}
         >
           Join Community
         </Button>

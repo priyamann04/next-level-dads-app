@@ -5,28 +5,18 @@ const BottomNav = () => {
   const location = useLocation();
   
   const navItems = [
-    { icon: Compass, label: "Discover", path: "/discover/dads" },
-    { icon: Users, label: "Groups", path: "/groups/communities" },
+    { icon: Compass, label: "Discover", path: "/discover" },
+    { icon: Users, label: "Groups", path: "/groups" },
     { icon: MessageCircle, label: "Chats", path: "/chats" },
     { icon: Users, label: "Profile", path: "/profile" },
   ];
-
-  const isActiveRoute = (path: string) => {
-    if (path === "/discover/dads") {
-      return location.pathname.startsWith("/discover");
-    }
-    if (path === "/groups/communities") {
-      return location.pathname.startsWith("/groups");
-    }
-    return location.pathname === path;
-  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-md z-50">
       <div className="max-w-md mx-auto flex justify-around items-center h-16 px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = isActiveRoute(item.path);
+          const isActive = location.pathname === item.path;
           
           return (
             <Link

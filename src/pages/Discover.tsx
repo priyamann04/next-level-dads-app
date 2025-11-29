@@ -149,11 +149,17 @@ const Discover = () => {
   const [communitySearchQuery, setCommunitySearchQuery] = useState("");
   const [eventSearchQuery, setEventSearchQuery] = useState("");
   
-  // Dad filters
-  const [childrenAgeFilter, setChildrenAgeFilter] = useState<string>("all");
-  const [interestFilter, setInterestFilter] = useState<string>("all");
-  const [locationFilter, setLocationFilter] = useState<string>("all");
-  const [dadAgeFilter, setDadAgeFilter] = useState<string>("all");
+  // Dad filters - pending selections (in filter panel)
+  const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([]);
+  const [pendingInterests, setPendingInterests] = useState<string[]>([]);
+  const [pendingLocations, setPendingLocations] = useState<string[]>([]);
+  const [pendingDadAges, setPendingDadAges] = useState<string[]>([]);
+  
+  // Applied filters (actually filtering the list)
+  const [appliedChildrenAges, setAppliedChildrenAges] = useState<string[]>([]);
+  const [appliedInterests, setAppliedInterests] = useState<string[]>([]);
+  const [appliedLocations, setAppliedLocations] = useState<string[]>([]);
+  const [appliedDadAges, setAppliedDadAges] = useState<string[]>([]);
 
   const handleJoin = (title: string) => {
     toast({
@@ -202,20 +208,70 @@ const Discover = () => {
     "Podcasts", "Finance", "Writing"
   ];
   
-  const provinces = ["all", ...Array.from(new Set(dads.map(d => d.province)))];
+  const provinces = Array.from(new Set(dads.map(d => d.province)));
   const ageRanges = ["all", "Under 30", "30-35", "36-40", "Over 40"];
 
-  // Filter dads based on selected filters
+  // Toggle functions for pending filters
+  const togglePendingChildrenAge = (stage: string) => {
+    setPendingChildrenAges(prev =>
+      prev.includes(stage) ? prev.filter(s => s !== stage) : [...prev, stage]
+    );
+  };
+
+  const togglePendingInterest = (interest: string) => {
+    setPendingInterests(prev =>
+      prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]
+    );
+  };
+
+  const togglePendingLocation = (location: string) => {
+    setPendingLocations(prev =>
+      prev.includes(location) ? prev.filter(l => l !== location) : [...prev, location]
+    );
+  };
+
+  const togglePendingDadAge = (ageRange: string) => {
+    setPendingDadAges(prev =>
+      prev.includes(ageRange) ? prev.filter(a => a !== ageRange) : [...prev, ageRange]
+    );
+  };
+
+  // Apply filters
+  const applyFilters = () => {
+    setAppliedChildrenAges(pendingChildrenAges);
+    setAppliedInterests(pendingInterests);
+    setAppliedLocations(pendingLocations);
+    setAppliedDadAges(pendingDadAges);
+  };
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setPendingChildrenAges([]);
+    setPendingInterests([]);
+    setPendingLocations([]);
+    setPendingDadAges([]);
+    setAppliedChildrenAges([]);
+    setAppliedInterests([]);
+    setAppliedLocations([]);
+    setAppliedDadAges([]);
+  };
+
+  // Filter dads based on applied filters
   const filteredDads = dads.filter((dad) => {
-    const matchesChildrenAge = childrenAgeFilter === "all" || dad.stage === childrenAgeFilter;
-    const matchesInterest = interestFilter === "all" || dad.interests.includes(interestFilter);
-    const matchesLocation = locationFilter === "all" || dad.province === locationFilter;
+    const matchesChildrenAge = appliedChildrenAges.length === 0 || appliedChildrenAges.includes(dad.stage);
+    const matchesInterest = appliedInterests.length === 0 || dad.interests.some(i => appliedInterests.includes(i));
+    const matchesLocation = appliedLocations.length === 0 || appliedLocations.includes(dad.province);
     
     let matchesAge = true;
-    if (dadAgeFilter === "Under 30") matchesAge = dad.age < 30;
-    else if (dadAgeFilter === "30-35") matchesAge = dad.age >= 30 && dad.age <= 35;
-    else if (dadAgeFilter === "36-40") matchesAge = dad.age >= 36 && dad.age <= 40;
-    else if (dadAgeFilter === "Over 40") matchesAge = dad.age > 40;
+    if (appliedDadAges.length > 0) {
+      matchesAge = appliedDadAges.some(range => {
+        if (range === "Under 30") return dad.age < 30;
+        if (range === "30-35") return dad.age >= 30 && dad.age <= 35;
+        if (range === "36-40") return dad.age >= 36 && dad.age <= 40;
+        if (range === "Over 40") return dad.age > 40;
+        return false;
+      });
+    }
     
     return matchesChildrenAge && matchesInterest && matchesLocation && matchesAge;
   });
@@ -294,20 +350,14 @@ const Discover = () => {
                   <div className="mt-6 space-y-6">
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground">Children's Age</h3>
+                      <p className="text-xs text-muted-foreground">Select all that apply</p>
                       <div className="flex gap-2 flex-wrap">
-                        <Badge
-                          variant={childrenAgeFilter === "all" ? "default" : "outline"}
-                          className="cursor-pointer rounded-full"
-                          onClick={() => setChildrenAgeFilter("all")}
-                        >
-                          All Ages
-                        </Badge>
                         {stageOptions.map((stage) => (
                           <Badge
                             key={stage}
-                            variant={childrenAgeFilter === stage ? "default" : "outline"}
+                            variant={pendingChildrenAges.includes(stage) ? "default" : "outline"}
                             className="cursor-pointer rounded-full"
-                            onClick={() => setChildrenAgeFilter(stage)}
+                            onClick={() => togglePendingChildrenAge(stage)}
                           >
                             {stage}
                           </Badge>
@@ -317,20 +367,14 @@ const Discover = () => {
 
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground">Interests</h3>
+                      <p className="text-xs text-muted-foreground">Select all that apply</p>
                       <div className="flex gap-2 flex-wrap">
-                        <Badge
-                          variant={interestFilter === "all" ? "default" : "outline"}
-                          className="cursor-pointer rounded-full"
-                          onClick={() => setInterestFilter("all")}
-                        >
-                          All Interests
-                        </Badge>
                         {interestOptions.map((interest) => (
                           <Badge
                             key={interest}
-                            variant={interestFilter === interest ? "default" : "outline"}
+                            variant={pendingInterests.includes(interest) ? "default" : "outline"}
                             className="cursor-pointer rounded-full"
-                            onClick={() => setInterestFilter(interest)}
+                            onClick={() => togglePendingInterest(interest)}
                           >
                             {interest}
                           </Badge>
@@ -340,15 +384,16 @@ const Discover = () => {
 
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground">Location</h3>
+                      <p className="text-xs text-muted-foreground">Select all that apply</p>
                       <div className="flex gap-2 flex-wrap">
                         {provinces.map((province) => (
                           <Badge
                             key={province}
-                            variant={locationFilter === province ? "default" : "outline"}
+                            variant={pendingLocations.includes(province) ? "default" : "outline"}
                             className="cursor-pointer rounded-full"
-                            onClick={() => setLocationFilter(province)}
+                            onClick={() => togglePendingLocation(province)}
                           >
-                            {province === "all" ? "All Locations" : province}
+                            {province}
                           </Badge>
                         ))}
                       </div>
@@ -356,32 +401,34 @@ const Discover = () => {
 
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-foreground">Dad's Age</h3>
+                      <p className="text-xs text-muted-foreground">Select all that apply</p>
                       <div className="flex gap-2 flex-wrap">
-                        {ageRanges.map((range) => (
+                        {ageRanges.slice(1).map((range) => (
                           <Badge
                             key={range}
-                            variant={dadAgeFilter === range ? "default" : "outline"}
+                            variant={pendingDadAges.includes(range) ? "default" : "outline"}
                             className="cursor-pointer rounded-full"
-                            onClick={() => setDadAgeFilter(range)}
+                            onClick={() => togglePendingDadAge(range)}
                           >
-                            {range === "all" ? "All Ages" : range}
+                            {range}
                           </Badge>
                         ))}
                       </div>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-4 flex gap-3">
+                      <Button
+                        className="flex-1"
+                        onClick={applyFilters}
+                      >
+                        Apply Filters
+                      </Button>
                       <Button
                         variant="outline"
-                        className="w-full"
-                        onClick={() => {
-                          setChildrenAgeFilter("all");
-                          setInterestFilter("all");
-                          setLocationFilter("all");
-                          setDadAgeFilter("all");
-                        }}
+                        className="flex-1"
+                        onClick={clearAllFilters}
                       >
-                        Clear All Filters
+                        Clear All
                       </Button>
                     </div>
                   </div>

@@ -14,6 +14,8 @@ import CommunityDetail from "./pages/CommunityDetail";
 import GroupChat from "./pages/GroupChat";
 import GroupMembers from "./pages/GroupMembers";
 import Profile from "./pages/Profile";
+import Connections from "./pages/Connections";
+import Requests from "./pages/Requests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,8 @@ const App = () => (
           <Route path="/group-members/:id" element={<GroupMembers />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<Profile />} />
+          <Route path="/connections" element={<Connections />} />
+          <Route path="/requests" element={<Requests />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,0 +1,164 @@
+import { useNavigate } from "react-router-dom";
+import BottomNav from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, MapPin } from "lucide-react";
+import logo from "@/assets/logo.png";
+import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
+import { toast } from "sonner";
+
+const Connections = () => {
+  const navigate = useNavigate();
+
+  // Mock connections data
+  const connections = [
+    {
+      id: "1",
+      name: "Mike Johnson",
+      age: 35,
+      city: "Vancouver",
+      province: "BC",
+      childAgeRange: "Elementary (6-12 years)",
+      bio: "Love hiking with my kids and trying out new recipes.",
+      interests: ["Outdoors", "Cooking", "Sports"],
+      avatarUrl: avatarDefaultGrey,
+    },
+    {
+      id: "2",
+      name: "David Chen",
+      age: 42,
+      city: "Calgary",
+      province: "AB",
+      childAgeRange: "Teen (13-17 years)",
+      bio: "Tech dad who enjoys gaming and teaching my kids to code.",
+      interests: ["Gaming", "Tech", "DIY"],
+      avatarUrl: avatarDefaultGrey,
+    },
+    {
+      id: "3",
+      name: "Steve Wilson",
+      age: 40,
+      city: "Montréal",
+      province: "QC",
+      childAgeRange: "Elementary (6-12 years)",
+      bio: "Outdoor adventure seeker and sports enthusiast.",
+      interests: ["Outdoors", "Sports", "Travel"],
+      avatarUrl: avatarDefaultGrey,
+    },
+  ];
+
+  const handleChat = (id: string) => {
+    navigate(`/chat/${id}`);
+  };
+
+  const handleUnconnect = (name: string) => {
+    toast.success(`Disconnected from ${name}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <div className="bg-card border-b border-border">
+        <div className="max-w-md mx-auto px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4 flex-1">
+            <img src={logo} alt="Next Level Dads" className="h-8" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/profile")}
+              className="rounded-full"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <h1 className="text-2xl font-heading font-semibold text-foreground">
+              Connections
+            </h1>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-md mx-auto px-6 py-6 space-y-4 animate-fade-in">
+        {connections.length > 0 ? (
+          connections.map((connection) => {
+            const initials = connection.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            
+            return (
+              <Card key={connection.id} className="overflow-hidden shadow-md">
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    {connection.avatarUrl ? (
+                      <img 
+                        src={connection.avatarUrl} 
+                        alt={connection.name}
+                        className="w-20 h-20 rounded-lg object-cover flex-shrink-0 aspect-square"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-lg flex-shrink-0 aspect-square">
+                        {initials}
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-heading font-semibold text-foreground">
+                        {connection.name}, {connection.age}
+                      </h3>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                        <MapPin className="w-3 h-3" />
+                        <span>{connection.city}, {connection.province}</span>
+                      </div>
+                      <Badge variant="soft" className="rounded-full mt-1.5 text-xs">
+                        {connection.childAgeRange}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <p className="text-foreground text-sm leading-relaxed">
+                    {connection.bio}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-1.5">
+                    {connection.interests.map((interest) => (
+                      <Badge 
+                        key={interest} 
+                        variant="outline" 
+                        className="rounded-full text-xs"
+                        style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
+                      >
+                        {interest}
+                      </Badge>
+                    ))}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1 rounded-full font-semibold"
+                      style={{ backgroundColor: "#D8A24A" }}
+                      onClick={() => handleChat(connection.id)}
+                    >
+                      Chat
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-full font-semibold border-2"
+                      onClick={() => handleUnconnect(connection.name)}
+                    >
+                      Unconnect
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No connections yet</p>
+          </div>
+        )}
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+};
+
+export default Connections;

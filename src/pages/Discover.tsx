@@ -148,6 +148,7 @@ const Discover = () => {
   const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
   const [communitySearchQuery, setCommunitySearchQuery] = useState("");
   const [eventSearchQuery, setEventSearchQuery] = useState("");
+  const [registeredEvents, setRegisteredEvents] = useState<number[]>([]);
   
   // Dad filters - pending selections (in filter panel)
   const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([]);
@@ -168,7 +169,8 @@ const Discover = () => {
     });
   };
 
-  const handleJoinEvent = (title: string) => {
+  const handleJoinEvent = (eventId: number, title: string) => {
+    setRegisteredEvents(prev => [...prev, eventId]);
     toast({
       title: "Registered for event! 🎉",
       description: `You've registered for ${title}.`,
@@ -581,9 +583,10 @@ const Discover = () => {
                         </span>
                         <Button
                           className="rounded-full"
-                          onClick={() => handleJoinEvent(event.title)}
+                          onClick={() => handleJoinEvent(event.id, event.title)}
+                          disabled={registeredEvents.includes(event.id)}
                         >
-                          Register
+                          {registeredEvents.includes(event.id) ? "Registered ✓" : "Register"}
                         </Button>
                       </div>
                     </CardContent>

@@ -61,7 +61,7 @@ const Groups = () => {
     leaveCommunity(id)
     toast({
       title: 'Left community',
-      description: `You've left ${title}.`,
+      description: `You've left ${title}. The group chat has been removed.`,
     })
   }
 
@@ -124,7 +124,7 @@ const Groups = () => {
                   <CardContent className="p-4 space-y-3">
                     <div
                       className="cursor-pointer space-y-2"
-                      onClick={() => navigate(`/community-detail/${community.id}`)}
+                      onClick={() => navigate(`/group-chat/community-${community.id}`)}
                     >
                       <h4 className="font-semibold text-foreground">
                         {community.title}

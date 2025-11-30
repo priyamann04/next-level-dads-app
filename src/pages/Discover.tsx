@@ -179,11 +179,13 @@ const Discover = () => {
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
 
   const handleJoin = (communityId: number, title: string) => {
-    joinCommunity(communityId)
+    joinCommunity(communityId, title)
     toast({
       title: 'Joined community! 🎉',
-      description: `You've joined ${title}. Check your messages for group chat access.`,
+      description: `Welcome to ${title}!`,
     })
+    // Redirect to the community group chat immediately
+    navigate(`/group-chat/community-${communityId}`)
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {

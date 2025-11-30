@@ -4,6 +4,7 @@ import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
 import { useToast } from '@/hooks/use-toast'
+import { useGroups } from '@/contexts/GroupsContext'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -157,13 +158,13 @@ const events = [
 const Discover = () => {
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { joinedCommunities, registeredEvents, joinCommunity, registerEvent, unregisterEvent } = useGroups()
   const [eventFilter, setEventFilter] = useState<'all' | 'virtual' | 'local'>(
     'all'
   )
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
   const [communitySearchQuery, setCommunitySearchQuery] = useState('')
   const [eventSearchQuery, setEventSearchQuery] = useState('')
-  const [registeredEvents, setRegisteredEvents] = useState<number[]>([])
 
   // Dad filters - pending selections (in filter panel)
   const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([])
@@ -177,7 +178,8 @@ const Discover = () => {
   const [appliedLocations, setAppliedLocations] = useState<string[]>([])
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
 
-  const handleJoin = (title: string) => {
+  const handleJoin = (communityId: number, title: string) => {
+    joinCommunity(communityId)
     toast({
       title: 'Joined community! 🎉',
       description: `You've joined ${title}. Check your messages for group chat access.`,
@@ -185,21 +187,19 @@ const Discover = () => {
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {
-    setRegisteredEvents((prev) => {
-      if (prev.includes(eventId)) {
-        toast({
-          title: 'Registration cancelled',
-          description: `You've cancelled your registration for ${title}.`,
-        })
-        return prev.filter((id) => id !== eventId)
-      } else {
-        toast({
-          title: 'Registered for event! 🎉',
-          description: `You've registered for ${title}.`,
-        })
-        return [...prev, eventId]
-      }
-    })
+    if (registeredEvents.includes(eventId)) {
+      unregisterEvent(eventId)
+      toast({
+        title: 'Registration cancelled',
+        description: `You've cancelled your registration for ${title}.`,
+      })
+    } else {
+      registerEvent(eventId)
+      toast({
+        title: 'Registered for event! 🎉',
+        description: `You've registered for ${title}.`,
+      })
+    }
   }
 
   const handleConnect = (name: string) => {
@@ -340,12 +340,13 @@ const Discover = () => {
 
   const filteredCommunities = communities.filter(
     (community) =>
-      community.title
+      !joinedCommunities.includes(community.id) &&
+      (community.title
         .toLowerCase()
         .includes(communitySearchQuery.toLowerCase()) ||
       community.description
         .toLowerCase()
-        .includes(communitySearchQuery.toLowerCase())
+        .includes(communitySearchQuery.toLowerCase()))
   )
 
   const filteredEvents = events.filter((event) => {
@@ -608,7 +609,7 @@ const Discover = () => {
                   >
                     <CommunityCard
                       {...community}
-                      onJoin={() => handleJoin(community.title)}
+                      onJoin={() => handleJoin(community.id, community.title)}
                     />
                   </div>
                 ))

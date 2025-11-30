@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Search, Users } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
+import { useGroups } from '@/contexts/GroupsContext'
 
 const mockChats = [
   {
@@ -48,8 +49,22 @@ const mockChats = [
 const Chats = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const navigate = useNavigate()
+  const { communityChats } = useGroups()
 
-  const filteredChats = mockChats.filter((chat) =>
+  // Combine community chats with mock chats
+  const communityGroupChats = communityChats.map((chat) => ({
+    id: `community-${chat.communityId}`,
+    name: chat.communityName,
+    lastMessage: 'Community chat started',
+    timestamp: 'New',
+    unread: 0,
+    avatar: avatarDefaultGrey,
+    isGroup: true,
+  }))
+
+  const allChats = [...communityGroupChats, ...mockChats]
+
+  const filteredChats = allChats.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 

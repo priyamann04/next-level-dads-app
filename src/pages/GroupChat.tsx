@@ -5,11 +5,17 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Send, Users } from "lucide-react";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
+import { useGroups } from "@/contexts/GroupsContext";
 
 const GroupChat = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [message, setMessage] = useState("");
+  const { communityChats } = useGroups();
+
+  // Check if this is a community chat
+  const isCommunityChat = id?.startsWith('community-');
+  const communityId = isCommunityChat ? id.replace('community-', '') : null;
 
   const groupData = {
     private: {
@@ -33,7 +39,24 @@ const GroupChat = () => {
     },
   };
 
-  const group = id === "private" ? groupData.private : groupData.public;
+  // Get community chat data or default group data
+  let group;
+  if (isCommunityChat && communityId) {
+    const communityChat = communityChats.find(
+      (chat) => chat.communityId === parseInt(communityId)
+    );
+    group = {
+      title: communityChat?.communityName || "Community Chat",
+      type: "Community",
+      members: [
+        { id: 1, name: "Mike", avatar: avatarDefaultGrey },
+        { id: 2, name: "David", avatar: avatarDefaultGrey },
+        { id: 3, name: "James", avatar: avatarDefaultGrey },
+      ],
+    };
+  } else {
+    group = id === "private" ? groupData.private : groupData.public;
+  }
 
   const messages = [
     { id: 1, sender: "Mike", text: "Hey everyone! Anyone up for a hike this weekend?", time: "10:30 AM", avatar: avatarDefaultGrey },
@@ -52,7 +75,7 @@ const GroupChat = () => {
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate("/discover?tab=communities")} className="text-muted-foreground">
+            <button onClick={() => navigate(-1)} className="text-muted-foreground">
               <ArrowLeft className="w-6 h-6" />
             </button>
             <div className="flex-1">
@@ -62,7 +85,13 @@ const GroupChat = () => {
               <p className="text-xs text-muted-foreground">{group.type} • {group.members.length} members</p>
             </div>
             <button
-              onClick={() => navigate(`/group-members/${id}`)}
+              onClick={() => {
+                if (isCommunityChat && communityId) {
+                  navigate(`/group-members/${communityId}`)
+                } else {
+                  navigate(`/group-members/${id}`)
+                }
+              }}
               className="text-muted-foreground"
             >
               <Users className="w-6 h-6" />

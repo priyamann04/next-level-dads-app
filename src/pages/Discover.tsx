@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
@@ -158,7 +158,18 @@ const events = [
 const Discover = () => {
   const { toast } = useToast()
   const navigate = useNavigate()
-  const { joinedCommunities, registeredEvents, joinCommunity, registerEvent, unregisterEvent } = useGroups()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabParam = searchParams.get('tab') || 'dads'
+  const [activeTab, setActiveTab] = useState(tabParam)
+
+  const {
+    joinedCommunities,
+    registeredEvents,
+    joinCommunity,
+    registerEvent,
+    unregisterEvent,
+  } = useGroups()
+
   const [eventFilter, setEventFilter] = useState<'all' | 'virtual' | 'local'>(
     'all'
   )
@@ -166,17 +177,112 @@ const Discover = () => {
   const [communitySearchQuery, setCommunitySearchQuery] = useState('')
   const [eventSearchQuery, setEventSearchQuery] = useState('')
 
-  // Dad filters - pending selections (in filter panel)
   const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([])
   const [pendingInterests, setPendingInterests] = useState<string[]>([])
   const [pendingLocations, setPendingLocations] = useState<string[]>([])
   const [pendingDadAges, setPendingDadAges] = useState<string[]>([])
 
-  // Applied filters (actually filtering the list)
   const [appliedChildrenAges, setAppliedChildrenAges] = useState<string[]>([])
   const [appliedInterests, setAppliedInterests] = useState<string[]>([])
   const [appliedLocations, setAppliedLocations] = useState<string[]>([])
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
+
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
+  // Keep URL & tab state in sync if URL changes externally
+  useEffect(() => {
+    const urlTab = searchParams.get('tab') || 'dads'
+    if (urlTab !== activeTab) setActiveTab(urlTab)
+  }, [searchParams])
+
+  // Helper data
+  const stageOptions = [
+    'Expecting',
+    'Newborn (0–1 year)',
+    'Toddler (2–3 years)',
+    'Preschool (4–5 years)',
+    'Elementary (6–12 years)',
+    'Teen (13–17 years)',
+    'Adult (18+ years)',
+  ]
+  const interestOptions = [
+    'Sports',
+    'Cooking',
+    'Outdoors',
+    'Fitness',
+    'Gaming',
+    'Music',
+    'Reading',
+    'Travel',
+    'Tech',
+    'DIY',
+    'Photography',
+    'Art',
+    'Cars',
+    'Parenting',
+    'Mental Wellness',
+    'Movies',
+    'Coffee',
+    'Home Projects',
+    'Volunteering',
+    'Board Games',
+    'Faith',
+    'Entrepreneurship',
+    'Pets',
+    'Gardening',
+    'Podcasts',
+    'Finance',
+    'Writing',
+  ]
+  const provinces = Array.from(new Set(dads.map((d) => d.province)))
+  const ageRanges = ['all', 'Under 30', '30-35', '36-40', 'Over 40']
+
+  // Filter toggle functions
+  const togglePendingChildrenAge = (stage: string) => {
+    setPendingChildrenAges((prev) =>
+      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage]
+    )
+  }
+  const togglePendingInterest = (interest: string) => {
+    setPendingInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest]
+    )
+  }
+  const togglePendingLocation = (location: string) => {
+    setPendingLocations((prev) =>
+      prev.includes(location)
+        ? prev.filter((l) => l !== location)
+        : [...prev, location]
+    )
+  }
+  const togglePendingDadAge = (ageRange: string) => {
+    setPendingDadAges((prev) =>
+      prev.includes(ageRange)
+        ? prev.filter((a) => a !== ageRange)
+        : [...prev, ageRange]
+    )
+  }
+
+  const applyFilters = () => {
+    setAppliedChildrenAges(pendingChildrenAges)
+    setAppliedInterests(pendingInterests)
+    setAppliedLocations(pendingLocations)
+    setAppliedDadAges(pendingDadAges)
+    setFiltersOpen(false)
+  }
+
+  const clearAllFilters = () => {
+    setPendingChildrenAges([])
+    setPendingInterests([])
+    setPendingLocations([])
+    setPendingDadAges([])
+    setAppliedChildrenAges([])
+    setAppliedInterests([])
+    setAppliedLocations([])
+    setAppliedDadAges([])
+  }
 
   const handleJoin = (communityId: number, title: string) => {
     joinCommunity(communityId, title)
@@ -184,7 +290,6 @@ const Discover = () => {
       title: 'Joined community! 🎉',
       description: `Welcome to ${title}!`,
     })
-    // Redirect to the community group chat immediately
     navigate(`/group-chat/community-${communityId}`)
   }
 
@@ -218,102 +323,7 @@ const Discover = () => {
     })
   }
 
-  // Extract unique values for filters
-  const stageOptions = [
-    'Expecting',
-    'Newborn (0–1 year)',
-    'Toddler (2–3 years)',
-    'Preschool (4–5 years)',
-    'Elementary (6–12 years)',
-    'Teen (13–17 years)',
-    'Adult (18+ years)',
-  ]
-
-  const interestOptions = [
-    'Sports',
-    'Cooking',
-    'Outdoors',
-    'Fitness',
-    'Gaming',
-    'Music',
-    'Reading',
-    'Travel',
-    'Tech',
-    'DIY',
-    'Photography',
-    'Art',
-    'Cars',
-    'Parenting',
-    'Mental Wellness',
-    'Movies',
-    'Coffee',
-    'Home Projects',
-    'Volunteering',
-    'Board Games',
-    'Faith',
-    'Entrepreneurship',
-    'Pets',
-    'Gardening',
-    'Podcasts',
-    'Finance',
-    'Writing',
-  ]
-
-  const provinces = Array.from(new Set(dads.map((d) => d.province)))
-  const ageRanges = ['all', 'Under 30', '30-35', '36-40', 'Over 40']
-
-  // Toggle functions for pending filters
-  const togglePendingChildrenAge = (stage: string) => {
-    setPendingChildrenAges((prev) =>
-      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage]
-    )
-  }
-
-  const togglePendingInterest = (interest: string) => {
-    setPendingInterests((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
-    )
-  }
-
-  const togglePendingLocation = (location: string) => {
-    setPendingLocations((prev) =>
-      prev.includes(location)
-        ? prev.filter((l) => l !== location)
-        : [...prev, location]
-    )
-  }
-
-  const togglePendingDadAge = (ageRange: string) => {
-    setPendingDadAges((prev) =>
-      prev.includes(ageRange)
-        ? prev.filter((a) => a !== ageRange)
-        : [...prev, ageRange]
-    )
-  }
-
-  // Apply filters
-  const applyFilters = () => {
-    setAppliedChildrenAges(pendingChildrenAges)
-    setAppliedInterests(pendingInterests)
-    setAppliedLocations(pendingLocations)
-    setAppliedDadAges(pendingDadAges)
-  }
-
-  // Clear all filters
-  const clearAllFilters = () => {
-    setPendingChildrenAges([])
-    setPendingInterests([])
-    setPendingLocations([])
-    setPendingDadAges([])
-    setAppliedChildrenAges([])
-    setAppliedInterests([])
-    setAppliedLocations([])
-    setAppliedDadAges([])
-  }
-
-  // Filter dads based on applied filters
+  // Filter lists
   const filteredDads = dads.filter((dad) => {
     const matchesChildrenAge =
       appliedChildrenAges.length === 0 ||
@@ -346,9 +356,9 @@ const Discover = () => {
       (community.title
         .toLowerCase()
         .includes(communitySearchQuery.toLowerCase()) ||
-      community.description
-        .toLowerCase()
-        .includes(communitySearchQuery.toLowerCase()))
+        community.description
+          .toLowerCase()
+          .includes(communitySearchQuery.toLowerCase()))
   )
 
   const filteredEvents = events.filter((event) => {
@@ -367,14 +377,11 @@ const Discover = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="relative bg-card border-b border-border px-6 py-5 flex items-center justify-center">
-        {/* Logo top-left */}
         <img
           src={logo}
           alt="Next Level Dads"
           className="h-10 absolute top-4 left-3"
         />
-
-        {/* Centered text */}
         <div className="text-center">
           <h1 className="text-2xl font-heading font-semibold text-foreground">
             Discover
@@ -384,7 +391,11 @@ const Discover = () => {
 
       <div className="max-w-md mx-auto px-6 py-6">
         <Tabs
-          defaultValue="dads"
+          value={activeTab}
+          onValueChange={(val) => {
+            setActiveTab(val)
+            setSearchParams({ tab: val })
+          }}
           className="w-full"
         >
           <TabsList className="w-full grid grid-cols-3 bg-card border-b border-border rounded-none h-12">
@@ -413,7 +424,10 @@ const Discover = () => {
             className="space-y-4 animate-fade-in"
           >
             <div className="flex justify-end mb-4">
-              <Sheet>
+              <Sheet
+                open={filtersOpen}
+                onOpenChange={setFiltersOpen}
+              >
                 <SheetTrigger asChild>
                   <Button
                     variant="outline"

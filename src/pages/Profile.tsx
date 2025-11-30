@@ -15,7 +15,7 @@ const Profile = () => {
   const from = searchParams.get('from')
   const communityId = searchParams.get('communityId')
   // If no ID in URL, we're viewing our own profile
-  const isOwnProfile = !id
+  const isOwnProfile = !id || id == '0'
 
   // Mock profiles data
   const profiles: { [key: string]: any } = {
@@ -55,7 +55,7 @@ const Profile = () => {
       avatar: avatarDefaultGrey,
     },
     '3': {
-      name: 'Anthony Williams',
+      name: 'Anthony',
       age: 36,
       city: 'Toronto',
       province: 'ON',
@@ -72,6 +72,16 @@ const Profile = () => {
       bio: "Outdoor adventure seeker and sports enthusiast. Let's grab a beer and swap parenting stories!",
       stages: ['Elementary (6-12 years)'],
       interests: ['Outdoors', 'Sports', 'Travel'],
+      avatar: avatarDefaultGrey,
+    },
+    '5': {
+      name: 'Robert',
+      age: 38,
+      city: 'Halifax',
+      province: 'NS',
+      bio: 'Tech enthusiast and soccer coach.',
+      stages: ['Elementary (6-12 years)'],
+      interests: ['Tech', 'Soccer', 'Reading'],
       avatar: avatarDefaultGrey,
     },
   }

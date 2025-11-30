@@ -1,13 +1,13 @@
-import { Users, Calendar } from "lucide-react";
-import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
+import { Users, Calendar } from 'lucide-react'
+import { Button } from './ui/button'
+import { Card, CardContent } from './ui/card'
 
 interface CommunityCardProps {
-  title: string;
-  description: string;
-  memberCount: number;
-  nextEvent?: string;
-  onJoin: () => void;
+  title: string
+  description: string
+  memberCount: number
+  nextEvent?: string
+  onJoin: () => void
 }
 
 const CommunityCard = ({
@@ -28,13 +28,13 @@ const CommunityCard = ({
             {description}
           </p>
         </div>
-        
+
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />
             <span>{memberCount} members</span>
           </div>
-          
+
           {nextEvent && (
             <div className="flex items-center gap-1 text-muted-foreground">
               <Calendar className="w-4 h-4" />
@@ -42,17 +42,20 @@ const CommunityCard = ({
             </div>
           )}
         </div>
-        
+
         <Button
           className="w-full rounded-full"
           variant="outline"
-          onClick={onJoin}
+          onClick={(e) => {
+            e.stopPropagation() // prevent parent div's onClick
+            onJoin() // call the passed handler
+          }}
         >
           Join Community
         </Button>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default CommunityCard;
+export default CommunityCard

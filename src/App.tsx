@@ -29,68 +29,68 @@ const App = () => (
       <BrowserRouter>
         <GroupsProvider>
           <Routes>
-          <Route
-            path="/"
-            element={<Welcome />}
-          />
-          <Route
-            path="/setup"
-            element={<ProfileSetup />}
-          />
-          <Route
-            path="/match"
-            element={<Match />}
-          />
-          <Route
-            path="/chats"
-            element={<Chats />}
-          />
-          <Route
-            path="/chat/:id"
-            element={<ChatDetail />}
-          />
-          <Route
-            path="/discover"
-            element={<Discover />}
-          />
-          <Route
-            path="/groups"
-            element={<Groups />}
-          />
-          <Route
-            path="/community-detail/:id"
-            element={<CommunityDetail />}
-          />
-          <Route
-            path="/group-chat/:id"
-            element={<GroupChat />}
-          />
-          <Route
-            path="/group-members/:id"
-            element={<GroupMembers />}
-          />
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
-          <Route
-            path="/profile/:id"
-            element={<Profile />}
-          />
-          <Route
-            path="/connections"
-            element={<Connections />}
-          />
-          <Route
-            path="/requests"
-            element={<Requests />}
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route
-            path="*"
-            element={<NotFound />}
-          />
-        </Routes>
+            <Route
+              path="/"
+              element={<Welcome />}
+            />
+            <Route
+              path="/setup"
+              element={<ProfileSetup />}
+            />
+            <Route
+              path="/match"
+              element={<Match />}
+            />
+            <Route
+              path="/chats"
+              element={<Chats />}
+            />
+            <Route
+              path="/chat/:id"
+              element={<ChatDetail />}
+            />
+            <Route
+              path="/discover"
+              element={<Discover />}
+            />
+            <Route
+              path="/groups"
+              element={<Groups />}
+            />
+            <Route
+              path="/community-detail/:id"
+              element={<CommunityDetail />}
+            />
+            <Route
+              path="/group-chat/:id"
+              element={<GroupChat />}
+            />
+            <Route
+              path="/group-members/:id"
+              element={<GroupMembers />}
+            />
+            <Route
+              path="/profile/:id"
+              element={<Profile />}
+            />
+            <Route
+              path="/profile"
+              element={<Profile />}
+            />
+            <Route
+              path="/connections"
+              element={<Connections />}
+            />
+            <Route
+              path="/requests"
+              element={<Requests />}
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route
+              path="*"
+              element={<NotFound />}
+            />
+          </Routes>
         </GroupsProvider>
       </BrowserRouter>
     </TooltipProvider>

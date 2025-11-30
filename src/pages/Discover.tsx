@@ -185,10 +185,20 @@ const Discover = () => {
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {
-    setRegisteredEvents((prev) => [...prev, eventId])
-    toast({
-      title: 'Registered for event! 🎉',
-      description: `You've registered for ${title}.`,
+    setRegisteredEvents((prev) => {
+      if (prev.includes(eventId)) {
+        toast({
+          title: 'Registration cancelled',
+          description: `You've cancelled your registration for ${title}.`,
+        })
+        return prev.filter((id) => id !== eventId)
+      } else {
+        toast({
+          title: 'Registered for event! 🎉',
+          description: `You've registered for ${title}.`,
+        })
+        return [...prev, eventId]
+      }
     })
   }
 
@@ -705,7 +715,6 @@ const Discover = () => {
                         <Button
                           className="rounded-full"
                           onClick={() => handleJoinEvent(event.id, event.title)}
-                          disabled={registeredEvents.includes(event.id)}
                         >
                           {registeredEvents.includes(event.id)
                             ? 'Registered ✓'

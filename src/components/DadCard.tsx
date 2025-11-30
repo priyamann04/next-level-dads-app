@@ -31,7 +31,7 @@ const DadCard = ({
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
   
   const handleConnect = () => {
-    setIsRequested(true);
+    setIsRequested(!isRequested);
     onConnect();
   };
   
@@ -86,7 +86,6 @@ const DadCard = ({
           className="w-full rounded-full font-semibold"
           style={{ backgroundColor: isRequested ? '#9ca3af' : '#D8A24A' }}
           onClick={handleConnect}
-          disabled={isRequested}
         >
           {isRequested ? 'Requested ✓' : 'Connect'}
         </Button>

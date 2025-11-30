@@ -1,63 +1,70 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import BottomNav from "@/components/BottomNav";
-import { Input } from "@/components/ui/input";
-import { Search, Users } from "lucide-react";
-import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
-import logo from "@/assets/logo.png";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import BottomNav from '@/components/BottomNav'
+import { Input } from '@/components/ui/input'
+import { Search, Users } from 'lucide-react'
+import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
+import logo from '@/assets/logo.png'
 
 const mockChats = [
   {
     id: 1,
-    name: "Mike",
+    name: 'Mike',
     lastMessage: "That sounds great! Let's plan for Saturday.",
-    timestamp: "2m ago",
+    timestamp: '2m ago',
     unread: 2,
     avatar: avatarDefaultGrey,
-    isGroup: false
+    isGroup: false,
   },
   {
-    id: "group-1",
-    name: "Toronto Dads Meetup",
-    lastMessage: "Alex: Anyone free for coffee this weekend?",
-    timestamp: "45m ago",
+    id: 'group-1',
+    name: 'Toronto Dads Meetup',
+    lastMessage: 'Alex: Anyone free for coffee this weekend?',
+    timestamp: '45m ago',
     unread: 5,
     avatar: avatarDefaultGrey,
-    isGroup: true
+    isGroup: true,
   },
   {
     id: 2,
-    name: "David",
-    lastMessage: "Thanks for the advice about the school situation!",
-    timestamp: "1h ago",
+    name: 'David',
+    lastMessage: 'Thanks for the advice about the school situation!',
+    timestamp: '1h ago',
     unread: 0,
     avatar: avatarDefaultGrey,
-    isGroup: false
+    isGroup: false,
   },
   {
     id: 3,
-    name: "James",
-    lastMessage: "The kids had a great time at the playdate",
-    timestamp: "3h ago",
+    name: 'James',
+    lastMessage: 'The kids had a great time at the playdate',
+    timestamp: '3h ago',
     unread: 0,
     avatar: avatarDefaultGrey,
-    isGroup: false
-  }
-];
+    isGroup: false,
+  },
+]
 
 const Chats = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate()
 
-  const filteredChats = mockChats.filter(chat =>
+  const filteredChats = mockChats.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  )
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-card border-b border-border">
-        <div className="max-w-md mx-auto px-6 py-6 flex items-center gap-4">
-          <img src={logo} alt="Next Level Dads" className="h-8" />
+      <div className="relative bg-card border-b border-border px-6 py-5 flex items-center justify-center">
+        {/* Logo top-left */}
+        <img
+          src={logo}
+          alt="Next Level Dads"
+          className="h-10 absolute top-4 left-3"
+        />
+
+        {/* Centered text */}
+        <div className="text-center">
           <h1 className="text-2xl font-heading font-semibold text-foreground">
             Chats
           </h1>
@@ -85,8 +92,8 @@ const Chats = () => {
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <img 
-                      src={chat.avatar} 
+                    <img
+                      src={chat.avatar}
                       alt={chat.name}
                       className="w-14 h-14 rounded-md object-cover"
                     />
@@ -96,7 +103,7 @@ const Chats = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="font-semibold text-foreground truncate">
@@ -130,7 +137,7 @@ const Chats = () => {
 
       <BottomNav />
     </div>
-  );
-};
+  )
+}
 
-export default Chats;
+export default Chats

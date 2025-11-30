@@ -1,91 +1,98 @@
-import { useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import BottomNav from "@/components/BottomNav";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Edit, MapPin, Calendar, ArrowLeft, LogOut } from "lucide-react";
-import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
-import logo from "@/assets/logo.png";
+import { useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import BottomNav from '@/components/BottomNav'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Edit, MapPin, Calendar, ArrowLeft, LogOut } from 'lucide-react'
+import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
+import logo from '@/assets/logo.png'
 
 const Profile = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const [searchParams] = useSearchParams();
-  const from = searchParams.get("from");
-  const communityId = searchParams.get("communityId");
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const from = searchParams.get('from')
+  const communityId = searchParams.get('communityId')
   // If no ID in URL, we're viewing our own profile
-  const isOwnProfile = !id;
+  const isOwnProfile = !id
 
   // Mock profiles data
   const profiles: { [key: string]: any } = {
-    "own": {
-      name: "John",
+    own: {
+      name: 'John',
       age: 36,
-      city: "Toronto",
-      province: "ON",
-      bio: "Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.",
-      stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
-      interests: ["Cooking", "Fitness", "Outdoors", "Tech"],
+      city: 'Toronto',
+      province: 'ON',
+      bio: 'Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.',
+      stages: ['Elementary (6-12 years)', 'Teen (13-17 years)'],
+      interests: ['Cooking', 'Fitness', 'Outdoors', 'Tech'],
       avatar: avatarDefaultGrey,
       stats: {
         connections: 12,
         communities: 4,
-        events: 8
-      }
+        events: 8,
+      },
     },
-    "1": {
-      name: "Mike",
+    '1': {
+      name: 'Mike',
       age: 35,
-      city: "Vancouver",
-      province: "BC",
-      bio: "Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.",
-      stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
-      interests: ["Outdoors", "Cooking", "Sports"],
-      avatar: avatarDefaultGrey
+      city: 'Vancouver',
+      province: 'BC',
+      bio: 'Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.',
+      stages: ['Elementary (6-12 years)', 'Teen (13-17 years)'],
+      interests: ['Outdoors', 'Cooking', 'Sports'],
+      avatar: avatarDefaultGrey,
     },
-    "2": {
-      name: "David",
+    '2': {
+      name: 'David',
       age: 42,
-      city: "Calgary",
-      province: "AB",
-      bio: "Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.",
-      stages: ["Elementary (6-12 years)", "Teen (13-17 years)"],
-      interests: ["Gaming", "Tech", "DIY"],
-      avatar: avatarDefaultGrey
+      city: 'Calgary',
+      province: 'AB',
+      bio: 'Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.',
+      stages: ['Elementary (6-12 years)', 'Teen (13-17 years)'],
+      interests: ['Gaming', 'Tech', 'DIY'],
+      avatar: avatarDefaultGrey,
     },
-    "3": {
-      name: "Anthony Williams",
+    '3': {
+      name: 'Anthony Williams',
       age: 36,
-      city: "Toronto",
-      province: "ON",
-      bio: "Fitness enthusiast and amateur photographer.",
-      stages: ["Preschool (4-5 years)"],
-      interests: ["Fitness", "Photography", "Art"],
-      avatar: avatarDefaultGrey
+      city: 'Toronto',
+      province: 'ON',
+      bio: 'Fitness enthusiast and amateur photographer.',
+      stages: ['Preschool (4-5 years)'],
+      interests: ['Fitness', 'Photography', 'Art'],
+      avatar: avatarDefaultGrey,
     },
-    "4": {
-      name: "Steve",
+    '4': {
+      name: 'Steve',
       age: 40,
-      city: "Montréal",
-      province: "QC",
+      city: 'Montréal',
+      province: 'QC',
       bio: "Outdoor adventure seeker and sports enthusiast. Let's grab a beer and swap parenting stories!",
-      stages: ["Elementary (6-12 years)"],
-      interests: ["Outdoors", "Sports", "Travel"],
-      avatar: avatarDefaultGrey
-    }
-  };
+      stages: ['Elementary (6-12 years)'],
+      interests: ['Outdoors', 'Sports', 'Travel'],
+      avatar: avatarDefaultGrey,
+    },
+  }
 
-  const userProfile = isOwnProfile ? profiles["own"] : profiles[id || "1"];
-  const pendingRequestsCount = 3; // Mock pending requests
+  const userProfile = isOwnProfile ? profiles['own'] : profiles[id || '1']
+  const pendingRequestsCount = 3 // Mock pending requests
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-card border-b border-border">
-        <div className="max-w-md mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            <img src={logo} alt="Next Level Dads" className="h-8" />
-            {from === "community" && communityId && (
+      <div className="bg-card border-b border-border px-6 py-5 relative">
+        {/* Logo top-left */}
+        <img
+          src={logo}
+          alt="Next Level Dads"
+          className="h-10 absolute top-4 left-3"
+        />
+
+        {/* Centered header text */}
+        <div className="flex items-center justify-center h-full">
+          <div className="flex items-center gap-4">
+            {from === 'community' && communityId && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -105,32 +112,38 @@ const Profile = () => {
       <div className="max-w-md mx-auto px-6 py-8 space-y-6 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="w-32 h-32 rounded-lg overflow-hidden border-4 border-primary/20">
-            <img src={userProfile.avatar} alt={userProfile.name} className="w-full h-full object-cover" />
+            <img
+              src={userProfile.avatar}
+              alt={userProfile.name}
+              className="w-full h-full object-cover"
+            />
           </div>
-          
+
           <div>
             <h2 className="text-2xl font-heading font-semibold text-foreground">
               {userProfile.name}, {userProfile.age}
             </h2>
             <div className="flex items-center justify-center gap-1 text-muted-foreground mt-1">
               <MapPin className="w-4 h-4" />
-              <span>{userProfile.city}, {userProfile.province}</span>
+              <span>
+                {userProfile.city}, {userProfile.province}
+              </span>
             </div>
           </div>
 
           {isOwnProfile && (
             <div className="flex gap-3 w-full max-w-sm">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1 rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
-                onClick={() => navigate("/connections")}
+                onClick={() => navigate('/connections')}
               >
                 Connections
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1 rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground relative"
-                onClick={() => navigate("/requests")}
+                onClick={() => navigate('/requests')}
               >
                 Requests
                 {pendingRequestsCount > 0 && (
@@ -172,14 +185,22 @@ const Profile = () => {
         <div className="bg-card rounded-lg p-6 space-y-4 shadow-md">
           <div>
             <h3 className="font-semibold text-foreground mb-2">About Me</h3>
-            <p className="text-muted-foreground leading-relaxed">{userProfile.bio}</p>
+            <p className="text-muted-foreground leading-relaxed">
+              {userProfile.bio}
+            </p>
           </div>
 
           <div>
-            <h3 className="font-semibold text-foreground mb-2">Children's Age</h3>
+            <h3 className="font-semibold text-foreground mb-2">
+              Children's Age
+            </h3>
             <div className="flex flex-wrap gap-2">
               {userProfile.stages.map((stage) => (
-                <Badge key={stage} variant="soft" className="rounded-full">
+                <Badge
+                  key={stage}
+                  variant="soft"
+                  className="rounded-full"
+                >
                   <Calendar className="w-3 h-3 mr-1" />
                   {stage}
                 </Badge>
@@ -191,7 +212,11 @@ const Profile = () => {
             <h3 className="font-semibold text-foreground mb-3">Interests</h3>
             <div className="flex flex-wrap gap-2">
               {userProfile.interests.map((interest) => (
-                <Badge key={interest} variant="soft" className="rounded-full">
+                <Badge
+                  key={interest}
+                  variant="soft"
+                  className="rounded-full"
+                >
                   {interest}
                 </Badge>
               ))}
@@ -201,19 +226,25 @@ const Profile = () => {
 
         {isOwnProfile && (
           <>
-            <Button variant="outline" className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground">
+            <Button
+              variant="outline"
+              className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
+            >
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
 
-            <Button variant="outline" className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground">
+            <Button
+              variant="outline"
+              className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
+            >
               Share Profile
             </Button>
 
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full rounded-full border-2 border-destructive text-destructive hover:bg-primary hover:text-primary-foreground hover:border-primary"
-              onClick={() => navigate("/welcome")}
+              onClick={() => navigate('/')}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Log Out
@@ -224,7 +255,7 @@ const Profile = () => {
 
       <BottomNav />
     </div>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile

@@ -6,8 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ArrowLeft, Send, Users } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { useGroups } from '@/contexts/GroupsContext'
+import { useLocation } from 'react-router-dom'
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search)
+}
 
 const GroupChat = () => {
+  const query = useQuery()
   const navigate = useNavigate()
   const { id } = useParams()
   const [message, setMessage] = useState('')
@@ -16,6 +22,7 @@ const GroupChat = () => {
   // Check if this is a community chat
   const isCommunityChat = id?.startsWith('community-')
   const communityId = isCommunityChat ? id.replace('community-', '') : null
+  const from = query.get('from') || 'groups'
 
   const groupData = {
     private: {
@@ -94,7 +101,13 @@ const GroupChat = () => {
         <div className="max-w-md mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => {
+                if (from === 'discover') {
+                  navigate(`/discover/communities`)
+                } else {
+                  navigate(`/groups/communities`)
+                }
+              }}
               className="text-muted-foreground"
             >
               <ArrowLeft className="w-6 h-6" />
@@ -110,9 +123,9 @@ const GroupChat = () => {
             <button
               onClick={() => {
                 if (isCommunityChat && communityId) {
-                  navigate(`/community-detail/${communityId}`)
+                  navigate(`/community-detail/${communityId}?from=${from}`)
                 } else {
-                  navigate(`/group-members/${id}`)
+                  navigate(`/group-members/${id}?from=${from}`)
                 }
               }}
               className="text-muted-foreground"

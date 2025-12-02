@@ -150,7 +150,7 @@ const CommunityDetail = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/discover?tab=communities')}
+            onClick={() => navigate('/discover/communities')}
             className="rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />

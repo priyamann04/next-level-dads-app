@@ -130,7 +130,7 @@ const GroupMembers = () => {
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-4">
           <button
-            onClick={() => navigate('/discover?tab=communities')}
+            onClick={() => navigate('/discover/communities')}
             className="text-muted-foreground mb-4"
           >
             <ArrowLeft className="w-6 h-6" />

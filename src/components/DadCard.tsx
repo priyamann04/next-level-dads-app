@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
 
 interface DadCardProps {
+  id: string;
   name: string;
   age: number;
   city: string;
@@ -14,9 +15,11 @@ interface DadCardProps {
   interests: string[];
   avatarUrl?: string;
   onConnect: () => void;
+  onClick?: () => void;
 }
 
 const DadCard = ({
+  id,
   name,
   age,
   city,
@@ -26,6 +29,7 @@ const DadCard = ({
   interests,
   avatarUrl,
   onConnect,
+  onClick,
 }: DadCardProps) => {
   const [isRequested, setIsRequested] = useState(false);
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -36,7 +40,7 @@ const DadCard = ({
   };
   
   return (
-    <Card className="overflow-hidden shadow-md">
+    <Card className="overflow-hidden shadow-md cursor-pointer" onClick={onClick}>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start gap-3">
           {avatarUrl ? (
@@ -85,7 +89,10 @@ const DadCard = ({
         <Button
           className="w-full rounded-full font-semibold"
           style={{ backgroundColor: isRequested ? '#9ca3af' : '#D8A24A' }}
-          onClick={handleConnect}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleConnect();
+          }}
         >
           {isRequested ? 'Requested ✓' : 'Connect'}
         </Button>

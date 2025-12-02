@@ -35,9 +35,13 @@ const mockMessages = [
 ];
 
 const chatData: { [key: string]: { name: string; avatar: string; status: string } } = {
-  "1": { name: "Mike", avatar: avatarDefaultGrey, status: "Active now" },
-  "2": { name: "David", avatar: avatarDefaultGrey, status: "Active 5m ago" },
-  "3": { name: "James", avatar: avatarDefaultGrey, status: "Active 1h ago" }
+  "chat-mike": { name: "Mike", avatar: avatarDefaultGrey, status: "Active now" },
+  "chat-david": { name: "David", avatar: avatarDefaultGrey, status: "Active 5m ago" },
+  "chat-james": { name: "James", avatar: avatarDefaultGrey, status: "Active 1h ago" },
+  "group-toronto": { name: "Toronto Dads Meetup", avatar: avatarDefaultGrey, status: "8 members" },
+  "chat-connection-mike": { name: "Mike Johnson", avatar: avatarDefaultGrey, status: "Active now" },
+  "chat-connection-david": { name: "David Chen", avatar: avatarDefaultGrey, status: "Active 10m ago" },
+  "chat-connection-steve": { name: "Steve Wilson", avatar: avatarDefaultGrey, status: "Active 1h ago" },
 };
 
 const ChatDetail = () => {
@@ -46,7 +50,7 @@ const ChatDetail = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(mockMessages);
   
-  const currentChat = chatData[id || "1"] || chatData["1"];
+  const currentChat = chatData[id || "chat-mike"] || chatData["chat-mike"];
 
   const handleSend = () => {
     if (message.trim()) {

@@ -11,7 +11,7 @@ import logo from "@/assets/logo.png";
 // Mock data
 const profiles = [
   {
-    id: 1,
+    id: "match-mike",
     name: "Mike",
     age: 35,
     location: "Vancouver, BC",
@@ -21,7 +21,7 @@ const profiles = [
     imageUrl: avatarLight1
   },
   {
-    id: 2,
+    id: "match-david",
     name: "David",
     age: 42,
     location: "Calgary, AB",
@@ -31,7 +31,7 @@ const profiles = [
     imageUrl: avatarMedium1
   },
   {
-    id: 3,
+    id: "match-james",
     name: "James",
     age: 38,
     location: "Halifax, NS",
@@ -41,7 +41,7 @@ const profiles = [
     imageUrl: avatarDark1
   },
   {
-    id: 4,
+    id: "match-steve",
     name: "Steve",
     age: 40,
     location: "Montréal, QC",

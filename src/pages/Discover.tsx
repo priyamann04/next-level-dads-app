@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils'
 
 const dads = [
   {
-    id: 1,
+    id: 'dad-james',
     name: 'James Martinez',
     age: 32,
     city: 'Vancouver',
@@ -42,7 +42,7 @@ const dads = [
     avatarUrl: avatarDefaultGrey,
   },
   {
-    id: 2,
+    id: 'dad-david',
     name: 'David Chen',
     age: 38,
     city: 'Toronto',
@@ -53,7 +53,7 @@ const dads = [
     avatarUrl: avatarDefaultGrey,
   },
   {
-    id: 3,
+    id: 'dad-marcus',
     name: 'Marcus Johnson',
     age: 35,
     city: 'Calgary',
@@ -64,7 +64,7 @@ const dads = [
     avatarUrl: avatarDefaultGrey,
   },
   {
-    id: 4,
+    id: 'dad-steve',
     name: 'Steve Williams',
     age: 40,
     city: 'Montréal',
@@ -567,11 +567,12 @@ const Discover = () => {
             <div className="space-y-4">
               {filteredDads.length > 0 ? (
                 filteredDads.map((dad) => (
-                  <DadCard
-                    key={dad.id}
-                    {...dad}
-                    onConnect={() => handleConnect(dad.name)}
-                  />
+                <DadCard
+                  key={dad.id}
+                  {...dad}
+                  onConnect={() => handleConnect(dad.name)}
+                  onClick={() => navigate(`/profile/${dad.id}`)}
+                />
                 ))
               ) : (
                 <div className="text-center py-12">

@@ -13,7 +13,7 @@ const Requests = () => {
   // Mock pending requests data
   const requests = [
     {
-      id: "1",
+      id: "request-james",
       name: "James Anderson",
       age: 38,
       city: "Toronto",
@@ -24,7 +24,7 @@ const Requests = () => {
       avatarUrl: avatarDefaultGrey,
     },
     {
-      id: "2",
+      id: "request-robert",
       name: "Robert Lee",
       age: 41,
       city: "Ottawa",
@@ -35,7 +35,7 @@ const Requests = () => {
       avatarUrl: avatarDefaultGrey,
     },
     {
-      id: "3",
+      id: "request-chris",
       name: "Chris Martinez",
       age: 36,
       city: "Toronto",
@@ -84,6 +84,7 @@ const Requests = () => {
               {...request}
               onAccept={() => handleAccept(request.name)}
               onIgnore={() => handleIgnore(request.name)}
+              onClick={() => navigate(`/profile/${request.id}`)}
             />
           ))
         ) : (

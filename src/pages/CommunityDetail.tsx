@@ -61,7 +61,7 @@ const CommunityDetail = () => {
   const membersData: Record<string, any[]> = {
     '1': [
       {
-        id: 1,
+        id: 'member-michael',
         name: 'Michael Thompson',
         age: 34,
         stage: 'Toddler (2-3 years)',
@@ -69,7 +69,7 @@ const CommunityDetail = () => {
         avatarUrl: avatarDefaultGrey,
       },
       {
-        id: 2,
+        id: 'member-robert',
         name: 'Robert Chen',
         age: 39,
         stage: 'Elementary (6-12 years)',
@@ -77,7 +77,7 @@ const CommunityDetail = () => {
         avatarUrl: avatarDefaultGrey,
       },
       {
-        id: 3,
+        id: 'member-anthony',
         name: 'Anthony Williams',
         age: 36,
         stage: 'Preschool (4-5 years)',
@@ -87,7 +87,7 @@ const CommunityDetail = () => {
     ],
     '2': [
       {
-        id: 4,
+        id: 'member-james-outdoor',
         name: 'James Martinez',
         age: 32,
         stage: 'Toddler (2-3 years)',
@@ -97,11 +97,41 @@ const CommunityDetail = () => {
     ],
     '3': [
       {
-        id: 5,
+        id: 'member-david-tech',
         name: 'David Chen',
         age: 38,
         stage: 'Elementary (6-12 years)',
         bio: 'Tech enthusiast and soccer coach.',
+        avatarUrl: avatarDefaultGrey,
+      },
+    ],
+    '4': [
+      {
+        id: 'member-alex',
+        name: 'Alex Johnson',
+        age: 29,
+        stage: 'Newborn (0-1 year)',
+        bio: 'New dad navigating parenthood.',
+        avatarUrl: avatarDefaultGrey,
+      },
+    ],
+    '5': [
+      {
+        id: 'member-chris',
+        name: 'Chris Williams',
+        age: 35,
+        stage: 'Elementary (6-12 years)',
+        bio: 'Coach and fitness enthusiast.',
+        avatarUrl: avatarDefaultGrey,
+      },
+    ],
+    '6': [
+      {
+        id: 'member-daniel',
+        name: 'Daniel Kim',
+        age: 42,
+        stage: 'Teen (13-17 years)',
+        bio: 'Photographer and musician.',
         avatarUrl: avatarDefaultGrey,
       },
     ],

@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
 
 interface ConnectionRequestCardProps {
+  id: string;
   name: string;
   age: number;
   city: string;
@@ -14,9 +15,11 @@ interface ConnectionRequestCardProps {
   avatarUrl?: string;
   onAccept: () => void;
   onIgnore: () => void;
+  onClick?: () => void;
 }
 
 const ConnectionRequestCard = ({
+  id,
   name,
   age,
   city,
@@ -27,11 +30,12 @@ const ConnectionRequestCard = ({
   avatarUrl,
   onAccept,
   onIgnore,
+  onClick,
 }: ConnectionRequestCardProps) => {
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
   
   return (
-    <Card className="overflow-hidden shadow-md">
+    <Card className="overflow-hidden shadow-md cursor-pointer" onClick={onClick}>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start gap-3">
           {avatarUrl ? (
@@ -81,14 +85,20 @@ const ConnectionRequestCard = ({
           <Button
             className="flex-1 rounded-full font-semibold"
             style={{ backgroundColor: '#D8A24A' }}
-            onClick={onAccept}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAccept();
+            }}
           >
             Accept
           </Button>
           <Button
             variant="outline"
             className="flex-1 rounded-full font-semibold"
-            onClick={onIgnore}
+            onClick={(e) => {
+              e.stopPropagation();
+              onIgnore();
+            }}
           >
             Ignore
           </Button>

@@ -2,7 +2,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GroupsProvider } from './contexts/GroupsContext'
 import Welcome from './pages/Welcome'
 import ProfileSetup from './pages/ProfileSetup'
@@ -51,10 +51,18 @@ const App = () => (
             />
             <Route
               path="/discover"
+              element={<Navigate to="/discover/dads" replace />}
+            />
+            <Route
+              path="/discover/:tab"
               element={<Discover />}
             />
             <Route
               path="/groups"
+              element={<Navigate to="/groups/communities" replace />}
+            />
+            <Route
+              path="/groups/:tab"
               element={<Groups />}
             />
             <Route

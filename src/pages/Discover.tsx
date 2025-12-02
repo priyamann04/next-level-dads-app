@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
 import { useToast } from '@/hooks/use-toast'
 import { useGroups } from '@/contexts/GroupsContext'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,6 +27,7 @@ import {
 } from '@/components/ui/sheet'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
+import { cn } from '@/lib/utils'
 
 const dads = [
   {
@@ -158,9 +158,7 @@ const events = [
 const Discover = () => {
   const { toast } = useToast()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const tabParam = searchParams.get('tab') || 'dads'
-  const [activeTab, setActiveTab] = useState(tabParam)
+  const { tab = 'dads' } = useParams<{ tab: string }>()
 
   const {
     joinedCommunities,
@@ -188,12 +186,6 @@ const Discover = () => {
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
 
   const [filtersOpen, setFiltersOpen] = useState(false)
-
-  // Keep URL & tab state in sync if URL changes externally
-  useEffect(() => {
-    const urlTab = searchParams.get('tab') || 'dads'
-    if (urlTab !== activeTab) setActiveTab(urlTab)
-  }, [searchParams])
 
   // Helper data
   const stageOptions = [
@@ -390,39 +382,42 @@ const Discover = () => {
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6">
-        <Tabs
-          value={activeTab}
-          onValueChange={(val) => {
-            setActiveTab(val)
-            setSearchParams({ tab: val })
-          }}
-          className="w-full"
-        >
-          <TabsList className="w-full grid grid-cols-3 bg-card border-b border-border rounded-none h-12">
-            <TabsTrigger
-              value="dads"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+        <div className="w-full">
+          <div className="w-full grid grid-cols-3 bg-card border-b border-border h-12 mb-2">
+            <Link
+              to="/discover/dads"
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
+                tab === 'dads' && "border-b-2 border-primary text-foreground",
+                tab !== 'dads' && "text-muted-foreground"
+              )}
             >
               Dads
-            </TabsTrigger>
-            <TabsTrigger
-              value="communities"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            </Link>
+            <Link
+              to="/discover/communities"
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
+                tab === 'communities' && "border-b-2 border-primary text-foreground",
+                tab !== 'communities' && "text-muted-foreground"
+              )}
             >
               Communities
-            </TabsTrigger>
-            <TabsTrigger
-              value="events"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            </Link>
+            <Link
+              to="/discover/events"
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
+                tab === 'events' && "border-b-2 border-primary text-foreground",
+                tab !== 'events' && "text-muted-foreground"
+              )}
             >
               Events
-            </TabsTrigger>
-          </TabsList>
+            </Link>
+          </div>
 
-          <TabsContent
-            value="dads"
-            className="space-y-4 animate-fade-in"
-          >
+          {tab === 'dads' && (
+            <div className="space-y-4 animate-fade-in">
             <div className="flex justify-end mb-4">
               <Sheet
                 open={filtersOpen}
@@ -597,12 +592,11 @@ const Discover = () => {
                 Refresh
               </Button>
             </div>
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent
-            value="communities"
-            className="space-y-4 animate-fade-in"
-          >
+          {tab === 'communities' && (
+            <div className="space-y-4 animate-fade-in">
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
@@ -635,12 +629,11 @@ const Discover = () => {
                 </div>
               )}
             </div>
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent
-            value="events"
-            className="space-y-4 animate-fade-in"
-          >
+          {tab === 'events' && (
+            <div className="space-y-4 animate-fade-in">
             <div className="relative mb-4">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
@@ -749,8 +742,9 @@ const Discover = () => {
                 </p>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+            </div>
+          )}
+        </div>
       </div>
 
       <BottomNav />

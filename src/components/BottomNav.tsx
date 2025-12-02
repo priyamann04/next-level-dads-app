@@ -5,8 +5,8 @@ const BottomNav = () => {
   const location = useLocation();
   
   const navItems = [
-    { icon: Compass, label: "Discover", path: "/discover" },
-    { icon: Users, label: "Groups", path: "/groups" },
+    { icon: Compass, label: "Discover", path: "/discover/dads" },
+    { icon: Users, label: "Groups", path: "/groups/communities" },
     { icon: MessageCircle, label: "Chats", path: "/chats" },
     { icon: Users, label: "Profile", path: "/profile" },
   ];
@@ -16,7 +16,7 @@ const BottomNav = () => {
       <div className="max-w-md mx-auto flex justify-around items-center h-16 px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path.split('/').slice(0, 2).join('/'));
           
           return (
             <Link

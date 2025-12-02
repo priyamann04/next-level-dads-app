@@ -5,11 +5,18 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
+import { useLocation } from 'react-router-dom'
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search)
+}
 
 const CommunityDetail = () => {
+  const query = useQuery()
   const navigate = useNavigate()
   const { id } = useParams()
   const [isInterested, setIsInterested] = useState(false)
+  const from = query.get('from') || 'groups'
 
   const communitiesData: Record<string, any> = {
     '1': {
@@ -150,7 +157,7 @@ const CommunityDetail = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/discover/communities')}
+            onClick={() => navigate(`/group-chat/community-${id}?from=${from}`)}
             className="rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />

@@ -282,7 +282,7 @@ const Discover = () => {
       title: 'Joined community! 🎉',
       description: `Welcome to ${title}!`,
     })
-    navigate(`/group-chat/community-${communityId}`)
+    navigate(`/group-chat/community-${communityId}?from=discover`)
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {
@@ -387,9 +387,9 @@ const Discover = () => {
             <Link
               to="/discover/dads"
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
-                tab === 'dads' && "border-b-2 border-primary text-foreground",
-                tab !== 'dads' && "text-muted-foreground"
+                'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
+                tab === 'dads' && 'border-b-2 border-primary text-foreground',
+                tab !== 'dads' && 'text-muted-foreground'
               )}
             >
               Dads
@@ -397,9 +397,10 @@ const Discover = () => {
             <Link
               to="/discover/communities"
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
-                tab === 'communities' && "border-b-2 border-primary text-foreground",
-                tab !== 'communities' && "text-muted-foreground"
+                'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
+                tab === 'communities' &&
+                  'border-b-2 border-primary text-foreground',
+                tab !== 'communities' && 'text-muted-foreground'
               )}
             >
               Communities
@@ -407,9 +408,9 @@ const Discover = () => {
             <Link
               to="/discover/events"
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
-                tab === 'events' && "border-b-2 border-primary text-foreground",
-                tab !== 'events' && "text-muted-foreground"
+                'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
+                tab === 'events' && 'border-b-2 border-primary text-foreground',
+                tab !== 'events' && 'text-muted-foreground'
               )}
             >
               Events
@@ -418,331 +419,333 @@ const Discover = () => {
 
           {tab === 'dads' && (
             <div className="space-y-4 animate-fade-in">
-            <div className="flex justify-end mb-4">
-              <Sheet
-                open={filtersOpen}
-                onOpenChange={setFiltersOpen}
-              >
-                <SheetTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="rounded-full"
-                  >
-                    <SlidersHorizontal className="w-4 h-4 mr-2" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="w-full sm:max-w-md overflow-y-auto"
+              <div className="flex justify-end mb-4">
+                <Sheet
+                  open={filtersOpen}
+                  onOpenChange={setFiltersOpen}
                 >
-                  <SheetHeader>
-                    <SheetTitle>Filter Dads</SheetTitle>
-                    <SheetDescription>
-                      Refine your search to find the perfect connections
-                    </SheetDescription>
-                  </SheetHeader>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="rounded-full"
+                    >
+                      <SlidersHorizontal className="w-4 h-4 mr-2" />
+                      Filters
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-full sm:max-w-md overflow-y-auto"
+                  >
+                    <SheetHeader>
+                      <SheetTitle>Filter Dads</SheetTitle>
+                      <SheetDescription>
+                        Refine your search to find the perfect connections
+                      </SheetDescription>
+                    </SheetHeader>
 
-                  <div className="mt-6 space-y-6">
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Children's Age
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Select all that apply
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {stageOptions.map((stage) => (
-                          <Badge
-                            key={stage}
-                            variant={
-                              pendingChildrenAges.includes(stage)
-                                ? 'default'
-                                : 'outline'
-                            }
-                            className="cursor-pointer rounded-full"
-                            onClick={() => togglePendingChildrenAge(stage)}
-                          >
-                            {stage}
-                          </Badge>
-                        ))}
+                    <div className="mt-6 space-y-6">
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-semibold text-foreground">
+                          Children's Age
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Select all that apply
+                        </p>
+                        <div className="flex gap-2 flex-wrap">
+                          {stageOptions.map((stage) => (
+                            <Badge
+                              key={stage}
+                              variant={
+                                pendingChildrenAges.includes(stage)
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              className="cursor-pointer rounded-full"
+                              onClick={() => togglePendingChildrenAge(stage)}
+                            >
+                              {stage}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-semibold text-foreground">
+                          Interests
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Select all that apply
+                        </p>
+                        <div className="flex gap-2 flex-wrap">
+                          {interestOptions.map((interest) => (
+                            <Badge
+                              key={interest}
+                              variant={
+                                pendingInterests.includes(interest)
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              className="cursor-pointer rounded-full"
+                              onClick={() => togglePendingInterest(interest)}
+                            >
+                              {interest}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-semibold text-foreground">
+                          Location
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Select all that apply
+                        </p>
+                        <div className="flex gap-2 flex-wrap">
+                          {provinces.map((province) => (
+                            <Badge
+                              key={province}
+                              variant={
+                                pendingLocations.includes(province)
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              className="cursor-pointer rounded-full"
+                              onClick={() => togglePendingLocation(province)}
+                            >
+                              {province}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <h3 className="text-sm font-semibold text-foreground">
+                          Dad's Age
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Select all that apply
+                        </p>
+                        <div className="flex gap-2 flex-wrap">
+                          {ageRanges.slice(1).map((range) => (
+                            <Badge
+                              key={range}
+                              variant={
+                                pendingDadAges.includes(range)
+                                  ? 'default'
+                                  : 'outline'
+                              }
+                              className="cursor-pointer rounded-full"
+                              onClick={() => togglePendingDadAge(range)}
+                            >
+                              {range}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-4 flex gap-3">
+                        <Button
+                          className="flex-1"
+                          onClick={applyFilters}
+                        >
+                          Apply Filters
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={clearAllFilters}
+                        >
+                          Clear All
+                        </Button>
                       </div>
                     </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
 
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Interests
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Select all that apply
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {interestOptions.map((interest) => (
-                          <Badge
-                            key={interest}
-                            variant={
-                              pendingInterests.includes(interest)
-                                ? 'default'
-                                : 'outline'
-                            }
-                            className="cursor-pointer rounded-full"
-                            onClick={() => togglePendingInterest(interest)}
-                          >
-                            {interest}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Location
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Select all that apply
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {provinces.map((province) => (
-                          <Badge
-                            key={province}
-                            variant={
-                              pendingLocations.includes(province)
-                                ? 'default'
-                                : 'outline'
-                            }
-                            className="cursor-pointer rounded-full"
-                            onClick={() => togglePendingLocation(province)}
-                          >
-                            {province}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Dad's Age
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        Select all that apply
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {ageRanges.slice(1).map((range) => (
-                          <Badge
-                            key={range}
-                            variant={
-                              pendingDadAges.includes(range)
-                                ? 'default'
-                                : 'outline'
-                            }
-                            className="cursor-pointer rounded-full"
-                            onClick={() => togglePendingDadAge(range)}
-                          >
-                            {range}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="pt-4 flex gap-3">
-                      <Button
-                        className="flex-1"
-                        onClick={applyFilters}
-                      >
-                        Apply Filters
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="flex-1"
-                        onClick={clearAllFilters}
-                      >
-                        Clear All
-                      </Button>
-                    </div>
+              <div className="space-y-4">
+                {filteredDads.length > 0 ? (
+                  filteredDads.map((dad) => (
+                    <DadCard
+                      key={dad.id}
+                      {...dad}
+                      onConnect={() => handleConnect(dad.name)}
+                      onClick={() => navigate(`/profile/${dad.id}`)}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No dads match your filters
+                    </p>
                   </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+                )}
+              </div>
 
-            <div className="space-y-4">
-              {filteredDads.length > 0 ? (
-                filteredDads.map((dad) => (
-                <DadCard
-                  key={dad.id}
-                  {...dad}
-                  onConnect={() => handleConnect(dad.name)}
-                  onClick={() => navigate(`/profile/${dad.id}`)}
-                />
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    No dads match your filters
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-4">
-              <Button
-                variant="outline"
-                className="w-full rounded-full"
-                onClick={handleRefresh}
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefresh}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           )}
 
           {tab === 'communities' && (
             <div className="space-y-4 animate-fade-in">
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <Input
-                placeholder="Search communities..."
-                value={communitySearchQuery}
-                onChange={(e) => setCommunitySearchQuery(e.target.value)}
-                className="pl-10 rounded-full"
-              />
-            </div>
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  placeholder="Search communities..."
+                  value={communitySearchQuery}
+                  onChange={(e) => setCommunitySearchQuery(e.target.value)}
+                  className="pl-10 rounded-full"
+                />
+              </div>
 
-            <div className="space-y-3">
-              {filteredCommunities.length > 0 ? (
-                filteredCommunities.map((community) => (
-                  <div
-                    key={community.id}
-                    onClick={() =>
-                      navigate(`/community-detail/${community.id}`)
-                    }
-                    className="cursor-pointer"
-                  >
-                    <CommunityCard
-                      {...community}
-                      onJoin={() => handleJoin(community.id, community.title)}
-                    />
+              <div className="space-y-3">
+                {filteredCommunities.length > 0 ? (
+                  filteredCommunities.map((community) => (
+                    <div
+                      key={community.id}
+                      // onClick={() => {}}
+                      // className="cursor-pointer"
+                    >
+                      <CommunityCard
+                        {...community}
+                        onJoin={() => handleJoin(community.id, community.title)}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No communities found
+                    </p>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No communities found</p>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
             </div>
           )}
 
           {tab === 'events' && (
             <div className="space-y-4 animate-fade-in">
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <Input
-                placeholder="Search events..."
-                value={eventSearchQuery}
-                onChange={(e) => setEventSearchQuery(e.target.value)}
-                className="pl-10 rounded-full"
-              />
-            </div>
-
-            <div className="py-4">
-              <Button
-                variant="outline"
-                className="w-full rounded-full font-semibold text-foreground bg-white"
-                style={{ borderColor: '#D8A24A' }}
-                onClick={() => {}}
-              >
-                Host Your Own Event
-              </Button>
-            </div>
-
-            <div className="flex gap-2 mb-4 flex-wrap">
-              <Badge
-                variant={eventFilter === 'all' ? 'default' : 'outline'}
-                className="cursor-pointer rounded-full"
-                onClick={() => setEventFilter('all')}
-              >
-                All
-              </Badge>
-              <Badge
-                variant={eventFilter === 'virtual' ? 'default' : 'outline'}
-                className="cursor-pointer rounded-full"
-                onClick={() => setEventFilter('virtual')}
-              >
-                Virtual
-              </Badge>
-              <Badge
-                variant={eventFilter === 'local' ? 'default' : 'outline'}
-                className="cursor-pointer rounded-full"
-                onClick={() => setEventFilter('local')}
-              >
-                Local
-              </Badge>
-              <Badge
-                variant={priceFilter === 'free' ? 'default' : 'outline'}
-                className="cursor-pointer rounded-full"
-                onClick={() => setPriceFilter('free')}
-              >
-                Free
-              </Badge>
-              <Badge
-                variant={priceFilter === 'paid' ? 'default' : 'outline'}
-                className="cursor-pointer rounded-full"
-                onClick={() => setPriceFilter('paid')}
-              >
-                Paid
-              </Badge>
-            </div>
-
-            {filteredEvents.length > 0 ? (
-              <div className="space-y-4">
-                {filteredEvents.map((event) => (
-                  <Card
-                    key={event.id}
-                    className="overflow-hidden shadow-md"
-                  >
-                    <CardContent className="p-6 space-y-3">
-                      <h3 className="text-lg font-heading font-semibold text-foreground">
-                        {event.title}
-                      </h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          <span>{event.location}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <DollarSign className="w-4 h-4" />
-                          <span>{event.price}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between pt-2">
-                        <span className="text-sm text-muted-foreground">
-                          {event.attending} attending
-                        </span>
-                        <Button
-                          className="rounded-full"
-                          onClick={() => handleJoinEvent(event.id, event.title)}
-                        >
-                          {registeredEvents.includes(event.id)
-                            ? 'Registered ✓'
-                            : 'Register'}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  placeholder="Search events..."
+                  value={eventSearchQuery}
+                  onChange={(e) => setEventSearchQuery(e.target.value)}
+                  className="pl-10 rounded-full"
+                />
               </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">
-                  No events match your filters
-                </p>
+
+              <div className="py-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full font-semibold text-foreground bg-white"
+                  style={{ borderColor: '#D8A24A' }}
+                  onClick={() => {}}
+                >
+                  Host Your Own Event
+                </Button>
               </div>
-            )}
+
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <Badge
+                  variant={eventFilter === 'all' ? 'default' : 'outline'}
+                  className="cursor-pointer rounded-full"
+                  onClick={() => setEventFilter('all')}
+                >
+                  All
+                </Badge>
+                <Badge
+                  variant={eventFilter === 'virtual' ? 'default' : 'outline'}
+                  className="cursor-pointer rounded-full"
+                  onClick={() => setEventFilter('virtual')}
+                >
+                  Virtual
+                </Badge>
+                <Badge
+                  variant={eventFilter === 'local' ? 'default' : 'outline'}
+                  className="cursor-pointer rounded-full"
+                  onClick={() => setEventFilter('local')}
+                >
+                  Local
+                </Badge>
+                <Badge
+                  variant={priceFilter === 'free' ? 'default' : 'outline'}
+                  className="cursor-pointer rounded-full"
+                  onClick={() => setPriceFilter('free')}
+                >
+                  Free
+                </Badge>
+                <Badge
+                  variant={priceFilter === 'paid' ? 'default' : 'outline'}
+                  className="cursor-pointer rounded-full"
+                  onClick={() => setPriceFilter('paid')}
+                >
+                  Paid
+                </Badge>
+              </div>
+
+              {filteredEvents.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredEvents.map((event) => (
+                    <Card
+                      key={event.id}
+                      className="overflow-hidden shadow-md"
+                    >
+                      <CardContent className="p-6 space-y-3">
+                        <h3 className="text-lg font-heading font-semibold text-foreground">
+                          {event.title}
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Calendar className="w-4 h-4" />
+                            <span>{event.date}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <MapPin className="w-4 h-4" />
+                            <span>{event.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <DollarSign className="w-4 h-4" />
+                            <span>{event.price}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-sm text-muted-foreground">
+                            {event.attending} attending
+                          </span>
+                          <Button
+                            className="rounded-full"
+                            onClick={() =>
+                              handleJoinEvent(event.id, event.title)
+                            }
+                          >
+                            {registeredEvents.includes(event.id)
+                              ? 'Registered ✓'
+                              : 'Register'}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">
+                    No events match your filters
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>

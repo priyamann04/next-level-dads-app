@@ -1,12 +1,12 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, Link } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calendar, MapPin, Users as UsersIcon } from 'lucide-react'
 import { useGroups } from '@/contexts/GroupsContext'
 import { useToast } from '@/hooks/use-toast'
 import logo from '@/assets/logo.png'
+import { cn } from '@/lib/utils'
 
 const allCommunities = [
   {
@@ -51,6 +51,7 @@ const allEvents = [
 const Groups = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { tab = 'communities' } = useParams<{ tab: string }>()
   const { joinedCommunities, registeredEvents, leaveCommunity, unregisterEvent } = useGroups()
 
   const myCommunities = allCommunities.filter((c) => joinedCommunities.includes(c.id))
@@ -92,29 +93,32 @@ const Groups = () => {
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6">
-        <Tabs
-          defaultValue="communities"
-          className="w-full"
-        >
-          <TabsList className="w-full grid grid-cols-2 bg-card border-b border-border rounded-none h-12">
-            <TabsTrigger
-              value="communities"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+        <div className="w-full">
+          <div className="w-full grid grid-cols-2 bg-card border-b border-border h-12 mb-2">
+            <Link
+              to="/groups/communities"
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
+                tab === 'communities' && "border-b-2 border-primary text-foreground",
+                tab !== 'communities' && "text-muted-foreground"
+              )}
             >
               Communities
-            </TabsTrigger>
-            <TabsTrigger
-              value="events"
-              className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none"
+            </Link>
+            <Link
+              to="/groups/events"
+              className={cn(
+                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
+                tab === 'events' && "border-b-2 border-primary text-foreground",
+                tab !== 'events' && "text-muted-foreground"
+              )}
             >
               Events
-            </TabsTrigger>
-          </TabsList>
+            </Link>
+          </div>
 
-          <TabsContent
-            value="communities"
-            className="space-y-3 animate-fade-in"
-          >
+          {tab === 'communities' && (
+            <div className="space-y-3 animate-fade-in">
             {myCommunities.length > 0 ? (
               myCommunities.map((community) => (
                 <Card
@@ -154,12 +158,11 @@ const Groups = () => {
                 <p className="text-muted-foreground">No joined communities yet</p>
               </div>
             )}
-          </TabsContent>
+            </div>
+          )}
 
-          <TabsContent
-            value="events"
-            className="space-y-4 animate-fade-in"
-          >
+          {tab === 'events' && (
+            <div className="space-y-4 animate-fade-in">
             {myEvents.length > 0 ? (
               myEvents.map((event) => (
                 <Card
@@ -200,8 +203,9 @@ const Groups = () => {
                 <p className="text-muted-foreground">No registered events yet</p>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+            </div>
+          )}
+        </div>
       </div>
 
       <BottomNav />

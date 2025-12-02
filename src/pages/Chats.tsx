@@ -9,7 +9,7 @@ import { useGroups } from '@/contexts/GroupsContext'
 
 const mockChats = [
   {
-    id: 1,
+    id: 'chat-mike',
     name: 'Mike',
     lastMessage: "That sounds great! Let's plan for Saturday.",
     timestamp: '2m ago',
@@ -18,7 +18,7 @@ const mockChats = [
     isGroup: false,
   },
   {
-    id: 'group-1',
+    id: 'group-toronto',
     name: 'Toronto Dads Meetup',
     lastMessage: 'Alex: Anyone free for coffee this weekend?',
     timestamp: '45m ago',
@@ -27,7 +27,7 @@ const mockChats = [
     isGroup: true,
   },
   {
-    id: 2,
+    id: 'chat-david',
     name: 'David',
     lastMessage: 'Thanks for the advice about the school situation!',
     timestamp: '1h ago',
@@ -36,7 +36,7 @@ const mockChats = [
     isGroup: false,
   },
   {
-    id: 3,
+    id: 'chat-james',
     name: 'James',
     lastMessage: 'The kids had a great time at the playdate',
     timestamp: '3h ago',

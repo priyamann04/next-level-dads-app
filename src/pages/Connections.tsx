@@ -14,7 +14,7 @@ const Connections = () => {
   // Mock connections data
   const connections = [
     {
-      id: "1",
+      id: "chat-connection-mike",
       name: "Mike Johnson",
       age: 35,
       city: "Vancouver",
@@ -25,7 +25,7 @@ const Connections = () => {
       avatarUrl: avatarDefaultGrey,
     },
     {
-      id: "2",
+      id: "chat-connection-david",
       name: "David Chen",
       age: 42,
       city: "Calgary",
@@ -36,7 +36,7 @@ const Connections = () => {
       avatarUrl: avatarDefaultGrey,
     },
     {
-      id: "3",
+      id: "chat-connection-steve",
       name: "Steve Wilson",
       age: 40,
       city: "Montréal",
@@ -83,7 +83,7 @@ const Connections = () => {
             const initials = connection.name.split(' ').map(n => n[0]).join('').toUpperCase();
             
             return (
-              <Card key={connection.id} className="overflow-hidden shadow-md">
+              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(`/profile/${connection.id}`)}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start gap-3">
                     {connection.avatarUrl ? (
@@ -133,14 +133,20 @@ const Connections = () => {
                     <Button
                       className="flex-1 rounded-full font-semibold"
                       style={{ backgroundColor: "#D8A24A" }}
-                      onClick={() => handleChat(connection.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChat(connection.id);
+                      }}
                     >
                       Chat
                     </Button>
                     <Button
                       variant="outline"
                       className="flex-1 rounded-full font-semibold border-2"
-                      onClick={() => handleUnconnect(connection.name)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUnconnect(connection.name);
+                      }}
                     >
                       Unconnect
                     </Button>

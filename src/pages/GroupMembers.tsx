@@ -20,7 +20,7 @@ const GroupMembers = () => {
         'A private group for dads who love outdoor activities and weekend adventures.',
       members: [
         {
-          id: 1,
+          id: 'member-mike-priv',
           name: 'Mike',
           age: 35,
           location: 'Vancouver, BC',
@@ -31,7 +31,7 @@ const GroupMembers = () => {
           avatar: avatarDefaultGrey,
         },
         {
-          id: 2,
+          id: 'member-david-priv',
           name: 'David',
           age: 42,
           location: 'Calgary, AB',
@@ -46,7 +46,7 @@ const GroupMembers = () => {
           avatar: avatarDefaultGrey,
         },
         {
-          id: 3,
+          id: 'member-james-priv',
           name: 'James',
           age: 38,
           location: 'Halifax, NS',
@@ -65,7 +65,7 @@ const GroupMembers = () => {
         'Open community for all dads in the Toronto area to connect, share experiences, and organize meetups.',
       members: [
         {
-          id: 1,
+          id: 'member-mike-pub',
           name: 'Mike',
           age: 35,
           location: 'Vancouver, BC',
@@ -76,7 +76,7 @@ const GroupMembers = () => {
           avatar: avatarDefaultGrey,
         },
         {
-          id: 2,
+          id: 'member-david-pub',
           name: 'David',
           age: 42,
           location: 'Calgary, AB',
@@ -91,7 +91,7 @@ const GroupMembers = () => {
           avatar: avatarDefaultGrey,
         },
         {
-          id: 3,
+          id: 'member-james-pub',
           name: 'James',
           age: 38,
           location: 'Halifax, NS',
@@ -102,7 +102,7 @@ const GroupMembers = () => {
           avatar: avatarDefaultGrey,
         },
         {
-          id: 4,
+          id: 'member-steve-pub',
           name: 'Steve',
           age: 40,
           location: 'Montréal, QC',
@@ -118,7 +118,7 @@ const GroupMembers = () => {
 
   const group = id === 'private' ? groupData.private : groupData.public
 
-  const handleConnect = (memberId: number, name: string) => {
+  const handleConnect = (memberId: string, name: string) => {
     toast({
       title: 'Connection request sent!',
       description: `Your request to connect with ${name} has been sent.`,

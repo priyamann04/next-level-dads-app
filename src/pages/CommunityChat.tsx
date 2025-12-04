@@ -1,68 +1,35 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ArrowLeft, Send, Users } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { useGroups } from '@/contexts/GroupsContext'
-import { useLocation } from 'react-router-dom'
+import { ROUTES, communityMembers, discoverTab, groupsTab } from '@/lib/routes'
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search)
-}
-
-const GroupChat = () => {
-  const query = useQuery()
+const CommunityChat = () => {
   const navigate = useNavigate()
-  const { id } = useParams()
+  const { communityId } = useParams<{ communityId: string }>()
+  const [searchParams] = useSearchParams()
   const [message, setMessage] = useState('')
   const { communityChats } = useGroups()
+  
+  const from = searchParams.get('from') || 'groups'
 
-  // Check if this is a community chat
-  const isCommunityChat = id?.startsWith('community-')
-  const communityId = isCommunityChat ? id.replace('community-', '') : null
-  const from = query.get('from') || 'groups'
+  // Find community chat data
+  const communityChat = communityChats.find(
+    (chat) => chat.communityId === parseInt(communityId || '0')
+  )
 
-  const groupData = {
-    private: {
-      title: 'Weekend Outdoor Adventures',
-      type: 'Private Group',
-      members: [
-        { id: 1, name: 'Mike', avatar: avatarDefaultGrey },
-        { id: 2, name: 'David', avatar: avatarDefaultGrey },
-        { id: 3, name: 'James', avatar: avatarDefaultGrey },
-      ],
-    },
-    public: {
-      title: 'Toronto Dads Community',
-      type: 'Public Group',
-      members: [
-        { id: 1, name: 'Mike', avatar: avatarDefaultGrey },
-        { id: 2, name: 'David', avatar: avatarDefaultGrey },
-        { id: 3, name: 'James', avatar: avatarDefaultGrey },
-        { id: 4, name: 'Steve', avatar: avatarDefaultGrey },
-      ],
-    },
-  }
-
-  // Get community chat data or default group data
-  let group
-  if (isCommunityChat && communityId) {
-    const communityChat = communityChats.find(
-      (chat) => chat.communityId === parseInt(communityId)
-    )
-    group = {
-      title: communityChat?.communityName || 'Community Chat',
-      type: 'Community',
-      members: [
-        { id: 1, name: 'Mike', avatar: avatarDefaultGrey },
-        { id: 2, name: 'David', avatar: avatarDefaultGrey },
-        { id: 3, name: 'James', avatar: avatarDefaultGrey },
-      ],
-    }
-  } else {
-    group = id === 'private' ? groupData.private : groupData.public
+  const group = {
+    title: communityChat?.communityName || 'Community Chat',
+    type: 'Community',
+    members: [
+      { id: 1, name: 'Mike', avatar: avatarDefaultGrey },
+      { id: 2, name: 'David', avatar: avatarDefaultGrey },
+      { id: 3, name: 'James', avatar: avatarDefaultGrey },
+    ],
   }
 
   const messages = [
@@ -95,19 +62,27 @@ const GroupChat = () => {
     }
   }
 
+  const handleBack = () => {
+    if (from === 'discover') {
+      navigate(discoverTab('communities'))
+    } else {
+      navigate(groupsTab('communities'))
+    }
+  }
+
+  const handleMembers = () => {
+    if (communityId) {
+      navigate(communityMembers(communityId))
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => {
-                if (from === 'discover') {
-                  navigate(`/discover/communities`)
-                } else {
-                  navigate(`/groups/communities`)
-                }
-              }}
+              onClick={handleBack}
               className="text-muted-foreground"
             >
               <ArrowLeft className="w-6 h-6" />
@@ -121,13 +96,7 @@ const GroupChat = () => {
               </p>
             </div>
             <button
-              onClick={() => {
-                if (isCommunityChat && communityId) {
-                  navigate(`/community-detail/${communityId}?from=${from}`)
-                } else {
-                  navigate(`/group-members/${id}?from=${from}`)
-                }
-              }}
+              onClick={handleMembers}
               className="text-muted-foreground"
             >
               <Users className="w-6 h-6" />
@@ -144,10 +113,7 @@ const GroupChat = () => {
           >
             {!msg.isSelf && (
               <Avatar className="w-8 h-8 shrink-0">
-                <AvatarImage
-                  src={msg.avatar}
-                  alt={msg.sender}
-                />
+                <AvatarImage src={msg.avatar} alt={msg.sender} />
                 <AvatarFallback>{msg.sender[0]}</AvatarFallback>
               </Avatar>
             )}
@@ -198,4 +164,4 @@ const GroupChat = () => {
   )
 }
 
-export default GroupChat
+export default CommunityChat

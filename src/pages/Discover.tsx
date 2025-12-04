@@ -282,7 +282,7 @@ const Discover = () => {
       title: 'Joined community! 🎉',
       description: `Welcome to ${title}!`,
     })
-    navigate(`/group-chat/community-${communityId}?from=discover`)
+    navigate(`/communities/${communityId}/chat?from=discover`)
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {

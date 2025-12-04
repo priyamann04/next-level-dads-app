@@ -6,6 +6,7 @@ import { Search, Users } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { useGroups } from '@/contexts/GroupsContext'
+import { chatDetail } from '@/lib/routes'
 
 const mockChats = [
   {
@@ -102,7 +103,7 @@ const Chats = () => {
             {filteredChats.map((chat) => (
               <div
                 key={chat.id}
-                onClick={() => navigate(`/chat/${chat.id}`)}
+                onClick={() => navigate(chatDetail(chat.id))}
                 className="px-6 py-4 hover:bg-muted/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-4">

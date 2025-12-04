@@ -346,7 +346,7 @@ const Profile = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate(`/community-detail/${communityId}`)}
+                onClick={() => navigate(`/communities/${communityId}`)}
                 className="rounded-full"
               >
                 <ArrowLeft className="w-5 h-5" />

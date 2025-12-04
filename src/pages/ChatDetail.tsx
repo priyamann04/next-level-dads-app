@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ChatMessage from "@/components/ChatMessage";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
+import { useGroups } from "@/contexts/GroupsContext";
+import { ROUTES } from "@/lib/routes";
 
 const mockMessages = [
   {
@@ -50,7 +52,19 @@ const ChatDetail = () => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(mockMessages);
   
-  const currentChat = chatData[id || "chat-mike"] || chatData["chat-mike"];
+  const { communityChats } = useGroups();
+  
+  // Check if this is a community chat
+  const isCommunityChat = id?.startsWith('community-');
+  
+  let currentChat: { name: string; avatar: string; status: string };
+  if (isCommunityChat && id) {
+    const communityId = id.replace('community-', '');
+    const chat = communityChats.find(c => c.communityId === parseInt(communityId));
+    currentChat = { name: chat?.communityName || 'Community Chat', avatar: avatarDefaultGrey, status: '3 members' };
+  } else {
+    currentChat = chatData[id || "chat-mike"] || chatData["chat-mike"];
+  }
 
   const handleSend = () => {
     if (message.trim()) {
@@ -69,7 +83,7 @@ const ChatDetail = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <div className="bg-card border-b border-border shadow-sm">
         <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
-          <button onClick={() => navigate("/chats")} className="text-muted-foreground">
+          <button onClick={() => navigate(ROUTES.CHATS)} className="text-muted-foreground">
             <ArrowLeft className="w-6 h-6" />
           </button>
           

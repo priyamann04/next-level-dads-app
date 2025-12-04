@@ -49,7 +49,7 @@ const Connections = () => {
   ];
 
   const handleChat = (id: string) => {
-    navigate(`/chat/${id}`);
+    navigate(`/chats/${id}`);
   };
 
   const handleUnconnect = (name: string) => {
@@ -83,7 +83,7 @@ const Connections = () => {
             const initials = connection.name.split(' ').map(n => n[0]).join('').toUpperCase();
             
             return (
-              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(`/profile/${connection.id}`)}>
+              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(`/profiles/${connection.id}`)}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start gap-3">
                     {connection.avatarUrl ? (

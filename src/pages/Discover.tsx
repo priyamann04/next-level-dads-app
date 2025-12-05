@@ -28,6 +28,7 @@ import {
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
+import { ROUTES, communityChat, profileDetail } from '@/lib/routes'
 
 const dads = [
   {
@@ -282,7 +283,7 @@ const Discover = () => {
       title: 'Joined community! 🎉',
       description: `Welcome to ${title}!`,
     })
-    navigate(`/communities/${communityId}/chat?from=discover`)
+    navigate(communityChat(communityId) + '?from=discover')
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {
@@ -385,7 +386,7 @@ const Discover = () => {
         <div className="w-full">
           <div className="w-full grid grid-cols-3 bg-card border-b border-border h-12 mb-2">
             <Link
-              to="/discover/dads"
+              to={ROUTES.DISCOVER_DADS}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'dads' && 'border-b-2 border-primary text-foreground',
@@ -395,7 +396,7 @@ const Discover = () => {
               Dads
             </Link>
             <Link
-              to="/discover/communities"
+              to={ROUTES.DISCOVER_COMMUNITIES}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'communities' &&
@@ -406,7 +407,7 @@ const Discover = () => {
               Communities
             </Link>
             <Link
-              to="/discover/events"
+              to={ROUTES.DISCOVER_EVENTS}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'events' && 'border-b-2 border-primary text-foreground',
@@ -572,7 +573,7 @@ const Discover = () => {
                       key={dad.id}
                       {...dad}
                       onConnect={() => handleConnect(dad.name)}
-                      onClick={() => navigate(`/profile/${dad.id}`)}
+                      onClick={() => navigate(profileDetail(dad.id))}
                     />
                   ))
                 ) : (

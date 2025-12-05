@@ -6,6 +6,7 @@ import logo from "@/assets/logo.png";
 import ConnectionRequestCard from "@/components/ConnectionRequestCard";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import { toast } from "sonner";
+import { ROUTES, profileDetail } from "@/lib/routes";
 
 const Requests = () => {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ const Requests = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(ROUTES.PROFILE)}
               className="rounded-full"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -84,7 +85,7 @@ const Requests = () => {
               {...request}
               onAccept={() => handleAccept(request.name)}
               onIgnore={() => handleIgnore(request.name)}
-              onClick={() => navigate(`/profile/${request.id}`)}
+              onClick={() => navigate(profileDetail(request.id))}
             />
           ))
         ) : (

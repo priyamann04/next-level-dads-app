@@ -49,6 +49,7 @@ export const ROUTES = {
   
   // Profile
   PROFILE: '/profile',
+  PROFILES: '/profiles',
   CONNECTIONS: '/connections',
   REQUESTS: '/requests',
 } as const

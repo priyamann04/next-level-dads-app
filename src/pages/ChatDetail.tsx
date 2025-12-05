@@ -48,22 +48,22 @@ const chatData: { [key: string]: { name: string; avatar: string; status: string 
 
 const ChatDetail = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { chatId } = useParams<{ chatId: string }>();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState(mockMessages);
   
   const { communityChats } = useGroups();
   
   // Check if this is a community chat
-  const isCommunityChat = id?.startsWith('community-');
+  const isCommunityChat = chatId?.startsWith('community-');
   
   let currentChat: { name: string; avatar: string; status: string };
-  if (isCommunityChat && id) {
-    const communityId = id.replace('community-', '');
+  if (isCommunityChat && chatId) {
+    const communityId = chatId.replace('community-', '');
     const chat = communityChats.find(c => c.communityId === parseInt(communityId));
     currentChat = { name: chat?.communityName || 'Community Chat', avatar: avatarDefaultGrey, status: '3 members' };
   } else {
-    currentChat = chatData[id || "chat-mike"] || chatData["chat-mike"];
+    currentChat = chatData[chatId || "chat-mike"] || chatData["chat-mike"];
   }
 
   const handleSend = () => {

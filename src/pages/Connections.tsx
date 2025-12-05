@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import { toast } from "sonner";
+import { ROUTES, chatDetail, profileDetail } from "@/lib/routes";
 
 const Connections = () => {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const Connections = () => {
   ];
 
   const handleChat = (id: string) => {
-    navigate(`/chats/${id}`);
+    navigate(chatDetail(id));
   };
 
   const handleUnconnect = (name: string) => {
@@ -65,7 +66,7 @@ const Connections = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(ROUTES.PROFILE)}
               className="rounded-full"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -83,7 +84,7 @@ const Connections = () => {
             const initials = connection.name.split(' ').map(n => n[0]).join('').toUpperCase();
             
             return (
-              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(`/profiles/${connection.id}`)}>
+              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(profileDetail(connection.id))}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start gap-3">
                     {connection.avatarUrl ? (

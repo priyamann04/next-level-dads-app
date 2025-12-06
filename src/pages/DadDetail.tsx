@@ -8,7 +8,6 @@ import BottomNav from '@/components/BottomNav'
 import { useToast } from '@/hooks/use-toast'
 import { ROUTES } from '@/lib/routes'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
-import logo from '@/assets/logo.png'
 
 // Shared dad data - in a real app this would come from a data store/API
 const dadsData: Record<string, {
@@ -128,22 +127,15 @@ const DadDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Header with back button */}
-      <div className="relative bg-card border-b border-border px-6 py-5 flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(ROUTES.DISCOVER_DADS)}
-          className="absolute left-3"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <img
-          src={logo}
-          alt="Next Level Dads"
-          className="h-10 absolute top-4 left-14"
-        />
-        <div className="flex-1 text-center">
+      {/* Header with back button - matching CommunityMembers style */}
+      <div className="bg-card border-b border-border">
+        <div className="max-w-md mx-auto px-6 py-4">
+          <button
+            onClick={() => navigate(ROUTES.DISCOVER_DADS)}
+            className="text-muted-foreground mb-4"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
           <h1 className="text-2xl font-heading font-semibold text-foreground">
             Profile
           </h1>

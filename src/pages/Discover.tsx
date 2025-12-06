@@ -28,7 +28,7 @@ import {
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
-import { ROUTES, communityChat, profileDetail } from '@/lib/routes'
+import { ROUTES, communityChat, dadDetail } from '@/lib/routes'
 
 const dads = [
   {
@@ -573,7 +573,7 @@ const Discover = () => {
                       key={dad.id}
                       {...dad}
                       onConnect={() => handleConnect(dad.name)}
-                      onClick={() => navigate(profileDetail(dad.id))}
+                      onClick={() => navigate(dadDetail(dad.id))}
                     />
                   ))
                 ) : (

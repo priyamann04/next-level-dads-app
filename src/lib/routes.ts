@@ -36,6 +36,9 @@ export const ROUTES = {
   DISCOVER_COMMUNITIES: '/discover/communities',
   DISCOVER_EVENTS: '/discover/events',
   
+  // Dad Detail (from Discover)
+  DAD_DETAIL: '/discover/dads/:dadId',
+  
   // Communities
   COMMUNITIES: '/communities',
   
@@ -63,6 +66,12 @@ export const ROUTES = {
  */
 export const discoverTab = (tab: 'dads' | 'communities' | 'events') => 
   `/discover/${tab}` as const
+
+/**
+ * Get route for a dad detail page (from Discover)
+ */
+export const dadDetail = (dadId: string) => 
+  `/discover/dads/${dadId}` as const
 
 /**
  * Get route for a specific groups tab

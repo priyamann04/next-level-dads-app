@@ -6,16 +6,29 @@ const BottomNav = () => {
   const location = useLocation();
   
   const navItems = [
-    { icon: Compass, label: "Discover", path: ROUTES.DISCOVER_DADS },
-    { icon: Users, label: "Groups", path: ROUTES.GROUPS_COMMUNITIES },
-    { icon: MessageCircle, label: "Chats", path: ROUTES.CHATS },
-    { icon: Users, label: "Profile", path: ROUTES.PROFILE },
+    { icon: Compass, label: "Discover", path: ROUTES.DISCOVER_DADS, activePrefix: '/discover' },
+    { icon: Users, label: "Groups", path: ROUTES.GROUPS_COMMUNITIES, activePrefix: '/groups' },
+    { icon: MessageCircle, label: "Chats", path: ROUTES.CHATS, activePrefix: '/chats' },
+    { icon: Users, label: "Profile", path: ROUTES.PROFILE, activePrefix: '/profile' },
   ];
 
-  // Check if current path is active (matches path or starts with base path)
-  const isActive = (navPath: string) => {
-    const basePath = navPath.split('/').slice(0, 2).join('/');
-    return location.pathname === navPath || location.pathname.startsWith(basePath);
+  // Check if current path matches the tab's active prefix
+  // Profile tab should only be active for /profile, not /profiles/:id
+  const isActive = (item: typeof navItems[0]) => {
+    const { pathname } = location;
+    
+    // Profile tab: only active for exact /profile routes (own profile)
+    if (item.activePrefix === '/profile') {
+      return pathname === '/profile' || pathname.startsWith('/profile/');
+    }
+    
+    // Discover tab: active for /discover/* including /discover/dads/:dadId
+    if (item.activePrefix === '/discover') {
+      return pathname.startsWith('/discover');
+    }
+    
+    // Other tabs: check if path starts with the prefix
+    return pathname.startsWith(item.activePrefix);
   };
 
   return (
@@ -23,7 +36,7 @@ const BottomNav = () => {
       <div className="max-w-md mx-auto flex justify-around items-center h-16 px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const active = isActive(item.path);
+          const active = isActive(item);
           
           return (
             <Link

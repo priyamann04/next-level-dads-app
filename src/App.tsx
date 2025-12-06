@@ -13,6 +13,7 @@ import Match from './pages/Match'
 import Chats from './pages/Chats'
 import ChatDetail from './pages/ChatDetail'
 import Discover from './pages/Discover'
+import DadDetail from './pages/DadDetail'
 import Groups from './pages/Groups'
 import CommunityDetail from './pages/CommunityDetail'
 import CommunityChat from './pages/CommunityChat'
@@ -33,6 +34,7 @@ const queryClient = new QueryClient()
  * 
  * /discover ................... Redirect to /discover/dads
  * /discover/:tab .............. Discover (dads | communities | events)
+ * /discover/dads/:dadId ....... Dad Detail (from Discover)
  * 
  * /communities/:communityId ... Community Detail
  * /communities/:communityId/chat ... Community Chat
@@ -45,7 +47,7 @@ const queryClient = new QueryClient()
  * /chats/:chatId .............. Chat Detail
  * 
  * /profile .................... Own Profile
- * /profiles/:profileId ........ Other User Profile
+ * /profiles/:profileId ........ Other User Profile (from Connections, etc.)
  * /connections ................ Connections List
  * /requests ................... Connection Requests
  */
@@ -65,6 +67,7 @@ const App = () => (
 
             {/* Discover (tabbed) */}
             <Route path={ROUTES.DISCOVER} element={<Navigate to={ROUTES.DISCOVER_DADS} replace />} />
+            <Route path="/discover/dads/:dadId" element={<DadDetail />} />
             <Route path="/discover/:tab" element={<Discover />} />
 
             {/* Communities */}

@@ -19,6 +19,7 @@ import GroupMembers from './pages/GroupMembers'
 import CommunityDetail from './pages/CommunityDetail'
 import CommunityMembers from './pages/CommunityMembers'
 import Profile from './pages/Profile'
+import EditProfile from './pages/EditProfile'
 import Connections from './pages/Connections'
 import Requests from './pages/Requests'
 import NotFound from './pages/NotFound'
@@ -85,6 +86,7 @@ const App = () => (
 
             {/* Profile */}
             <Route path={ROUTES.PROFILE} element={<Profile />} />
+            <Route path={ROUTES.EDIT_PROFILE} element={<EditProfile />} />
             <Route path="/profiles/:profileId" element={<Profile />} />
             <Route path={ROUTES.CONNECTIONS} element={<Connections />} />
             <Route path={ROUTES.REQUESTS} element={<Requests />} />

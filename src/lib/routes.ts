@@ -52,6 +52,7 @@ export const ROUTES = {
   
   // Profile
   PROFILE: '/profile',
+  EDIT_PROFILE: '/profile/edit',
   PROFILES: '/profiles',
   CONNECTIONS: '/connections',
   REQUESTS: '/requests',

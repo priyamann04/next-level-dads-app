@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ArrowLeft, Send, Users } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { useGroups } from '@/contexts/GroupsContext'
-import { ROUTES, communityMembers, discoverTab, groupsTab } from '@/lib/routes'
+import { ROUTES, communityMembers, groupMembers, discoverTab, groupsTab } from '@/lib/routes'
 
 // Chat type definitions
 export type ChatType = 'individual' | 'private-group' | 'community'
@@ -264,6 +264,8 @@ const Chat = () => {
   const handleMembers = () => {
     if (chatInfo.type === 'community' && chatInfo.communityId) {
       navigate(communityMembers(chatInfo.communityId))
+    } else if (chatInfo.type === 'private-group' && chatId) {
+      navigate(groupMembers(chatId))
     }
   }
 

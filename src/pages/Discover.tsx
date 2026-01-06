@@ -243,7 +243,7 @@ const Discover = () => {
     'SK', // Saskatchewan
     'YT', // Yukon
   ]
-  const ageRanges = ['all', 'Under 30', '30-35', '36-40', 'Over 40']
+  const ageRanges = ['all', 'Under 25', '26-30', '31-35', '36-40', '40-50', '50-60', '60+']
 
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
@@ -583,7 +583,7 @@ const Discover = () => {
 
                       <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-foreground">
-                          Dad's Age
+                          Age
                         </h3>
                         <p className="text-xs text-muted-foreground">
                           Select all that apply

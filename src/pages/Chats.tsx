@@ -180,9 +180,9 @@ const Chats = () => {
           <Dialog open={isNewChatOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
-                className="rounded-full border-2 border-primary shrink-0"
+                className="shrink-0"
               >
                 <Plus className="w-5 h-5" />
               </Button>

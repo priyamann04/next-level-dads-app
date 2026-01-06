@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, MapPin, Users, Clock, Info } from 'lucide-react'
+import { Calendar, MapPin, Users, Clock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { eventDetail } from '@/lib/routes'
 import type { Event } from '@/data/events'
@@ -81,27 +81,13 @@ const EventCard = ({
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground"
-              onClick={(e) => {
-                e.stopPropagation()
-                handleCardClick()
-              }}
-            >
-              <Info className="w-4 h-4 mr-1" />
-              More Info
-            </Button>
-            <Button
-              variant={isRegistered ? 'outline' : 'default'}
-              className="rounded-full"
-              onClick={handleActionClick}
-            >
-              {isRegistered ? 'Unregister' : 'Register'}
-            </Button>
-          </div>
+          <Button
+            variant={isRegistered ? 'outline' : 'default'}
+            className="rounded-full"
+            onClick={handleActionClick}
+          >
+            {isRegistered ? 'Unregister' : 'Register'}
+          </Button>
         </div>
       </CardContent>
     </Card>

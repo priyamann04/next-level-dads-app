@@ -22,6 +22,7 @@ import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
 import Connections from './pages/Connections'
 import Requests from './pages/Requests'
+import EventDetail from './pages/EventDetail'
 import NotFound from './pages/NotFound'
 
 const queryClient = new QueryClient()
@@ -74,6 +75,9 @@ const App = () => (
             {/* Communities (member pages only - chat is unified) */}
             <Route path="/communities/:communityId" element={<CommunityDetail />} />
             <Route path="/communities/:communityId/members" element={<CommunityMembers />} />
+
+            {/* Events */}
+            <Route path="/events/:eventId" element={<EventDetail />} />
 
             {/* My Groups (tabbed) */}
             <Route path={ROUTES.GROUPS} element={<Navigate to={ROUTES.GROUPS_COMMUNITIES} replace />} />

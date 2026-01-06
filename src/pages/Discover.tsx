@@ -3,15 +3,12 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
+import EventCard from '@/components/EventCard'
 import { useToast } from '@/hooks/use-toast'
 import { useGroups } from '@/contexts/GroupsContext'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  Calendar,
-  MapPin,
-  DollarSign,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -29,6 +26,7 @@ import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { ROUTES, communityChat, dadDetail } from '@/lib/routes'
+import { events as sharedEvents } from '@/data/events'
 
 const dads = [
   {
@@ -126,35 +124,6 @@ const communities = [
   },
 ]
 
-const events = [
-  {
-    id: 1,
-    title: 'Saturday Morning Coffee Meetup',
-    date: 'Sat, Nov 16 @ 9:00 AM',
-    location: "Joe's Coffee Shop",
-    type: 'Local',
-    price: 'Free',
-    attending: 12,
-  },
-  {
-    id: 2,
-    title: 'Virtual Parenting Q&A',
-    date: 'Thu, Nov 14 @ 7:00 PM',
-    location: 'Online via Zoom',
-    type: 'Virtual',
-    price: 'Free',
-    attending: 28,
-  },
-  {
-    id: 3,
-    title: 'Dad & Kids Hiking Adventure',
-    date: 'Sun, Nov 17 @ 10:00 AM',
-    location: 'Mountain View Trail',
-    type: 'Local',
-    price: '$10',
-    attending: 15,
-  },
-]
 
 const Discover = () => {
   const { toast } = useToast()
@@ -369,7 +338,7 @@ const Discover = () => {
           .includes(communitySearchQuery.toLowerCase()))
   )
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = sharedEvents.filter((event) => {
     const matchesType =
       eventFilter === 'all' || event.type.toLowerCase() === eventFilter
     const matchesPrice =
@@ -759,45 +728,26 @@ const Discover = () => {
               {filteredEvents.length > 0 ? (
                 <div className="space-y-4">
                   {filteredEvents.map((event) => (
-                    <Card
+                    <EventCard
                       key={event.id}
-                      className="overflow-hidden shadow-md"
-                    >
-                      <CardContent className="p-6 space-y-3">
-                        <h3 className="text-lg font-heading font-semibold text-foreground">
-                          {event.title}
-                        </h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Calendar className="w-4 h-4" />
-                            <span>{event.date}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            <span>{event.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <DollarSign className="w-4 h-4" />
-                            <span>{event.price}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2">
-                          <span className="text-sm text-muted-foreground">
-                            {event.attending} attending
-                          </span>
-                          <Button
-                            className="rounded-full"
-                            onClick={() =>
-                              handleJoinEvent(event.id, event.title)
-                            }
-                          >
-                            {registeredEvents.includes(event.id)
-                              ? 'Registered ✓'
-                              : 'Register'}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      event={event}
+                      isRegistered={registeredEvents.includes(event.id)}
+                      onRegister={() => {
+                        registerEvent(event.id)
+                        toast({
+                          title: 'Registered for event! 🎉',
+                          description: `You've registered for ${event.title}.`,
+                        })
+                      }}
+                      onUnregister={() => {
+                        unregisterEvent(event.id)
+                        toast({
+                          title: 'Registration cancelled',
+                          description: `You've cancelled your registration for ${event.title}.`,
+                        })
+                      }}
+                      context="discover"
+                    />
                   ))}
                 </div>
               ) : (

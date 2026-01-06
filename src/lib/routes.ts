@@ -38,6 +38,9 @@ export const ROUTES = {
   // Dad Detail (from Discover)
   DAD_DETAIL: '/discover/dads/:dadId',
   
+  // Event Detail
+  EVENT_DETAIL: '/events/:eventId',
+  
   // Communities
   COMMUNITIES: '/communities',
   
@@ -73,6 +76,16 @@ export const discoverTab = (tab: 'dads' | 'communities' | 'events') =>
  */
 export const dadDetail = (dadId: string) => 
   `/discover/dads/${dadId}` as const
+
+/**
+ * Get route for event detail page
+ */
+export const eventDetail = (eventId: number | string, from?: 'discover' | 'groups') => {
+  const params = new URLSearchParams()
+  if (from) params.set('from', from)
+  const queryString = params.toString()
+  return queryString ? `/events/${eventId}?${queryString}` : `/events/${eventId}`
+}
 
 /**
  * Get route for a specific groups tab

@@ -93,7 +93,7 @@ const CommunityDetail = () => {
 
   const handleBack = () => {
     if (communityId) {
-      navigate(communityChat(communityId))
+      navigate(communityChat(communityId, from === 'discover' ? 'discover' : 'groups'))
     }
   }
 

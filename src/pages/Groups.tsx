@@ -74,7 +74,7 @@ const Groups = () => {
   }
 
   const handleCommunityClick = (communityId: number) => {
-    navigate(communityChat(communityId))
+    navigate(communityChat(communityId, 'groups'))
   }
 
   return (

@@ -228,7 +228,21 @@ const Discover = () => {
     'Finance',
     'Writing',
   ]
-  const provinces = Array.from(new Set(dads.map((d) => d.province)))
+  const provinces = [
+    'AB', // Alberta
+    'BC', // British Columbia
+    'MB', // Manitoba
+    'NB', // New Brunswick
+    'NL', // Newfoundland and Labrador
+    'NS', // Nova Scotia
+    'NT', // Northwest Territories
+    'NU', // Nunavut
+    'ON', // Ontario
+    'PE', // Prince Edward Island
+    'QC', // Quebec
+    'SK', // Saskatchewan
+    'YT', // Yukon
+  ]
   const ageRanges = ['all', 'Under 30', '30-35', '36-40', 'Over 40']
 
   // Filter toggle functions

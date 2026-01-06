@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
@@ -187,6 +187,7 @@ const Discover = () => {
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
 
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
   // Helper data
   const stageOptions = [
@@ -476,24 +477,69 @@ const Discover = () => {
                           Interests
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                          Select all that apply
+                          Search and select interests
                         </p>
-                        <div className="flex gap-2 flex-wrap">
-                          {interestOptions.map((interest) => (
-                            <Badge
-                              key={interest}
-                              variant={
-                                pendingInterests.includes(interest)
-                                  ? 'default'
-                                  : 'outline'
-                              }
-                              className="cursor-pointer rounded-full"
-                              onClick={() => togglePendingInterest(interest)}
-                            >
-                              {interest}
-                            </Badge>
-                          ))}
+                        
+                        {/* Selected interests display */}
+                        {pendingInterests.length > 0 && (
+                          <div className="flex gap-2 flex-wrap mb-2">
+                            {pendingInterests.map((interest) => (
+                              <Badge
+                                key={interest}
+                                variant="default"
+                                className="cursor-pointer rounded-full"
+                                onClick={() => togglePendingInterest(interest)}
+                              >
+                                {interest} ✕
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Interest search input */}
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search interests..."
+                            value={interestSearchQuery}
+                            onChange={(e) => setInterestSearchQuery(e.target.value)}
+                            className="pl-9"
+                          />
                         </div>
+                        
+                        {/* Filtered interest suggestions */}
+                        {interestSearchQuery && (
+                          <div className="max-h-40 overflow-y-auto border border-border rounded-md bg-card">
+                            {interestOptions
+                              .filter(
+                                (interest) =>
+                                  interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
+                                  !pendingInterests.includes(interest)
+                              )
+                              .map((interest) => (
+                                <button
+                                  key={interest}
+                                  type="button"
+                                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                                  onClick={() => {
+                                    togglePendingInterest(interest)
+                                    setInterestSearchQuery('')
+                                  }}
+                                >
+                                  {interest}
+                                </button>
+                              ))}
+                            {interestOptions.filter(
+                              (interest) =>
+                                interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
+                                !pendingInterests.includes(interest)
+                            ).length === 0 && (
+                              <div className="px-3 py-2 text-sm text-muted-foreground">
+                                No matching interests
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-3">

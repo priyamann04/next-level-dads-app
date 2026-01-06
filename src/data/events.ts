@@ -13,6 +13,7 @@ export interface Event {
   price: string // "Free" or "$15" (includes currency symbol)
   attending: number
   host: string
+  hostId: string
   hostAvatar?: string
 }
 
@@ -28,6 +29,7 @@ export const events: Event[] = [
     price: 'Free',
     attending: 12,
     host: 'Saturday Coffee Dads',
+    hostId: 'saturday-coffee-dads',
   },
   {
     id: 2,
@@ -40,6 +42,7 @@ export const events: Event[] = [
     price: 'Free',
     attending: 28,
     host: 'New Dads Support',
+    hostId: 'new-dads-support',
   },
   {
     id: 3,
@@ -52,6 +55,7 @@ export const events: Event[] = [
     price: '$10',
     attending: 15,
     host: 'Outdoor Adventure Dads',
+    hostId: 'outdoor-adventure-dads',
   },
 ]
 

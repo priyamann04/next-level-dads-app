@@ -102,6 +102,12 @@ export const communityMembers = (communityId: number | string) =>
   `/communities/${communityId}/members` as const
 
 /**
+ * Get route for private group members
+ */
+export const groupMembers = (groupId: string) => 
+  `/groups/members/${groupId}` as const
+
+/**
  * Get route for a specific chat (unified)
  */
 export const chatDetail = (chatId: string, type?: 'individual' | 'private-group' | 'community', from?: string) => {

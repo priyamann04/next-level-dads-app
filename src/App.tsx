@@ -15,6 +15,7 @@ import Chat from './pages/Chat'
 import Discover from './pages/Discover'
 import DadDetail from './pages/DadDetail'
 import Groups from './pages/Groups'
+import GroupMembers from './pages/GroupMembers'
 import CommunityDetail from './pages/CommunityDetail'
 import CommunityMembers from './pages/CommunityMembers'
 import Profile from './pages/Profile'
@@ -76,6 +77,7 @@ const App = () => (
             {/* My Groups (tabbed) */}
             <Route path={ROUTES.GROUPS} element={<Navigate to={ROUTES.GROUPS_COMMUNITIES} replace />} />
             <Route path="/groups/:tab" element={<Groups />} />
+            <Route path="/groups/members/:groupId" element={<GroupMembers />} />
 
             {/* Chats (unified - handles individual, private-group, and community chats) */}
             <Route path={ROUTES.CHATS} element={<Chats />} />

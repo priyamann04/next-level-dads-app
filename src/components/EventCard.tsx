@@ -46,7 +46,7 @@ const EventCard = ({
           <h3 className="text-lg font-heading font-semibold text-foreground">
             {event.title}
           </h3>
-          <Badge variant={event.type === 'Virtual' ? 'secondary' : 'outline'} className="shrink-0">
+          <Badge variant="outline" className="shrink-0">
             {event.type}
           </Badge>
         </div>

@@ -1,13 +1,15 @@
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
+import EventCard from '@/components/EventCard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Calendar, MapPin, Users as UsersIcon } from 'lucide-react'
+import { Users as UsersIcon } from 'lucide-react'
 import { useGroups } from '@/contexts/GroupsContext'
 import { useToast } from '@/hooks/use-toast'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { ROUTES, communityChat } from '@/lib/routes'
+import { getEventsByIds } from '@/data/events'
 
 const allCommunities = [
   {
@@ -30,31 +32,14 @@ const allCommunities = [
   },
 ]
 
-const allEvents = [
-  {
-    id: 1,
-    title: 'Saturday Morning Coffee Meetup',
-    date: 'Sat, Nov 16 @ 9:00 AM',
-    location: "Joe's Coffee Shop",
-    attending: 12,
-  },
-  {
-    id: 3,
-    title: 'Dad & Kids Hiking Adventure',
-    date: 'Sun, Nov 17 @ 10:00 AM',
-    location: 'Mountain View Trail',
-    attending: 15,
-  },
-]
-
 const Groups = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { tab = 'communities' } = useParams<{ tab: string }>()
-  const { joinedCommunities, registeredEvents, leaveCommunity, unregisterEvent } = useGroups()
+  const { joinedCommunities, registeredEvents, leaveCommunity, registerEvent, unregisterEvent } = useGroups()
 
   const myCommunities = allCommunities.filter((c) => joinedCommunities.includes(c.id))
-  const myEvents = allEvents.filter((e) => registeredEvents.includes(e.id))
+  const myEvents = getEventsByIds(registeredEvents)
 
   const handleLeaveCommunity = (id: number, title: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -65,13 +50,6 @@ const Groups = () => {
     })
   }
 
-  const handleUnregisterEvent = (id: number, title: string) => {
-    unregisterEvent(id)
-    toast({
-      title: 'Unregistered from event',
-      description: `You've unregistered from ${title}.`,
-    })
-  }
 
   const handleCommunityClick = (communityId: number) => {
     navigate(communityChat(communityId, 'groups'))
@@ -165,35 +143,26 @@ const Groups = () => {
             <div className="space-y-4 animate-fade-in">
               {myEvents.length > 0 ? (
                 myEvents.map((event) => (
-                  <Card key={event.id} className="overflow-hidden shadow-md">
-                    <CardContent className="p-6 space-y-3">
-                      <h3 className="text-lg font-heading font-semibold text-foreground">
-                        {event.title}
-                      </h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          <span>{event.location}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between pt-2">
-                        <span className="text-sm text-muted-foreground">
-                          {event.attending} attending
-                        </span>
-                        <Button
-                          variant="outline"
-                          className="rounded-full"
-                          onClick={() => handleUnregisterEvent(event.id, event.title)}
-                        >
-                          Unregister
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isRegistered={true}
+                    onRegister={() => {
+                      registerEvent(event.id)
+                      toast({
+                        title: 'Registered for event! 🎉',
+                        description: `You've registered for ${event.title}.`,
+                      })
+                    }}
+                    onUnregister={() => {
+                      unregisterEvent(event.id)
+                      toast({
+                        title: 'Unregistered from event',
+                        description: `You've unregistered from ${event.title}.`,
+                      })
+                    }}
+                    context="groups"
+                  />
                 ))
               ) : (
                 <div className="text-center py-12">

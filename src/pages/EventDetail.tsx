@@ -104,7 +104,7 @@ const EventDetail = () => {
                   {event.title}
                 </h2>
                 <Badge 
-                  variant={event.type === 'Virtual' ? 'secondary' : 'outline'} 
+                  variant="outline"
                   className="shrink-0"
                 >
                   {event.type}

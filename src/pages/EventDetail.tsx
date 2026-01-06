@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast'
 import { getEventById } from '@/data/events'
 import logo from '@/assets/logo.png'
 import BottomNav from '@/components/BottomNav'
-import { ROUTES, hostDetail } from '@/lib/routes'
+import { ROUTES } from '@/lib/routes'
 
 const EventDetail = () => {
   const { eventId } = useParams<{ eventId: string }>()
@@ -142,13 +142,10 @@ const EventDetail = () => {
                 </div>
               </div>
               
-              <div 
-                className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 -mx-2 px-2 py-1 rounded-lg transition-colors"
-                onClick={() => navigate(hostDetail(event.hostId))}
-              >
+              <div className="flex items-center gap-3">
                 <User className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium text-primary underline underline-offset-2">{event.host}</p>
+                  <p className="text-sm font-medium text-foreground">{event.host}</p>
                   <p className="text-xs text-muted-foreground">Hosted by</p>
                 </div>
               </div>

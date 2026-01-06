@@ -23,7 +23,6 @@ import EditProfile from './pages/EditProfile'
 import Connections from './pages/Connections'
 import Requests from './pages/Requests'
 import EventDetail from './pages/EventDetail'
-import HostDetail from './pages/HostDetail'
 import NotFound from './pages/NotFound'
 
 const queryClient = new QueryClient()
@@ -79,9 +78,6 @@ const App = () => (
 
             {/* Events */}
             <Route path="/events/:eventId" element={<EventDetail />} />
-
-            {/* Hosts */}
-            <Route path="/hosts/:hostId" element={<HostDetail />} />
 
             {/* My Groups (tabbed) */}
             <Route path={ROUTES.GROUPS} element={<Navigate to={ROUTES.GROUPS_COMMUNITIES} replace />} />

@@ -41,9 +41,6 @@ export const ROUTES = {
   // Event Detail
   EVENT_DETAIL: '/events/:eventId',
   
-  // Host Detail
-  HOST_DETAIL: '/hosts/:hostId',
-  
   // Communities
   COMMUNITIES: '/communities',
   
@@ -89,12 +86,6 @@ export const eventDetail = (eventId: number | string, from?: 'discover' | 'group
   const queryString = params.toString()
   return queryString ? `/events/${eventId}?${queryString}` : `/events/${eventId}`
 }
-
-/**
- * Get route for host detail page
- */
-export const hostDetail = (hostId: string) => 
-  `/hosts/${hostId}` as const
 
 /**
  * Get route for a specific groups tab

@@ -10,11 +10,10 @@
  * ├── /match (Match Screen)
  * ├── /discover/:tab (Discover - dads, communities, events)
  * ├── /communities/:communityId (Community Detail)
- * │   ├── /communities/:communityId/chat (Community Chat)
  * │   └── /communities/:communityId/members (Community Members)
  * ├── /groups/:tab (My Groups - communities, events)
  * ├── /chats (Chats List)
- * │   └── /chats/:chatId (Chat Detail)
+ * │   └── /chats/:chatId (Unified Chat - individual, private-group, community)
  * ├── /profiles/:profileId (Profile Detail)
  * ├── /profile (Own Profile)
  * ├── /connections (Connections)
@@ -47,8 +46,9 @@ export const ROUTES = {
   GROUPS_COMMUNITIES: '/groups/communities',
   GROUPS_EVENTS: '/groups/events',
   
-  // Chats
+  // Chats (unified)
   CHATS: '/chats',
+  CHAT: '/chats/:chatId',
   
   // Profile
   PROFILE: '/profile',
@@ -86,10 +86,14 @@ export const communityDetail = (communityId: number | string) =>
   `/communities/${communityId}` as const
 
 /**
- * Get route for community chat
+ * Get route for community chat (unified chat page)
  */
-export const communityChat = (communityId: number | string) => 
-  `/communities/${communityId}/chat` as const
+export const communityChat = (communityId: number | string, from?: 'discover' | 'groups') => {
+  const params = new URLSearchParams()
+  params.set('type', 'community')
+  if (from) params.set('from', from)
+  return `/chats/community-${communityId}?${params.toString()}`
+}
 
 /**
  * Get route for community members
@@ -98,10 +102,15 @@ export const communityMembers = (communityId: number | string) =>
   `/communities/${communityId}/members` as const
 
 /**
- * Get route for a specific chat
+ * Get route for a specific chat (unified)
  */
-export const chatDetail = (chatId: string) => 
-  `/chats/${chatId}` as const
+export const chatDetail = (chatId: string, type?: 'individual' | 'private-group' | 'community', from?: string) => {
+  const params = new URLSearchParams()
+  if (type) params.set('type', type)
+  if (from) params.set('from', from)
+  const queryString = params.toString()
+  return queryString ? `/chats/${chatId}?${queryString}` : `/chats/${chatId}`
+}
 
 /**
  * Get route for a profile

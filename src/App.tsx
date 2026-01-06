@@ -11,12 +11,11 @@ import Welcome from './pages/Welcome'
 import ProfileSetup from './pages/ProfileSetup'
 import Match from './pages/Match'
 import Chats from './pages/Chats'
-import ChatDetail from './pages/ChatDetail'
+import Chat from './pages/Chat'
 import Discover from './pages/Discover'
 import DadDetail from './pages/DadDetail'
 import Groups from './pages/Groups'
 import CommunityDetail from './pages/CommunityDetail'
-import CommunityChat from './pages/CommunityChat'
 import CommunityMembers from './pages/CommunityMembers'
 import Profile from './pages/Profile'
 import Connections from './pages/Connections'
@@ -36,15 +35,15 @@ const queryClient = new QueryClient()
  * /discover/:tab .............. Discover (dads | communities | events)
  * /discover/dads/:dadId ....... Dad Detail (from Discover)
  * 
- * /communities/:communityId ... Community Detail
- * /communities/:communityId/chat ... Community Chat
+ * /communities/:communityId ... Community Detail (members list)
  * /communities/:communityId/members ... Community Members
  * 
  * /groups ..................... Redirect to /groups/communities
  * /groups/:tab ................ My Groups (communities | events)
  * 
  * /chats ...................... Chats List
- * /chats/:chatId .............. Chat Detail
+ * /chats/:chatId .............. Unified Chat (individual | private-group | community)
+ *                               Query params: ?type=individual|private-group|community&from=chats|groups|discover
  * 
  * /profile .................... Own Profile
  * /profiles/:profileId ........ Other User Profile (from Connections, etc.)
@@ -70,18 +69,17 @@ const App = () => (
             <Route path="/discover/dads/:dadId" element={<DadDetail />} />
             <Route path="/discover/:tab" element={<Discover />} />
 
-            {/* Communities */}
+            {/* Communities (member pages only - chat is unified) */}
             <Route path="/communities/:communityId" element={<CommunityDetail />} />
-            <Route path="/communities/:communityId/chat" element={<CommunityChat />} />
             <Route path="/communities/:communityId/members" element={<CommunityMembers />} />
 
             {/* My Groups (tabbed) */}
             <Route path={ROUTES.GROUPS} element={<Navigate to={ROUTES.GROUPS_COMMUNITIES} replace />} />
             <Route path="/groups/:tab" element={<Groups />} />
 
-            {/* Chats */}
+            {/* Chats (unified - handles individual, private-group, and community chats) */}
             <Route path={ROUTES.CHATS} element={<Chats />} />
-            <Route path="/chats/:chatId" element={<ChatDetail />} />
+            <Route path="/chats/:chatId" element={<Chat />} />
 
             {/* Profile */}
             <Route path={ROUTES.PROFILE} element={<Profile />} />

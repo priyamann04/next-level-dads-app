@@ -480,6 +480,7 @@ const Profile = () => {
             <Button
               variant="outline"
               className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
+              onClick={() => navigate(ROUTES.EDIT_PROFILE)}
             >
               <Edit className="w-4 h-4 mr-2" />
               Edit Profile

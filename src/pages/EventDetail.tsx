@@ -2,7 +2,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Calendar, Clock, MapPin, Users, User } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, MapPin, Users, User, Mail, Phone } from 'lucide-react'
 import { useGroups } from '@/contexts/GroupsContext'
 import { useToast } from '@/hooks/use-toast'
 import { getEventById } from '@/data/events'
@@ -142,11 +142,33 @@ const EventDetail = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
-                <User className="w-5 h-5 text-primary" />
-                <div>
+              <div className="flex items-start gap-3">
+                <User className="w-5 h-5 text-primary mt-0.5" />
+                <div className="space-y-1">
                   <p className="text-sm font-medium text-foreground">{event.host}</p>
                   <p className="text-xs text-muted-foreground">Hosted by</p>
+                  {(event.hostEmail || event.hostPhone) && (
+                    <div className="pt-1 space-y-1">
+                      {event.hostEmail && (
+                        <a 
+                          href={`mailto:${event.hostEmail}`} 
+                          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          <Mail className="w-3.5 h-3.5" />
+                          {event.hostEmail}
+                        </a>
+                      )}
+                      {event.hostPhone && (
+                        <a 
+                          href={`tel:${event.hostPhone}`} 
+                          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                          {event.hostPhone}
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

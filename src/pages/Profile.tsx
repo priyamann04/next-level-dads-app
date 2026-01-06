@@ -4,15 +4,36 @@ import BottomNav from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Edit, MapPin, Calendar, ArrowLeft, LogOut } from 'lucide-react'
+import { Edit, MapPin, Calendar, ArrowLeft, LogOut, Share2 } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { ROUTES, communityDetail } from '@/lib/routes'
+import { useToast } from '@/hooks/use-toast'
 
 const Profile = () => {
   const navigate = useNavigate()
   const { profileId } = useParams<{ profileId: string }>()
   const [searchParams] = useSearchParams()
+  const { toast } = useToast()
+
+  const handleShareProfile = async () => {
+    // Generate a shareable link using the user's profile ID
+    const profileUrl = `${window.location.origin}/profiles/own`
+    
+    try {
+      await navigator.clipboard.writeText(profileUrl)
+      toast({
+        title: "Link copied!",
+        description: "Your profile link has been copied to clipboard.",
+      })
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      toast({
+        title: "Share your profile",
+        description: profileUrl,
+      })
+    }
+  }
   const from = searchParams.get('from')
   const communityId = searchParams.get('communityId')
   // If no ID in URL, we're viewing our own profile
@@ -489,7 +510,9 @@ const Profile = () => {
             <Button
               variant="outline"
               className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
+              onClick={handleShareProfile}
             >
+              <Share2 className="w-4 h-4 mr-2" />
               Share Profile
             </Button>
 

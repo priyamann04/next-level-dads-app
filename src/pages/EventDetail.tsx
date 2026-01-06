@@ -121,32 +121,32 @@ const EventDetail = () => {
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{event.date}</p>
                   <p className="text-xs text-muted-foreground">Date</p>
+                  <p className="text-sm font-medium text-foreground">{event.date}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{event.time}</p>
                   <p className="text-xs text-muted-foreground">Time</p>
+                  <p className="text-sm font-medium text-foreground">{event.time}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{event.location}</p>
                   <p className="text-xs text-muted-foreground">Location</p>
+                  <p className="text-sm font-medium text-foreground">{event.location}</p>
                 </div>
               </div>
               
               <div className="flex items-start gap-3">
                 <User className="w-5 h-5 text-primary mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">{event.host}</p>
                   <p className="text-xs text-muted-foreground">Hosted by</p>
+                  <p className="text-sm font-medium text-foreground">{event.host}</p>
                   {(event.hostEmail || event.hostPhone) && (
                     <div className="pt-1 space-y-1">
                       {event.hostEmail && (

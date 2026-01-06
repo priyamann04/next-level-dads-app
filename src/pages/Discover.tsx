@@ -243,7 +243,7 @@ const Discover = () => {
     'SK', // Saskatchewan
     'YT', // Yukon
   ]
-  const ageRanges = ['all', 'Under 25', '26-30', '31-35', '36-40', '40-50', '50-60', '60+']
+  const ageRanges = ['all', 'Under 25', '25-29', '30-34', '35-39', '40-44', '45-49', '50-59', '60+']
 
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {

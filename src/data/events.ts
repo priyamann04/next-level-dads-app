@@ -14,6 +14,8 @@ export interface Event {
   attending: number
   host: string
   hostAvatar?: string
+  hostEmail?: string
+  hostPhone?: string
 }
 
 export const events: Event[] = [
@@ -28,6 +30,8 @@ export const events: Event[] = [
     price: 'Free',
     attending: 12,
     host: 'Saturday Coffee Dads',
+    hostEmail: 'coffee@saturdaydads.com',
+    hostPhone: '(555) 123-4567',
   },
   {
     id: 2,
@@ -40,6 +44,8 @@ export const events: Event[] = [
     price: 'Free',
     attending: 28,
     host: 'New Dads Support',
+    hostEmail: 'support@newdads.org',
+    hostPhone: '(555) 987-6543',
   },
   {
     id: 3,
@@ -52,6 +58,8 @@ export const events: Event[] = [
     price: '$10',
     attending: 15,
     host: 'Outdoor Adventure Dads',
+    hostEmail: 'hikes@outdoordads.com',
+    hostPhone: '(555) 456-7890',
   },
 ]
 

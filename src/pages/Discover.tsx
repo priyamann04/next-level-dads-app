@@ -1,17 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
+import EventCard from '@/components/EventCard'
 import { useToast } from '@/hooks/use-toast'
 import { useGroups } from '@/contexts/GroupsContext'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
-  Calendar,
-  MapPin,
-  DollarSign,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -28,6 +25,8 @@ import {
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
+import { ROUTES, communityChat, dadDetail } from '@/lib/routes'
+import { events as sharedEvents } from '@/data/events'
 
 const dads = [
   {
@@ -125,35 +124,6 @@ const communities = [
   },
 ]
 
-const events = [
-  {
-    id: 1,
-    title: 'Saturday Morning Coffee Meetup',
-    date: 'Sat, Nov 16 @ 9:00 AM',
-    location: "Joe's Coffee Shop",
-    type: 'Local',
-    price: 'Free',
-    attending: 12,
-  },
-  {
-    id: 2,
-    title: 'Virtual Parenting Q&A',
-    date: 'Thu, Nov 14 @ 7:00 PM',
-    location: 'Online via Zoom',
-    type: 'Virtual',
-    price: 'Free',
-    attending: 28,
-  },
-  {
-    id: 3,
-    title: 'Dad & Kids Hiking Adventure',
-    date: 'Sun, Nov 17 @ 10:00 AM',
-    location: 'Mountain View Trail',
-    type: 'Local',
-    price: '$10',
-    attending: 15,
-  },
-]
 
 const Discover = () => {
   const { toast } = useToast()
@@ -186,6 +156,7 @@ const Discover = () => {
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
 
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
   // Helper data
   const stageOptions = [
@@ -226,8 +197,22 @@ const Discover = () => {
     'Finance',
     'Writing',
   ]
-  const provinces = Array.from(new Set(dads.map((d) => d.province)))
-  const ageRanges = ['all', 'Under 30', '30-35', '36-40', 'Over 40']
+  const provinces = [
+    'AB', // Alberta
+    'BC', // British Columbia
+    'MB', // Manitoba
+    'NB', // New Brunswick
+    'NL', // Newfoundland and Labrador
+    'NS', // Nova Scotia
+    'NT', // Northwest Territories
+    'NU', // Nunavut
+    'ON', // Ontario
+    'PE', // Prince Edward Island
+    'QC', // Quebec
+    'SK', // Saskatchewan
+    'YT', // Yukon
+  ]
+  const ageRanges = ['all', 'Under 25', '25-29', '30-34', '35-39', '40-44', '45-49', '50-59', '60+']
 
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
@@ -282,7 +267,7 @@ const Discover = () => {
       title: 'Joined community! 🎉',
       description: `Welcome to ${title}!`,
     })
-    navigate(`/group-chat/community-${communityId}?from=discover`)
+    navigate(communityChat(communityId) + '?from=discover')
   }
 
   const handleJoinEvent = (eventId: number, title: string) => {
@@ -353,7 +338,7 @@ const Discover = () => {
           .includes(communitySearchQuery.toLowerCase()))
   )
 
-  const filteredEvents = events.filter((event) => {
+  const filteredEvents = sharedEvents.filter((event) => {
     const matchesType =
       eventFilter === 'all' || event.type.toLowerCase() === eventFilter
     const matchesPrice =
@@ -385,7 +370,7 @@ const Discover = () => {
         <div className="w-full">
           <div className="w-full grid grid-cols-3 bg-card border-b border-border h-12 mb-2">
             <Link
-              to="/discover/dads"
+              to={ROUTES.DISCOVER_DADS}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'dads' && 'border-b-2 border-primary text-foreground',
@@ -395,7 +380,7 @@ const Discover = () => {
               Dads
             </Link>
             <Link
-              to="/discover/communities"
+              to={ROUTES.DISCOVER_COMMUNITIES}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'communities' &&
@@ -406,7 +391,7 @@ const Discover = () => {
               Communities
             </Link>
             <Link
-              to="/discover/events"
+              to={ROUTES.DISCOVER_EVENTS}
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'events' && 'border-b-2 border-primary text-foreground',
@@ -475,24 +460,69 @@ const Discover = () => {
                           Interests
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                          Select all that apply
+                          Search and select interests
                         </p>
-                        <div className="flex gap-2 flex-wrap">
-                          {interestOptions.map((interest) => (
-                            <Badge
-                              key={interest}
-                              variant={
-                                pendingInterests.includes(interest)
-                                  ? 'default'
-                                  : 'outline'
-                              }
-                              className="cursor-pointer rounded-full"
-                              onClick={() => togglePendingInterest(interest)}
-                            >
-                              {interest}
-                            </Badge>
-                          ))}
+                        
+                        {/* Selected interests display */}
+                        {pendingInterests.length > 0 && (
+                          <div className="flex gap-2 flex-wrap mb-2">
+                            {pendingInterests.map((interest) => (
+                              <Badge
+                                key={interest}
+                                variant="default"
+                                className="cursor-pointer rounded-full"
+                                onClick={() => togglePendingInterest(interest)}
+                              >
+                                {interest} ✕
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Interest search input */}
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search interests..."
+                            value={interestSearchQuery}
+                            onChange={(e) => setInterestSearchQuery(e.target.value)}
+                            className="pl-9"
+                          />
                         </div>
+                        
+                        {/* Filtered interest suggestions */}
+                        {interestSearchQuery && (
+                          <div className="max-h-40 overflow-y-auto border border-border rounded-md bg-card">
+                            {interestOptions
+                              .filter(
+                                (interest) =>
+                                  interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
+                                  !pendingInterests.includes(interest)
+                              )
+                              .map((interest) => (
+                                <button
+                                  key={interest}
+                                  type="button"
+                                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                                  onClick={() => {
+                                    togglePendingInterest(interest)
+                                    setInterestSearchQuery('')
+                                  }}
+                                >
+                                  {interest}
+                                </button>
+                              ))}
+                            {interestOptions.filter(
+                              (interest) =>
+                                interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
+                                !pendingInterests.includes(interest)
+                            ).length === 0 && (
+                              <div className="px-3 py-2 text-sm text-muted-foreground">
+                                No matching interests
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-3">
@@ -522,7 +552,7 @@ const Discover = () => {
 
                       <div className="space-y-3">
                         <h3 className="text-sm font-semibold text-foreground">
-                          Dad's Age
+                          Age
                         </h3>
                         <p className="text-xs text-muted-foreground">
                           Select all that apply
@@ -572,7 +602,7 @@ const Discover = () => {
                       key={dad.id}
                       {...dad}
                       onConnect={() => handleConnect(dad.name)}
-                      onClick={() => navigate(`/profile/${dad.id}`)}
+                      onClick={() => navigate(dadDetail(dad.id))}
                     />
                   ))
                 ) : (
@@ -698,45 +728,26 @@ const Discover = () => {
               {filteredEvents.length > 0 ? (
                 <div className="space-y-4">
                   {filteredEvents.map((event) => (
-                    <Card
+                    <EventCard
                       key={event.id}
-                      className="overflow-hidden shadow-md"
-                    >
-                      <CardContent className="p-6 space-y-3">
-                        <h3 className="text-lg font-heading font-semibold text-foreground">
-                          {event.title}
-                        </h3>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Calendar className="w-4 h-4" />
-                            <span>{event.date}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            <span>{event.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <DollarSign className="w-4 h-4" />
-                            <span>{event.price}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between pt-2">
-                          <span className="text-sm text-muted-foreground">
-                            {event.attending} attending
-                          </span>
-                          <Button
-                            className="rounded-full"
-                            onClick={() =>
-                              handleJoinEvent(event.id, event.title)
-                            }
-                          >
-                            {registeredEvents.includes(event.id)
-                              ? 'Registered ✓'
-                              : 'Register'}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      event={event}
+                      isRegistered={registeredEvents.includes(event.id)}
+                      onRegister={() => {
+                        registerEvent(event.id)
+                        toast({
+                          title: 'Registered for event! 🎉',
+                          description: `You've registered for ${event.title}.`,
+                        })
+                      }}
+                      onUnregister={() => {
+                        unregisterEvent(event.id)
+                        toast({
+                          title: 'Registration cancelled',
+                          description: `You've cancelled your registration for ${event.title}.`,
+                        })
+                      }}
+                      context="discover"
+                    />
                   ))}
                 </div>
               ) : (

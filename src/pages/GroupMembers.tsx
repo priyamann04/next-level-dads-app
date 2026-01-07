@@ -1,122 +1,110 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, MessageCircle } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { ArrowLeft, MessageCircle, Plus, Search, Check } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
+import { chatDetail, profileDetail } from '@/lib/routes'
+
+// Private group data with members
+const privateGroupsData: Record<string, {
+  title: string
+  type: string
+  description: string
+  members: Array<{
+    id: string
+    name: string
+    age: number
+    location: string
+    bio: string
+    childrenAges: string
+    stages: string[]
+    interests: string[]
+    avatar: string
+  }>
+}> = {
+  'group-toronto': {
+    title: 'Toronto Dads Meetup',
+    type: 'Private Group',
+    description: 'A private group for Toronto area dads to connect and plan activities.',
+    members: [
+      {
+        id: 'member-alex-toronto',
+        name: 'Alex Turner',
+        age: 35,
+        location: 'Toronto, ON',
+        bio: 'Software developer and weekend soccer coach.',
+        childrenAges: 'Dad of 2 kids, ages 6 and 9',
+        stages: ['Elementary (6–12 years)'],
+        interests: ['Tech', 'Sports', 'Gaming'],
+        avatar: avatarDefaultGrey,
+      },
+      {
+        id: 'member-brian-toronto',
+        name: 'Brian Mitchell',
+        age: 38,
+        location: 'Toronto, ON',
+        bio: 'Marketing professional who loves hiking.',
+        childrenAges: 'Dad of 1 kid, age 4',
+        stages: ['Preschool (4–5 years)'],
+        interests: ['Outdoors', 'Photography', 'Music'],
+        avatar: avatarDefaultGrey,
+      },
+      {
+        id: 'member-chris-toronto',
+        name: 'Chris Parker',
+        age: 41,
+        location: 'Mississauga, ON',
+        bio: 'Finance manager and amateur chef.',
+        childrenAges: 'Dad of 3 kids, ages 7, 10, and 13',
+        stages: ['Elementary (6–12 years)', 'Teen (13–17 years)'],
+        interests: ['Cooking', 'Sports', 'Reading'],
+        avatar: avatarDefaultGrey,
+      },
+    ],
+  },
+}
+
+// Mock connections for adding members
+const availableConnections = [
+  {
+    id: 'chat-connection-mike',
+    name: 'Mike Johnson',
+    avatar: avatarDefaultGrey,
+  },
+  {
+    id: 'chat-connection-david',
+    name: 'David Chen',
+    avatar: avatarDefaultGrey,
+  },
+  {
+    id: 'chat-connection-steve',
+    name: 'Steve Wilson',
+    avatar: avatarDefaultGrey,
+  },
+]
 
 const GroupMembers = () => {
   const navigate = useNavigate()
-  const { id } = useParams()
+  const { groupId } = useParams<{ groupId: string }>()
   const { toast } = useToast()
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
-  const groupData = {
-    private: {
-      title: 'Weekend Outdoor Adventures',
-      type: 'Private Group',
-      description:
-        'A private group for dads who love outdoor activities and weekend adventures.',
-      members: [
-        {
-          id: 'member-mike-priv',
-          name: 'Mike',
-          age: 35,
-          location: 'Vancouver, BC',
-          bio: 'Love hiking and cooking',
-          childrenAges: 'Dad of 2 kids, ages 5 and 9',
-          stages: ['School Age (5–8 years)', 'Pre-Teen (9–12 years)'],
-          interests: ['Outdoors', 'Cooking', 'Fitness'],
-          avatar: avatarDefaultGrey,
-        },
-        {
-          id: 'member-david-priv',
-          name: 'David',
-          age: 42,
-          location: 'Calgary, AB',
-          bio: 'Tech dad, gaming enthusiast',
-          childrenAges: 'Dad of 3 kids, ages 7, 10, and 14',
-          stages: [
-            'School Age (5–8 years)',
-            'Pre-Teen (9–12 years)',
-            'Teenager (13–17 years)',
-          ],
-          interests: ['Tech', 'Gaming', 'Reading'],
-          avatar: avatarDefaultGrey,
-        },
-        {
-          id: 'member-james-priv',
-          name: 'James',
-          age: 38,
-          location: 'Halifax, NS',
-          bio: 'Music lover and photographer',
-          childrenAges: 'Dad of 1 kid, age 3',
-          stages: ['Toddler Years (2–4 years)'],
-          interests: ['Music', 'Photography', 'Art'],
-          avatar: avatarDefaultGrey,
-        },
-      ],
-    },
-    public: {
-      title: 'Toronto Dads Community',
-      type: 'Public Group',
-      description:
-        'Open community for all dads in the Toronto area to connect, share experiences, and organize meetups.',
-      members: [
-        {
-          id: 'member-mike-pub',
-          name: 'Mike',
-          age: 35,
-          location: 'Vancouver, BC',
-          bio: 'Love hiking and cooking',
-          childrenAges: 'Dad of 2 kids, ages 5 and 9',
-          stages: ['School Age (5–8 years)', 'Pre-Teen (9–12 years)'],
-          interests: ['Outdoors', 'Cooking', 'Fitness'],
-          avatar: avatarDefaultGrey,
-        },
-        {
-          id: 'member-david-pub',
-          name: 'David',
-          age: 42,
-          location: 'Calgary, AB',
-          bio: 'Tech dad, gaming enthusiast',
-          childrenAges: 'Dad of 3 kids, ages 7, 10, and 14',
-          stages: [
-            'School Age (5–8 years)',
-            'Pre-Teen (9–12 years)',
-            'Teenager (13–17 years)',
-          ],
-          interests: ['Tech', 'Gaming', 'Reading'],
-          avatar: avatarDefaultGrey,
-        },
-        {
-          id: 'member-james-pub',
-          name: 'James',
-          age: 38,
-          location: 'Halifax, NS',
-          bio: 'Music lover and photographer',
-          childrenAges: 'Dad of 1 kid, age 3',
-          stages: ['Toddler Years (2–4 years)'],
-          interests: ['Music', 'Photography', 'Art'],
-          avatar: avatarDefaultGrey,
-        },
-        {
-          id: 'member-steve-pub',
-          name: 'Steve',
-          age: 40,
-          location: 'Montréal, QC',
-          bio: 'Outdoor adventure seeker',
-          childrenAges: 'Dad of 2 kids, ages 6 and 8',
-          stages: ['School Age (5–8 years)'],
-          interests: ['Outdoors', 'Sports', 'Travel'],
-          avatar: avatarDefaultGrey,
-        },
-      ],
-    },
-  }
+  const group = privateGroupsData[groupId || 'group-toronto'] || privateGroupsData['group-toronto']
 
-  const group = id === 'private' ? groupData.private : groupData.public
+  // Filter out connections that are already members
+  const existingMemberIds = group.members.map(m => m.id)
+  const filteredConnections = availableConnections.filter(
+    c => !existingMemberIds.includes(c.id) && 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const handleConnect = (memberId: string, name: string) => {
     toast({
@@ -125,12 +113,46 @@ const GroupMembers = () => {
     })
   }
 
+  const handleMemberClick = (memberId: string) => {
+    navigate(profileDetail(memberId))
+  }
+
+  const handleBack = () => {
+    if (groupId) {
+      navigate(chatDetail(groupId, 'private-group'))
+    }
+  }
+
+  const toggleMemberSelection = (id: string) => {
+    setSelectedMembers(prev => 
+      prev.includes(id) 
+        ? prev.filter(m => m !== id)
+        : [...prev, id]
+    )
+  }
+
+  const handleAddMembers = () => {
+    if (selectedMembers.length > 0) {
+      const names = selectedMembers
+        .map(id => availableConnections.find(c => c.id === id)?.name)
+        .filter(Boolean)
+        .join(', ')
+      
+      toast({
+        title: 'Members added!',
+        description: `${names} ${selectedMembers.length === 1 ? 'has' : 'have'} been added to the group.`,
+      })
+      setSelectedMembers([])
+      setIsAddMemberOpen(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-4">
           <button
-            onClick={() => navigate('/discover/communities')}
+            onClick={handleBack}
             className="text-muted-foreground mb-4"
           >
             <ArrowLeft className="w-6 h-6" />
@@ -139,10 +161,7 @@ const GroupMembers = () => {
             <h1 className="text-2xl font-heading font-semibold text-foreground mb-2">
               {group.title}
             </h1>
-            <Badge
-              variant="soft"
-              className="rounded-full mb-3"
-            >
+            <Badge variant="soft" className="rounded-full mb-3">
               {group.type}
             </Badge>
             <p className="text-muted-foreground">{group.description}</p>
@@ -151,27 +170,92 @@ const GroupMembers = () => {
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6">
-        <h2 className="text-lg font-heading font-semibold text-foreground mb-4">
-          Members ({group.members.length})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-heading font-semibold text-foreground">
+            Members ({group.members.length})
+          </h2>
+          
+          <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Add Members</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="Search connections..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 rounded-full"
+                  />
+                </div>
+                
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                  {filteredConnections.length > 0 ? (
+                    filteredConnections.map((connection) => (
+                      <div
+                        key={connection.id}
+                        onClick={() => toggleMemberSelection(connection.id)}
+                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                          selectedMembers.includes(connection.id)
+                            ? 'bg-primary/10 border border-primary'
+                            : 'bg-muted/50 hover:bg-muted'
+                        }`}
+                      >
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={connection.avatar} alt={connection.name} />
+                          <AvatarFallback>{connection.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="flex-1 font-medium">{connection.name}</span>
+                        {selectedMembers.includes(connection.id) && (
+                          <Check className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-muted-foreground py-4">
+                      No connections available to add
+                    </p>
+                  )}
+                </div>
+                
+                {selectedMembers.length > 0 && (
+                  <Button
+                    onClick={handleAddMembers}
+                    className="w-full rounded-full"
+                    style={{ backgroundColor: '#D8A24A' }}
+                  >
+                    Add {selectedMembers.length} Member{selectedMembers.length > 1 ? 's' : ''}
+                  </Button>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
         <div className="space-y-3">
           {group.members.map((member) => (
             <Card
               key={member.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() =>
-                navigate(
-                  `/profile/${member.id}?from=community&communityId=${id}`
-                )
-              }
+              onClick={() => handleMemberClick(member.id)}
             >
               <CardContent className="p-4">
                 <div className="flex items-start gap-4 mb-3">
                   <Avatar className="w-12 h-12 shrink-0">
-                    <AvatarImage
-                      src={member.avatar}
-                      alt={member.name}
-                    />
+                    <AvatarImage src={member.avatar} alt={member.name} />
                     <AvatarFallback>{member.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">

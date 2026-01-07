@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -7,52 +8,54 @@ import { ArrowLeft, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import { toast } from "sonner";
+import { ROUTES, chatDetail, profileDetail } from "@/lib/routes";
+
+const initialConnections = [
+  {
+    id: "chat-connection-mike",
+    name: "Mike Johnson",
+    age: 35,
+    city: "Vancouver",
+    province: "BC",
+    childAgeRange: "Elementary (6-12 years)",
+    bio: "Love hiking with my kids and trying out new recipes.",
+    interests: ["Outdoors", "Cooking", "Sports"],
+    avatarUrl: avatarDefaultGrey,
+  },
+  {
+    id: "chat-connection-david",
+    name: "David Chen",
+    age: 42,
+    city: "Calgary",
+    province: "AB",
+    childAgeRange: "Teen (13-17 years)",
+    bio: "Tech dad who enjoys gaming and teaching my kids to code.",
+    interests: ["Gaming", "Tech", "DIY"],
+    avatarUrl: avatarDefaultGrey,
+  },
+  {
+    id: "chat-connection-steve",
+    name: "Steve Wilson",
+    age: 40,
+    city: "Montréal",
+    province: "QC",
+    childAgeRange: "Elementary (6-12 years)",
+    bio: "Outdoor adventure seeker and sports enthusiast.",
+    interests: ["Outdoors", "Sports", "Travel"],
+    avatarUrl: avatarDefaultGrey,
+  },
+];
 
 const Connections = () => {
   const navigate = useNavigate();
-
-  // Mock connections data
-  const connections = [
-    {
-      id: "chat-connection-mike",
-      name: "Mike Johnson",
-      age: 35,
-      city: "Vancouver",
-      province: "BC",
-      childAgeRange: "Elementary (6-12 years)",
-      bio: "Love hiking with my kids and trying out new recipes.",
-      interests: ["Outdoors", "Cooking", "Sports"],
-      avatarUrl: avatarDefaultGrey,
-    },
-    {
-      id: "chat-connection-david",
-      name: "David Chen",
-      age: 42,
-      city: "Calgary",
-      province: "AB",
-      childAgeRange: "Teen (13-17 years)",
-      bio: "Tech dad who enjoys gaming and teaching my kids to code.",
-      interests: ["Gaming", "Tech", "DIY"],
-      avatarUrl: avatarDefaultGrey,
-    },
-    {
-      id: "chat-connection-steve",
-      name: "Steve Wilson",
-      age: 40,
-      city: "Montréal",
-      province: "QC",
-      childAgeRange: "Elementary (6-12 years)",
-      bio: "Outdoor adventure seeker and sports enthusiast.",
-      interests: ["Outdoors", "Sports", "Travel"],
-      avatarUrl: avatarDefaultGrey,
-    },
-  ];
+  const [connections, setConnections] = useState(initialConnections);
 
   const handleChat = (id: string) => {
-    navigate(`/chat/${id}`);
+    navigate(chatDetail(id));
   };
 
-  const handleUnconnect = (name: string) => {
+  const handleUnconnect = (id: string, name: string) => {
+    setConnections(prev => prev.filter(c => c.id !== id));
     toast.success(`Disconnected from ${name}`);
   };
 
@@ -65,7 +68,7 @@ const Connections = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(ROUTES.PROFILE)}
               className="rounded-full"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -83,7 +86,7 @@ const Connections = () => {
             const initials = connection.name.split(' ').map(n => n[0]).join('').toUpperCase();
             
             return (
-              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(`/profile/${connection.id}`)}>
+              <Card key={connection.id} className="overflow-hidden shadow-md cursor-pointer" onClick={() => navigate(profileDetail(connection.id))}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start gap-3">
                     {connection.avatarUrl ? (
@@ -145,7 +148,7 @@ const Connections = () => {
                       className="flex-1 rounded-full font-semibold border-2"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleUnconnect(connection.name);
+                        handleUnconnect(connection.id, connection.name);
                       }}
                     >
                       Unconnect

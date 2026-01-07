@@ -1,4 +1,4 @@
-import { Users, Calendar } from 'lucide-react'
+import { Users } from 'lucide-react'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 
@@ -6,7 +6,6 @@ interface CommunityCardProps {
   title: string
   description: string
   memberCount: number
-  nextEvent?: string
   onJoin: () => void
 }
 
@@ -14,7 +13,6 @@ const CommunityCard = ({
   title,
   description,
   memberCount,
-  nextEvent,
   onJoin,
 }: CommunityCardProps) => {
   return (
@@ -29,18 +27,11 @@ const CommunityCard = ({
           </p>
         </div>
 
-        <div className="flex items-center justify-between text-sm">
+        <div className="flex items-center text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />
             <span>{memberCount} members</span>
           </div>
-
-          {nextEvent && (
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Calendar className="w-4 h-4" />
-              <span className="text-xs">{nextEvent}</span>
-            </div>
-          )}
         </div>
 
         <Button

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import logo from '@/assets/logo.png'
 import heroImage from '@/assets/welcome-hero.jpg'
+import { ROUTES } from '@/lib/routes'
 
 const Welcome = () => {
   const navigate = useNavigate()
@@ -36,7 +37,7 @@ const Welcome = () => {
             size="lg"
             className="w-full rounded-full font-semibold text-base shadow-md"
             style={{ backgroundColor: '#D8A24A' }}
-            onClick={() => navigate('/setup')}
+            onClick={() => navigate(ROUTES.SETUP)}
           >
             Get Started
           </Button>
@@ -44,7 +45,7 @@ const Welcome = () => {
             size="lg"
             variant="ghost"
             className="w-full rounded-full font-semibold text-base text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/discover')}
+            onClick={() => navigate(ROUTES.DISCOVER_DADS)}
           >
             Skip
           </Button>

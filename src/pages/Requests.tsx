@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -6,52 +7,55 @@ import logo from "@/assets/logo.png";
 import ConnectionRequestCard from "@/components/ConnectionRequestCard";
 import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
 import { toast } from "sonner";
+import { ROUTES, profileDetail } from "@/lib/routes";
+
+const initialRequests = [
+  {
+    id: "request-james",
+    name: "James Anderson",
+    age: 38,
+    city: "Toronto",
+    province: "ON",
+    childAgeRange: "Preschool (4-5 years)",
+    bio: "New to Toronto and looking to connect with local dads.",
+    interests: ["Fitness", "Photography", "Coffee"],
+    avatarUrl: avatarDefaultGrey,
+  },
+  {
+    id: "request-robert",
+    name: "Robert Lee",
+    age: 41,
+    city: "Ottawa",
+    province: "ON",
+    childAgeRange: "Elementary (6-12 years)",
+    bio: "Hockey dad who loves the outdoors and weekend camping trips.",
+    interests: ["Sports", "Outdoors", "Music"],
+    avatarUrl: avatarDefaultGrey,
+  },
+  {
+    id: "request-chris",
+    name: "Chris Martinez",
+    age: 36,
+    city: "Toronto",
+    province: "ON",
+    childAgeRange: "Teen (13-17 years)",
+    bio: "Entrepreneur and dad of two teens. Always learning something new.",
+    interests: ["Business", "Reading", "Tech"],
+    avatarUrl: avatarDefaultGrey,
+  },
+];
 
 const Requests = () => {
   const navigate = useNavigate();
+  const [requests, setRequests] = useState(initialRequests);
 
-  // Mock pending requests data
-  const requests = [
-    {
-      id: "request-james",
-      name: "James Anderson",
-      age: 38,
-      city: "Toronto",
-      province: "ON",
-      childAgeRange: "Preschool (4-5 years)",
-      bio: "New to Toronto and looking to connect with local dads.",
-      interests: ["Fitness", "Photography", "Coffee"],
-      avatarUrl: avatarDefaultGrey,
-    },
-    {
-      id: "request-robert",
-      name: "Robert Lee",
-      age: 41,
-      city: "Ottawa",
-      province: "ON",
-      childAgeRange: "Elementary (6-12 years)",
-      bio: "Hockey dad who loves the outdoors and weekend camping trips.",
-      interests: ["Sports", "Outdoors", "Music"],
-      avatarUrl: avatarDefaultGrey,
-    },
-    {
-      id: "request-chris",
-      name: "Chris Martinez",
-      age: 36,
-      city: "Toronto",
-      province: "ON",
-      childAgeRange: "Teen (13-17 years)",
-      bio: "Entrepreneur and dad of two teens. Always learning something new.",
-      interests: ["Business", "Reading", "Tech"],
-      avatarUrl: avatarDefaultGrey,
-    },
-  ];
-
-  const handleAccept = (name: string) => {
+  const handleAccept = (id: string, name: string) => {
+    setRequests(prev => prev.filter(r => r.id !== id));
     toast.success(`Accepted connection request from ${name}`);
   };
 
-  const handleIgnore = (name: string) => {
+  const handleIgnore = (id: string, name: string) => {
+    setRequests(prev => prev.filter(r => r.id !== id));
     toast.success(`Ignored connection request from ${name}`);
   };
 
@@ -64,7 +68,7 @@ const Requests = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate("/profile")}
+              onClick={() => navigate(ROUTES.PROFILE)}
               className="rounded-full"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -82,9 +86,9 @@ const Requests = () => {
             <ConnectionRequestCard
               key={request.id}
               {...request}
-              onAccept={() => handleAccept(request.name)}
-              onIgnore={() => handleIgnore(request.name)}
-              onClick={() => navigate(`/profile/${request.id}`)}
+              onAccept={() => handleAccept(request.id, request.name)}
+              onIgnore={() => handleIgnore(request.id, request.name)}
+              onClick={() => navigate(profileDetail(request.id))}
             />
           ))
         ) : (

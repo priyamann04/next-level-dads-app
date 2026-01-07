@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 const ProfileSetup = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const ProfileSetup = () => {
     if (step < totalSteps) {
       setStep(step + 1);
     } else {
-      navigate("/discover");
+      navigate(ROUTES.DISCOVER_DADS);
     }
   };
 
@@ -85,7 +86,7 @@ const ProfileSetup = () => {
     if (step > 1) {
       setStep(step - 1);
     } else {
-      navigate("/");
+      navigate(ROUTES.WELCOME);
     }
   };
 
@@ -105,7 +106,7 @@ const ProfileSetup = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => navigate("/discover")}
+              onClick={() => navigate(ROUTES.DISCOVER_DADS)}
               className="text-muted-foreground hover:text-foreground"
             >
               Skip

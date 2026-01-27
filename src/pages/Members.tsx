@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { chatDetail, profileDetail } from '@/lib/routes'
 
-interface GroupMember {
+interface Member {
   id: string
   name: string
   age: number
@@ -29,37 +29,43 @@ interface GroupMember {
   avatar: string
 }
 
-interface PrivateGroup {
+interface ParentGroup {
   title: string
   type: string
   description: string
-  members: GroupMember[]
+  members: Member[]
 }
 
-// Private group data with members
-const privateGroupsData: Record<string, PrivateGroup> = {}
+// Data sources (empty for pure UI shell)
+const communitiesData: Record<string, ParentGroup> = {}
+const privateGroupsData: Record<string, ParentGroup> = {}
 
-// Mock connections for adding members
-const availableConnections = []
+// Available connections for adding members (empty for pure UI shell)
+const availableConnections: Array<{ id: string; name: string; avatar: string }> = []
 
-const GroupMembers = () => {
+const Members = () => {
   const navigate = useNavigate()
-  const { groupId } = useParams<{ groupId: string }>()
+  const { communityId, groupId } = useParams<{ communityId?: string; groupId?: string }>()
   const { toast } = useToast()
+
+  // Derive configuration from route params
+  const parentType: 'group' | 'community' = groupId ? 'group' : 'community'
+  const parentId = groupId || communityId || ''
+  const canAddMembers = parentType === 'group'
+
+  // State for add member dialog (only used when canAddMembers is true)
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
-  const group = {
-    title: 'Sample Private Group',
-    type: 'Support',
-    description: 'This is a sample private group description.',
-    members: [],
-  }
+  // Get parent data based on type
+  const parentData: ParentGroup = parentType === 'group'
+    ? privateGroupsData[parentId] || { title: 'Sample Private Group', type: 'Support', description: 'This is a sample private group description.', members: [] }
+    : communitiesData[parentId] || { title: 'Sample Community', type: 'Community', description: 'This is a sample community description.', members: [] }
 
-  // Filter out connections that are already members
-  const existingMemberIds = []
-  const filteredConnections = []
+  // Filter connections for add member dialog
+  const existingMemberIds: string[] = []
+  const filteredConnections: Array<{ id: string; name: string; avatar: string }> = []
 
   const handleConnect = (memberId: string, name: string) => {}
 
@@ -101,15 +107,15 @@ const GroupMembers = () => {
           </button>
           <div className="mb-4">
             <h1 className="text-2xl font-heading font-semibold text-foreground mb-2">
-              {group.title}
+              {parentData.title}
             </h1>
             <Badge
               variant="soft"
               className="rounded-full mb-3"
             >
-              {group.type}
+              {parentData.type}
             </Badge>
-            <p className="text-muted-foreground">{group.description}</p>
+            <p className="text-muted-foreground">{parentData.description}</p>
           </div>
         </div>
       </div>
@@ -117,90 +123,92 @@ const GroupMembers = () => {
       <div className="max-w-md mx-auto px-6 py-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-heading font-semibold text-foreground">
-            Members ({group.members.length})
+            Members ({parentData.members.length})
           </h2>
 
-          <Dialog
-            open={isAddMemberOpen}
-            onOpenChange={setIsAddMemberOpen}
-          >
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-                style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add Member
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-sm">
-              <DialogHeader>
-                <DialogTitle>Add Members</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
-                    placeholder="Search connections..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 rounded-full"
-                  />
-                </div>
+          {canAddMembers && (
+            <Dialog
+              open={isAddMemberOpen}
+              onOpenChange={setIsAddMemberOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full"
+                  style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-sm">
+                <DialogHeader>
+                  <DialogTitle>Add Members</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search connections..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9 rounded-full"
+                    />
+                  </div>
 
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {filteredConnections.length > 0 ? (
-                    filteredConnections.map((connection) => (
-                      <div
-                        key={connection.id}
-                        onClick={() => toggleMemberSelection(connection.id)}
-                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                          selectedMembers.includes(connection.id)
-                            ? 'bg-primary/10 border border-primary'
-                            : 'bg-muted/50 hover:bg-muted'
-                        }`}
-                      >
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage
-                            src={connection.avatar}
-                            alt={connection.name}
-                          />
-                          <AvatarFallback>{connection.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <span className="flex-1 font-medium">
-                          {connection.name}
-                        </span>
-                        {selectedMembers.includes(connection.id) && (
-                          <Check className="w-5 h-5 text-primary" />
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-muted-foreground py-4">
-                      No connections available to add
-                    </p>
+                  <div className="max-h-60 overflow-y-auto space-y-2">
+                    {filteredConnections.length > 0 ? (
+                      filteredConnections.map((connection) => (
+                        <div
+                          key={connection.id}
+                          onClick={() => toggleMemberSelection(connection.id)}
+                          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                            selectedMembers.includes(connection.id)
+                              ? 'bg-primary/10 border border-primary'
+                              : 'bg-muted/50 hover:bg-muted'
+                          }`}
+                        >
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage
+                              src={connection.avatar}
+                              alt={connection.name}
+                            />
+                            <AvatarFallback>{connection.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <span className="flex-1 font-medium">
+                            {connection.name}
+                          </span>
+                          {selectedMembers.includes(connection.id) && (
+                            <Check className="w-5 h-5 text-primary" />
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-muted-foreground py-4">
+                        No connections available to add
+                      </p>
+                    )}
+                  </div>
+
+                  {selectedMembers.length > 0 && (
+                    <Button
+                      onClick={handleAddMembers}
+                      className="w-full rounded-full"
+                      style={{ backgroundColor: '#D8A24A' }}
+                    >
+                      Add {selectedMembers.length} Member
+                      {selectedMembers.length > 1 ? 's' : ''}
+                    </Button>
                   )}
                 </div>
-
-                {selectedMembers.length > 0 && (
-                  <Button
-                    onClick={handleAddMembers}
-                    className="w-full rounded-full"
-                    style={{ backgroundColor: '#D8A24A' }}
-                  >
-                    Add {selectedMembers.length} Member
-                    {selectedMembers.length > 1 ? 's' : ''}
-                  </Button>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <div className="space-y-3">
-          {group.members.map((member) => (
+          {parentData.members.map((member) => (
             <Card
               key={member.id}
               className="cursor-pointer hover:shadow-md transition-shadow"
@@ -281,4 +289,4 @@ const GroupMembers = () => {
   )
 }
 
-export default GroupMembers
+export default Members

@@ -14,9 +14,8 @@ import Chat from './pages/Chat'
 import Discover from './pages/Discover'
 import DadDetail from './pages/DadDetail'
 import Groups from './pages/Groups'
-import GroupMembers from './pages/GroupMembers'
 import CommunityDetail from './pages/CommunityDetail'
-import CommunityMembers from './pages/CommunityMembers'
+import Members from './pages/Members'
 import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
 import Connections from './pages/Connections'
@@ -37,8 +36,8 @@ const queryClient = new QueryClient()
  * /discover/:tab .............. Discover (dads | communities | events)
  * /discover/dads/:dadId ....... Dad Detail (from Discover)
  *
- * /communities/:communityId ... Community Detail (members list)
- * /communities/:communityId/members ... Community Members
+ * /communities/:communityId ... Community Detail
+ * /communities/:communityId/members ... Members (unified)
  *
  * /groups ..................... Redirect to /groups/communities
  * /groups/:tab ................ My Groups (communities | events)
@@ -100,7 +99,7 @@ const App = () => (
           />
           <Route
             path="/communities/:communityId/members"
-            element={<CommunityMembers />}
+            element={<Members />}
           />
 
           {/* Events */}
@@ -125,7 +124,7 @@ const App = () => (
           />
           <Route
             path="/groups/members/:groupId"
-            element={<GroupMembers />}
+            element={<Members />}
           />
 
           {/* Chats (unified - handles individual, private-group, and community chats) */}

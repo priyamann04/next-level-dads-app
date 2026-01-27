@@ -4,9 +4,8 @@ import BottomNav from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import logo from '@/assets/logo.png'
-import ConnectionRequestCard from '@/components/ConnectionRequestCard'
+import DadCard from '@/components/DadCard'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
-import { toast } from 'sonner'
 import { ROUTES, profileDetail } from '@/lib/routes'
 
 interface ConnectionRequest {
@@ -59,11 +58,20 @@ const Requests = () => {
       <div className="max-w-md mx-auto px-6 py-6 space-y-4 animate-fade-in">
         {requests.length > 0 ? (
           requests.map((request) => (
-            <ConnectionRequestCard
+            <DadCard
               key={request.id}
-              {...request}
-              onAccept={() => handleAccept(request.id, request.name)}
-              onIgnore={() => handleIgnore(request.id, request.name)}
+              id={request.id}
+              name={request.name}
+              age={request.age}
+              city={request.city}
+              province={request.province}
+              childAgeRange={request.childAgeRange}
+              bio={request.bio}
+              interests={request.interests}
+              avatarUrl={request.avatarUrl}
+              variant="request"
+              onPrimaryAction={() => handleAccept(request.id, request.name)}
+              onSecondaryAction={() => handleIgnore(request.id, request.name)}
               onClick={() => navigate(profileDetail(request.id))}
             />
           ))

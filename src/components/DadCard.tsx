@@ -4,18 +4,22 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
 
+type CardVariant = 'discover' | 'connection' | 'request';
+
 interface DadCardProps {
   id: string;
   name: string;
   age: number;
   city: string;
   province: string;
-  stage: string;
+  childAgeRange: string;
   bio: string;
   interests: string[];
   avatarUrl?: string;
-  onConnect: () => void;
   onClick?: () => void;
+  variant?: CardVariant;
+  onPrimaryAction?: () => void;
+  onSecondaryAction?: () => void;
 }
 
 const DadCard = ({
@@ -24,28 +28,66 @@ const DadCard = ({
   age,
   city,
   province,
-  stage,
+  childAgeRange,
   bio,
   interests,
   avatarUrl,
-  onConnect,
   onClick,
+  variant = 'discover',
+  onPrimaryAction,
+  onSecondaryAction,
 }: DadCardProps) => {
   const [isRequested, setIsRequested] = useState(false);
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
-  
-  const handleConnect = () => {
-    setIsRequested(!isRequested);
-    onConnect();
+
+  const handlePrimaryAction = () => {
+    if (variant === 'discover') {
+      setIsRequested(!isRequested);
+    }
+    onPrimaryAction?.();
   };
-  
+
+  const getPrimaryButtonLabel = () => {
+    switch (variant) {
+      case 'discover':
+        return isRequested ? 'Requested ✓' : 'Connect';
+      case 'connection':
+        return 'Chat';
+      case 'request':
+        return 'Accept';
+    }
+  };
+
+  const getSecondaryButtonLabel = () => {
+    switch (variant) {
+      case 'connection':
+        return 'Unconnect';
+      case 'request':
+        return 'Ignore';
+      default:
+        return '';
+    }
+  };
+
+  const getPrimaryButtonStyle = () => {
+    if (variant === 'discover' && isRequested) {
+      return { backgroundColor: '#9ca3af' };
+    }
+    return { backgroundColor: '#D8A24A' };
+  };
+
+  const hasSecondaryAction = variant === 'connection' || variant === 'request';
+
   return (
-    <Card className="overflow-hidden shadow-md cursor-pointer" onClick={onClick}>
+    <Card
+      className={`overflow-hidden shadow-md${onClick ? ' cursor-pointer' : ''}`}
+      onClick={onClick}
+    >
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start gap-3">
           {avatarUrl ? (
-            <img 
-              src={avatarUrl} 
+            <img
+              src={avatarUrl}
               alt={name}
               className="w-20 h-20 rounded-lg object-cover flex-shrink-0 aspect-square"
             />
@@ -54,7 +96,7 @@ const DadCard = ({
               {initials}
             </div>
           )}
-          
+
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-heading font-semibold text-foreground">
               {name}, {age}
@@ -64,20 +106,20 @@ const DadCard = ({
               <span>{city}, {province}</span>
             </div>
             <Badge variant="soft" className="rounded-full mt-1.5 text-xs">
-              {stage}
+              {childAgeRange}
             </Badge>
           </div>
         </div>
-        
+
         <p className="text-foreground text-sm leading-relaxed">
           {bio}
         </p>
-        
+
         <div className="flex flex-wrap gap-1.5">
           {interests.map((interest) => (
-            <Badge 
-              key={interest} 
-              variant="outline" 
+            <Badge
+              key={interest}
+              variant="outline"
               className="rounded-full text-xs"
               style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
             >
@@ -85,17 +127,42 @@ const DadCard = ({
             </Badge>
           ))}
         </div>
-        
-        <Button
-          className="w-full rounded-full font-semibold"
-          style={{ backgroundColor: isRequested ? '#9ca3af' : '#D8A24A' }}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleConnect();
-          }}
-        >
-          {isRequested ? 'Requested ✓' : 'Connect'}
-        </Button>
+
+        {hasSecondaryAction ? (
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 rounded-full font-semibold"
+              style={getPrimaryButtonStyle()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handlePrimaryAction();
+              }}
+            >
+              {getPrimaryButtonLabel()}
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 rounded-full font-semibold"
+              onClick={(e) => {
+                e.stopPropagation();
+                onSecondaryAction?.();
+              }}
+            >
+              {getSecondaryButtonLabel()}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            className="w-full rounded-full font-semibold"
+            style={getPrimaryButtonStyle()}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrimaryAction();
+            }}
+          >
+            {getPrimaryButtonLabel()}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

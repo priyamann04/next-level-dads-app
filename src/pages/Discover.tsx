@@ -442,8 +442,16 @@ const Discover = () => {
                   filteredDads.map((dad) => (
                     <DadCard
                       key={dad.id}
-                      {...dad}
-                      onConnect={() => handleConnect(dad.name)}
+                      id={dad.id}
+                      name={dad.name}
+                      age={dad.age}
+                      city={dad.city}
+                      province={dad.province}
+                      childAgeRange={dad.stage}
+                      bio={dad.bio}
+                      interests={dad.interests}
+                      avatarUrl={dad.avatarUrl}
+                      onPrimaryAction={() => handleConnect(dad.name)}
                       onClick={() => navigate(dadDetail(dad.id))}
                     />
                   ))

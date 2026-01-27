@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import DadCard from '@/components/DadCard'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
-import { ROUTES, chatDetail, profileDetail } from '@/lib/routes'
+import { ROUTES, profileDetail } from '@/lib/routes'
 
 interface Connection {
   id: string

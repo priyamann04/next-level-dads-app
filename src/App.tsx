@@ -12,11 +12,11 @@ import Match from './pages/Match'
 import Chats from './pages/Chats'
 import Chat from './pages/Chat'
 import Discover from './pages/Discover'
-import DadDetail from './pages/DadDetail'
 import Groups from './pages/Groups'
 import CommunityDetail from './pages/CommunityDetail'
 import Members from './pages/Members'
-import Profile from './pages/Profile'
+import MyProfile from './pages/MyProfile'
+import ProfileDetail from './pages/ProfileDetail'
 import EditProfile from './pages/EditProfile'
 import Connections from './pages/Connections'
 import Requests from './pages/Requests'
@@ -34,22 +34,26 @@ const queryClient = new QueryClient()
  *
  * /discover ................... Redirect to /discover/dads
  * /discover/:tab .............. Discover (dads | communities | events)
- * /discover/dads/:dadId ....... Dad Detail (from Discover)
+ * /discover/dads/:id .......... ProfileDetail (discover context with Connect button)
  *
  * /communities/:communityId ... Community Detail
- * /communities/:communityId/members ... Members (unified)
+ * /communities/:communityId/members ... Members
  *
  * /groups ..................... Redirect to /groups/communities
  * /groups/:tab ................ My Groups (communities | events)
+ * /groups/:groupId/members .... Members (normalized pattern)
  *
  * /chats ...................... Chats List
- * /chats/:chatId .............. Unified Chat (individual | private-group | community)
- *                               Query params: ?type=individual|private-group|community&from=chats|groups|discover
+ * /chats/individual/:id ....... Chat (individual 1:1)
+ * /chats/group/:id ............ Chat (private group)
+ * /chats/community/:id ........ Chat (community)
  *
- * /profile .................... Own Profile
- * /profiles/:profileId ........ Other User Profile (from Connections, etc.)
+ * /profile .................... MyProfile (own profile with stats, edit, logout)
+ * /profiles/:id ............... ProfileDetail (read-only other user view)
  * /connections ................ Connections List
  * /requests ................... Connection Requests
+ *
+ * /events/:eventId ............ Event Detail
  */
 
 const App = () => (
@@ -84,15 +88,15 @@ const App = () => (
             }
           />
           <Route
-            path="/discover/dads/:dadId"
-            element={<DadDetail />}
+            path="/discover/dads/:id"
+            element={<ProfileDetail />}
           />
           <Route
             path="/discover/:tab"
             element={<Discover />}
           />
 
-          {/* Communities (member pages only - chat is unified) */}
+          {/* Communities */}
           <Route
             path="/communities/:communityId"
             element={<CommunityDetail />}
@@ -123,32 +127,40 @@ const App = () => (
             element={<Groups />}
           />
           <Route
-            path="/groups/members/:groupId"
+            path="/groups/:groupId/members"
             element={<Members />}
           />
 
-          {/* Chats (unified - handles individual, private-group, and community chats) */}
+          {/* Chats (typed routes) */}
           <Route
             path={ROUTES.CHATS}
             element={<Chats />}
           />
           <Route
-            path="/chats/:chatId"
+            path="/chats/individual/:id"
+            element={<Chat />}
+          />
+          <Route
+            path="/chats/group/:id"
+            element={<Chat />}
+          />
+          <Route
+            path="/chats/community/:id"
             element={<Chat />}
           />
 
           {/* Profile */}
           <Route
             path={ROUTES.PROFILE}
-            element={<Profile />}
+            element={<MyProfile />}
           />
           <Route
             path={ROUTES.EDIT_PROFILE}
             element={<EditProfile />}
           />
           <Route
-            path="/profiles/:profileId"
-            element={<Profile />}
+            path="/profiles/:id"
+            element={<ProfileDetail />}
           />
           <Route
             path={ROUTES.CONNECTIONS}

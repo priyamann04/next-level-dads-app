@@ -15,7 +15,7 @@ import {
 import { ArrowLeft, MessageCircle, Plus, Search, Check } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
-import { chatDetail, profileDetail } from '@/lib/routes'
+import { profileDetail } from '@/lib/routes'
 
 interface Member {
   id: string

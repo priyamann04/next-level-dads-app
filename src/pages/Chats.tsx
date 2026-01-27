@@ -14,7 +14,7 @@ import {
 import { Search, Users, Plus, Check } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
-import { chatDetail } from '@/lib/routes'
+import { individualChat, groupChat, communityChat } from '@/lib/routes'
 import { toast } from 'sonner'
 
 const Chats = () => {
@@ -181,7 +181,7 @@ const Chats = () => {
             {filteredChats.map((chat) => (
               <div
                 key={chat.id}
-                onClick={() => navigate(chatDetail(chat.id))}
+                onClick={() => navigate(individualChat(chat.id))}
                 className="px-6 py-4 hover:bg-muted/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-4">

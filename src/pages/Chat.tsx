@@ -1,12 +1,11 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ArrowLeft, Send, Users } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import {
-  ROUTES,
   communityMembers,
   groupMembers,
   discoverTab,
@@ -14,7 +13,7 @@ import {
 } from '@/lib/routes'
 
 // Chat type definitions
-export type ChatType = 'individual' | 'private-group' | 'community'
+export type ChatType = 'individual' | 'group' | 'community'
 
 interface Message {
   id: number
@@ -27,19 +26,44 @@ interface Message {
 
 const Chat = () => {
   const navigate = useNavigate()
-  const { chatId } = useParams<{ chatId: string }>()
+  const location = useLocation()
+  const { id } = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
   const [message, setMessage] = useState('')
 
+  // Derive chat type from route path
+  const chatType: ChatType = location.pathname.startsWith('/chats/community')
+    ? 'community'
+    : location.pathname.startsWith('/chats/group')
+      ? 'group'
+      : 'individual'
+  const chatId = id || ''
+
+  const from = searchParams.get('from')
+
   const handleSend = () => {}
 
-  const handleBack = () => {}
+  const handleBack = () => {
+    if (from === 'groups') {
+      navigate(groupsTab('communities'))
+    } else if (from === 'discover') {
+      navigate(discoverTab('communities'))
+    } else {
+      navigate(-1)
+    }
+  }
 
-  const handleMembers = () => {}
+  const handleMembers = () => {
+    if (chatType === 'community' && chatId) {
+      navigate(communityMembers(chatId))
+    } else if (chatType === 'group' && chatId) {
+      navigate(groupMembers(chatId))
+    }
+  }
 
-  const isGroupChat = false
+  const isGroupChat = chatType === 'group' || chatType === 'community'
 
-  const chatTypeLabel = ''
+  const chatTypeLabel = chatType === 'community' ? 'Community' : chatType === 'group' ? 'Group' : ''
 
   const chatInfo = {
     name: 'Chat Name',

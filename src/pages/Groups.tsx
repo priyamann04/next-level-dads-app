@@ -4,44 +4,36 @@ import EventCard from '@/components/EventCard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Users as UsersIcon } from 'lucide-react'
-import { useGroups } from '@/contexts/GroupsContext'
 import { useToast } from '@/hooks/use-toast'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { ROUTES, communityChat } from '@/lib/routes'
 import { getEventsByIds } from '@/data/events'
 
-const allCommunities = [
-  {
-    id: 1,
-    title: 'Saturday Coffee Dads',
-    description: 'Weekly Saturday morning meetups at local coffee shops.',
-    memberCount: 42,
-  },
-  {
-    id: 2,
-    title: 'Outdoor Adventure Dads',
-    description: 'For dads who love hiking, camping, and exploring nature with their kids.',
-    memberCount: 67,
-  },
-  {
-    id: 5,
-    title: 'Sports & Fitness Dads',
-    description: 'Stay active together! Organize pickup games and workout sessions.',
-    memberCount: 78,
-  },
-]
+const allCommunities = []
 
 const Groups = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { tab = 'communities' } = useParams<{ tab: string }>()
-  const { joinedCommunities, registeredEvents, leaveCommunity, registerEvent, unregisterEvent } = useGroups()
 
-  const myCommunities = allCommunities.filter((c) => joinedCommunities.includes(c.id))
+  const joinedCommunities = []
+  const registeredEvents = []
+
+  const leaveCommunity = (id: number) => {}
+  const registerEvent = (eventId: number) => {}
+  const unregisterEvent = (eventId: number) => {}
+
+  const myCommunities = allCommunities.filter((c) =>
+    joinedCommunities.includes(c.id),
+  )
   const myEvents = getEventsByIds(registeredEvents)
 
-  const handleLeaveCommunity = (id: number, title: string, e: React.MouseEvent) => {
+  const handleLeaveCommunity = (
+    id: number,
+    title: string,
+    e: React.MouseEvent,
+  ) => {
     e.stopPropagation()
     leaveCommunity(id)
     toast({
@@ -49,7 +41,6 @@ const Groups = () => {
       description: `You've left ${title}. The group chat has been removed.`,
     })
   }
-
 
   const handleCommunityClick = (communityId: number) => {
     navigate(communityChat(communityId, 'groups'))
@@ -76,9 +67,10 @@ const Groups = () => {
             <Link
               to={ROUTES.GROUPS_COMMUNITIES}
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
-                tab === 'communities' && "border-b-2 border-primary text-foreground",
-                tab !== 'communities' && "text-muted-foreground"
+                'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
+                tab === 'communities' &&
+                  'border-b-2 border-primary text-foreground',
+                tab !== 'communities' && 'text-muted-foreground',
               )}
             >
               Communities
@@ -86,9 +78,9 @@ const Groups = () => {
             <Link
               to={ROUTES.GROUPS_EVENTS}
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all",
-                tab === 'events' && "border-b-2 border-primary text-foreground",
-                tab !== 'events' && "text-muted-foreground"
+                'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
+                tab === 'events' && 'border-b-2 border-primary text-foreground',
+                tab !== 'events' && 'text-muted-foreground',
               )}
             >
               Events
@@ -124,7 +116,9 @@ const Groups = () => {
                       <Button
                         variant="outline"
                         className="w-full rounded-full"
-                        onClick={(e) => handleLeaveCommunity(community.id, community.title, e)}
+                        onClick={(e) =>
+                          handleLeaveCommunity(community.id, community.title, e)
+                        }
                       >
                         Leave Group
                       </Button>
@@ -133,7 +127,9 @@ const Groups = () => {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">No joined communities yet</p>
+                  <p className="text-muted-foreground">
+                    No joined communities yet
+                  </p>
                 </div>
               )}
             </div>
@@ -166,7 +162,9 @@ const Groups = () => {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">No registered events yet</p>
+                  <p className="text-muted-foreground">
+                    No registered events yet
+                  </p>
                 </div>
               )}
             </div>

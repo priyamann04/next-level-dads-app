@@ -7,79 +7,25 @@ import { Badge } from '@/components/ui/badge'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { communityChat, profileWithContext } from '@/lib/routes'
 
-const communitiesData: Record<string, {
+interface Community {
   title: string
   description: string
   memberCount: number
   nextEvent: string | null
-}> = {
-  '1': {
-    title: 'Saturday Coffee Dads',
-    description: 'Weekly Saturday morning meetups at local coffee shops. Share stories, swap advice, and build lasting friendships.',
-    memberCount: 42,
-    nextEvent: 'Sat 9am',
-  },
-  '2': {
-    title: 'Outdoor Adventure Dads',
-    description: 'For dads who love hiking, camping, and exploring nature with their kids. Monthly outdoor excursions.',
-    memberCount: 67,
-    nextEvent: 'Next Sun',
-  },
-  '3': {
-    title: 'Tech & Gaming Dads',
-    description: 'Connect over technology, gaming, and teaching kids to code. Virtual meetups and gaming sessions.',
-    memberCount: 89,
-    nextEvent: null,
-  },
-  '4': {
-    title: 'New Dads Support',
-    description: 'Just starting your fatherhood journey? Connect with other new dads navigating the early years together.',
-    memberCount: 53,
-    nextEvent: 'Thu 7pm',
-  },
-  '5': {
-    title: 'Sports & Fitness Dads',
-    description: 'Stay active together! Organize pickup games, workout sessions, and teach kids about sports.',
-    memberCount: 78,
-    nextEvent: 'Sat 10am',
-  },
-  '6': {
-    title: 'Creative Dads',
-    description: 'For fathers who love art, music, photography, and creative pursuits. Share projects and inspire each other.',
-    memberCount: 34,
-    nextEvent: null,
-  },
 }
 
-const membersData: Record<string, Array<{
+interface Member {
   id: string
   name: string
   age: number
   stage: string
   bio: string
   avatarUrl: string
-}>> = {
-  '1': [
-    { id: 'member-michael', name: 'Michael Thompson', age: 34, stage: 'Toddler (2-3 years)', bio: 'Love getting outside with my boys and exploring new parks.', avatarUrl: avatarDefaultGrey },
-    { id: 'member-robert', name: 'Robert Chen', age: 39, stage: 'Elementary (6-12 years)', bio: 'Tech guy who loves cooking and weekend adventures.', avatarUrl: avatarDefaultGrey },
-    { id: 'member-anthony', name: 'Anthony Williams', age: 36, stage: 'Preschool (4-5 years)', bio: 'Fitness enthusiast and amateur photographer.', avatarUrl: avatarDefaultGrey },
-  ],
-  '2': [
-    { id: 'member-james-outdoor', name: 'James Martinez', age: 32, stage: 'Toddler (2-3 years)', bio: 'Weekend warrior dad who loves trail running.', avatarUrl: avatarDefaultGrey },
-  ],
-  '3': [
-    { id: 'member-david-tech', name: 'David Chen', age: 38, stage: 'Elementary (6-12 years)', bio: 'Tech enthusiast and soccer coach.', avatarUrl: avatarDefaultGrey },
-  ],
-  '4': [
-    { id: 'member-alex', name: 'Alex Johnson', age: 29, stage: 'Newborn (0-1 year)', bio: 'New dad navigating parenthood.', avatarUrl: avatarDefaultGrey },
-  ],
-  '5': [
-    { id: 'member-chris', name: 'Chris Williams', age: 35, stage: 'Elementary (6-12 years)', bio: 'Coach and fitness enthusiast.', avatarUrl: avatarDefaultGrey },
-  ],
-  '6': [
-    { id: 'member-daniel', name: 'Daniel Kim', age: 42, stage: 'Teen (13-17 years)', bio: 'Photographer and musician.', avatarUrl: avatarDefaultGrey },
-  ],
 }
+
+const communitiesData: Record<string, Community> = {}
+
+const membersData: Record<string, Member[]> = {}
 
 const CommunityDetail = () => {
   const navigate = useNavigate()
@@ -88,14 +34,15 @@ const CommunityDetail = () => {
   const [isInterested, setIsInterested] = useState(false)
   const from = searchParams.get('from') || 'groups'
 
-  const community = communitiesData[communityId || '1'] || communitiesData['1']
-  const members = membersData[communityId || '1'] || membersData['1']
-
-  const handleBack = () => {
-    if (communityId) {
-      navigate(communityChat(communityId, from === 'discover' ? 'discover' : 'groups'))
-    }
+  const community = {
+    title: 'Sample Community',
+    description: 'This is a sample community description.',
+    memberCount: 42,
+    nextEvent: '2024-07-15T18:00:00Z',
   }
+  const members = []
+
+  const handleBack = () => {}
 
   const handleMemberClick = (memberId: string) => {
     navigate(profileWithContext(memberId, 'community', communityId))
@@ -141,7 +88,10 @@ const CommunityDetail = () => {
                     <h4 className="font-semibold text-foreground text-base">
                       {member.name}
                     </h4>
-                    <Badge variant="soft" className="rounded-full text-xs mt-1">
+                    <Badge
+                      variant="soft"
+                      className="rounded-full text-xs mt-1"
+                    >
                       {member.stage}
                     </Badge>
                     <p className="text-sm text-foreground mt-2 leading-relaxed">

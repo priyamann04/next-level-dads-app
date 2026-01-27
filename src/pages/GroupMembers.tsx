@@ -5,89 +5,42 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { ArrowLeft, MessageCircle, Plus, Search, Check } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { chatDetail, profileDetail } from '@/lib/routes'
 
-// Private group data with members
-const privateGroupsData: Record<string, {
+interface GroupMember {
+  id: string
+  name: string
+  age: number
+  location: string
+  bio: string
+  childrenAges: string
+  stages: string[]
+  interests: string[]
+  avatar: string
+}
+
+interface PrivateGroup {
   title: string
   type: string
   description: string
-  members: Array<{
-    id: string
-    name: string
-    age: number
-    location: string
-    bio: string
-    childrenAges: string
-    stages: string[]
-    interests: string[]
-    avatar: string
-  }>
-}> = {
-  'group-toronto': {
-    title: 'Toronto Dads Meetup',
-    type: 'Private Group',
-    description: 'A private group for Toronto area dads to connect and plan activities.',
-    members: [
-      {
-        id: 'member-alex-toronto',
-        name: 'Alex Turner',
-        age: 35,
-        location: 'Toronto, ON',
-        bio: 'Software developer and weekend soccer coach.',
-        childrenAges: 'Dad of 2 kids, ages 6 and 9',
-        stages: ['Elementary (6–12 years)'],
-        interests: ['Tech', 'Sports', 'Gaming'],
-        avatar: avatarDefaultGrey,
-      },
-      {
-        id: 'member-brian-toronto',
-        name: 'Brian Mitchell',
-        age: 38,
-        location: 'Toronto, ON',
-        bio: 'Marketing professional who loves hiking.',
-        childrenAges: 'Dad of 1 kid, age 4',
-        stages: ['Preschool (4–5 years)'],
-        interests: ['Outdoors', 'Photography', 'Music'],
-        avatar: avatarDefaultGrey,
-      },
-      {
-        id: 'member-chris-toronto',
-        name: 'Chris Parker',
-        age: 41,
-        location: 'Mississauga, ON',
-        bio: 'Finance manager and amateur chef.',
-        childrenAges: 'Dad of 3 kids, ages 7, 10, and 13',
-        stages: ['Elementary (6–12 years)', 'Teen (13–17 years)'],
-        interests: ['Cooking', 'Sports', 'Reading'],
-        avatar: avatarDefaultGrey,
-      },
-    ],
-  },
+  members: GroupMember[]
 }
 
+// Private group data with members
+const privateGroupsData: Record<string, PrivateGroup> = {}
+
 // Mock connections for adding members
-const availableConnections = [
-  {
-    id: 'chat-connection-mike',
-    name: 'Mike Johnson',
-    avatar: avatarDefaultGrey,
-  },
-  {
-    id: 'chat-connection-david',
-    name: 'David Chen',
-    avatar: avatarDefaultGrey,
-  },
-  {
-    id: 'chat-connection-steve',
-    name: 'Steve Wilson',
-    avatar: avatarDefaultGrey,
-  },
-]
+const availableConnections = []
 
 const GroupMembers = () => {
   const navigate = useNavigate()
@@ -97,47 +50,36 @@ const GroupMembers = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
 
-  const group = privateGroupsData[groupId || 'group-toronto'] || privateGroupsData['group-toronto']
+  const group = {
+    title: 'Sample Private Group',
+    type: 'Support',
+    description: 'This is a sample private group description.',
+    members: [],
+  }
 
   // Filter out connections that are already members
-  const existingMemberIds = group.members.map(m => m.id)
-  const filteredConnections = availableConnections.filter(
-    c => !existingMemberIds.includes(c.id) && 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const existingMemberIds = []
+  const filteredConnections = []
 
-  const handleConnect = (memberId: string, name: string) => {
-    toast({
-      title: 'Connection request sent!',
-      description: `Your request to connect with ${name} has been sent.`,
-    })
-  }
+  const handleConnect = (memberId: string, name: string) => {}
 
-  const handleMemberClick = (memberId: string) => {
-    navigate(profileDetail(memberId))
-  }
+  const handleMemberClick = (memberId: string) => {}
 
-  const handleBack = () => {
-    if (groupId) {
-      navigate(chatDetail(groupId, 'private-group'))
-    }
-  }
+  const handleBack = () => {}
 
   const toggleMemberSelection = (id: string) => {
-    setSelectedMembers(prev => 
-      prev.includes(id) 
-        ? prev.filter(m => m !== id)
-        : [...prev, id]
+    setSelectedMembers((prev) =>
+      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id],
     )
   }
 
   const handleAddMembers = () => {
     if (selectedMembers.length > 0) {
       const names = selectedMembers
-        .map(id => availableConnections.find(c => c.id === id)?.name)
+        .map((id) => availableConnections.find((c) => c.id === id)?.name)
         .filter(Boolean)
         .join(', ')
-      
+
       toast({
         title: 'Members added!',
         description: `${names} ${selectedMembers.length === 1 ? 'has' : 'have'} been added to the group.`,
@@ -161,7 +103,10 @@ const GroupMembers = () => {
             <h1 className="text-2xl font-heading font-semibold text-foreground mb-2">
               {group.title}
             </h1>
-            <Badge variant="soft" className="rounded-full mb-3">
+            <Badge
+              variant="soft"
+              className="rounded-full mb-3"
+            >
               {group.type}
             </Badge>
             <p className="text-muted-foreground">{group.description}</p>
@@ -174,8 +119,11 @@ const GroupMembers = () => {
           <h2 className="text-lg font-heading font-semibold text-foreground">
             Members ({group.members.length})
           </h2>
-          
-          <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+
+          <Dialog
+            open={isAddMemberOpen}
+            onOpenChange={setIsAddMemberOpen}
+          >
             <DialogTrigger asChild>
               <Button
                 variant="outline"
@@ -201,7 +149,7 @@ const GroupMembers = () => {
                     className="pl-9 rounded-full"
                   />
                 </div>
-                
+
                 <div className="max-h-60 overflow-y-auto space-y-2">
                   {filteredConnections.length > 0 ? (
                     filteredConnections.map((connection) => (
@@ -215,10 +163,15 @@ const GroupMembers = () => {
                         }`}
                       >
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={connection.avatar} alt={connection.name} />
+                          <AvatarImage
+                            src={connection.avatar}
+                            alt={connection.name}
+                          />
                           <AvatarFallback>{connection.name[0]}</AvatarFallback>
                         </Avatar>
-                        <span className="flex-1 font-medium">{connection.name}</span>
+                        <span className="flex-1 font-medium">
+                          {connection.name}
+                        </span>
                         {selectedMembers.includes(connection.id) && (
                           <Check className="w-5 h-5 text-primary" />
                         )}
@@ -230,21 +183,22 @@ const GroupMembers = () => {
                     </p>
                   )}
                 </div>
-                
+
                 {selectedMembers.length > 0 && (
                   <Button
                     onClick={handleAddMembers}
                     className="w-full rounded-full"
                     style={{ backgroundColor: '#D8A24A' }}
                   >
-                    Add {selectedMembers.length} Member{selectedMembers.length > 1 ? 's' : ''}
+                    Add {selectedMembers.length} Member
+                    {selectedMembers.length > 1 ? 's' : ''}
                   </Button>
                 )}
               </div>
             </DialogContent>
           </Dialog>
         </div>
-        
+
         <div className="space-y-3">
           {group.members.map((member) => (
             <Card
@@ -255,7 +209,10 @@ const GroupMembers = () => {
               <CardContent className="p-4">
                 <div className="flex items-start gap-4 mb-3">
                   <Avatar className="w-12 h-12 shrink-0">
-                    <AvatarImage src={member.avatar} alt={member.name} />
+                    <AvatarImage
+                      src={member.avatar}
+                      alt={member.name}
+                    />
                     <AvatarFallback>{member.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">

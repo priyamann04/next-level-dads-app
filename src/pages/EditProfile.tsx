@@ -36,7 +36,19 @@ const INTERESTS_OPTIONS = [
 ]
 
 const PROVINCES = [
-  'AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'NT', 'NU', 'ON', 'PE', 'QC', 'SK', 'YT'
+  'AB',
+  'BC',
+  'MB',
+  'NB',
+  'NL',
+  'NS',
+  'NT',
+  'NU',
+  'ON',
+  'PE',
+  'QC',
+  'SK',
+  'YT',
 ]
 
 const EditProfile = () => {
@@ -47,36 +59,38 @@ const EditProfile = () => {
   const [age, setAge] = useState('36')
   const [city, setCity] = useState('Toronto')
   const [province, setProvince] = useState('ON')
-  const [bio, setBio] = useState('Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.')
-  const [stages, setStages] = useState<string[]>(['Elementary (6-12 years)', 'Teen (13-17 years)'])
-  const [interests, setInterests] = useState<string[]>(['Cooking', 'Fitness', 'Outdoors', 'Tech'])
+  const [bio, setBio] = useState(
+    'Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.',
+  )
+  const [stages, setStages] = useState<string[]>([
+    'Elementary (6-12 years)',
+    'Teen (13-17 years)',
+  ])
+  const [interests, setInterests] = useState<string[]>([
+    'Cooking',
+    'Fitness',
+    'Outdoors',
+    'Tech',
+  ])
   const [avatar, setAvatar] = useState(avatarDefaultGrey)
 
   const toggleStage = (stage: string) => {
-    setStages(prev =>
-      prev.includes(stage)
-        ? prev.filter(s => s !== stage)
-        : [...prev, stage]
+    setStages((prev) =>
+      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage],
     )
   }
 
   const toggleInterest = (interest: string) => {
-    setInterests(prev =>
+    setInterests((prev) =>
       prev.includes(interest)
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest],
     )
   }
 
-  const handleSave = () => {
-    // Would save to database here
-    navigate(ROUTES.PROFILE)
-  }
+  const handleSave = () => {}
 
-  const handlePhotoChange = () => {
-    // Would open file picker / camera
-    console.log('Change photo')
-  }
+  const handlePhotoChange = () => {}
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -128,7 +142,7 @@ const EditProfile = () => {
         {/* Basic Info */}
         <div className="bg-card rounded-lg p-6 space-y-4 shadow-md">
           <h3 className="font-semibold text-foreground">Basic Information</h3>
-          
+
           <div className="space-y-2">
             <label className="text-sm text-muted-foreground">Name</label>
             <Input
@@ -164,8 +178,13 @@ const EditProfile = () => {
                 onChange={(e) => setProvince(e.target.value)}
                 className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
               >
-                {PROVINCES.map(p => (
-                  <option key={p} value={p}>{p}</option>
+                {PROVINCES.map((p) => (
+                  <option
+                    key={p}
+                    value={p}
+                  >
+                    {p}
+                  </option>
                 ))}
               </select>
             </div>
@@ -214,7 +233,9 @@ const EditProfile = () => {
                 className="rounded-full cursor-pointer transition-colors"
                 onClick={() => toggleInterest(interest)}
               >
-                {interests.includes(interest) && <Check className="w-3 h-3 mr-1" />}
+                {interests.includes(interest) && (
+                  <Check className="w-3 h-3 mr-1" />
+                )}
                 {interest}
               </Badge>
             ))}

@@ -5,14 +5,9 @@ import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
 import EventCard from '@/components/EventCard'
 import { useToast } from '@/hooks/use-toast'
-import { useGroups } from '@/contexts/GroupsContext'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  RefreshCw,
-  Search,
-  SlidersHorizontal,
-} from 'lucide-react'
+import { RefreshCw, Search, SlidersHorizontal } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   Sheet,
@@ -28,118 +23,83 @@ import { cn } from '@/lib/utils'
 import { ROUTES, communityChat, dadDetail } from '@/lib/routes'
 import { events as sharedEvents } from '@/data/events'
 
-const dads = [
-  {
-    id: 'dad-james',
-    name: 'James Martinez',
-    age: 32,
-    city: 'Vancouver',
-    province: 'BC',
-    stage: 'Toddler (2–3 years)',
-    bio: 'Weekend warrior dad who loves trail running and teaching my little one about nature.',
-    interests: ['Fitness', 'Cooking', 'Outdoors'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: 'dad-david',
-    name: 'David Chen',
-    age: 38,
-    city: 'Toronto',
-    province: 'ON',
-    stage: 'Elementary (6–12 years)',
-    bio: 'Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.',
-    interests: ['Tech', 'Sports', 'Gaming'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: 'dad-marcus',
-    name: 'Marcus Johnson',
-    age: 35,
-    city: 'Calgary',
-    province: 'AB',
-    stage: 'Preschool (4–5 years)',
-    bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
-    interests: ['Music', 'Photography', 'Art'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: 'dad-steve',
-    name: 'Steve Williams',
-    age: 40,
-    city: 'Montréal',
-    province: 'QC',
-    stage: 'Teen (13–17 years)',
-    bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
-    interests: ['Outdoors', 'Sports', 'Travel'],
-    avatarUrl: avatarDefaultGrey,
-  },
+// Helper data
+const stageOptions = [
+  'Expecting',
+  'Newborn (0–1 year)',
+  'Toddler (2–3 years)',
+  'Preschool (4–5 years)',
+  'Elementary (6–12 years)',
+  'Teen (13–17 years)',
+  'Adult (18+ years)',
+]
+const interestOptions = [
+  'Sports',
+  'Cooking',
+  'Outdoors',
+  'Fitness',
+  'Gaming',
+  'Music',
+  'Reading',
+  'Travel',
+  'Tech',
+  'DIY',
+  'Photography',
+  'Art',
+  'Cars',
+  'Parenting',
+  'Mental Wellness',
+  'Movies',
+  'Coffee',
+  'Home Projects',
+  'Volunteering',
+  'Board Games',
+  'Faith',
+  'Entrepreneurship',
+  'Pets',
+  'Gardening',
+  'Podcasts',
+  'Finance',
+  'Writing',
+]
+const provinces = [
+  'AB', // Alberta
+  'BC', // British Columbia
+  'MB', // Manitoba
+  'NB', // New Brunswick
+  'NL', // Newfoundland and Labrador
+  'NS', // Nova Scotia
+  'NT', // Northwest Territories
+  'NU', // Nunavut
+  'ON', // Ontario
+  'PE', // Prince Edward Island
+  'QC', // Quebec
+  'SK', // Saskatchewan
+  'YT', // Yukon
+]
+const ageRanges = [
+  'all',
+  'Under 25',
+  '25-29',
+  '30-34',
+  '35-39',
+  '40-44',
+  '45-49',
+  '50-59',
+  '60+',
 ]
 
-const communities = [
-  {
-    id: 1,
-    title: 'Saturday Coffee Dads',
-    description:
-      'Weekly Saturday morning meetups at local coffee shops. Share stories, swap advice, and build lasting friendships.',
-    memberCount: 42,
-    nextEvent: 'Sat 9am',
-  },
-  {
-    id: 2,
-    title: 'Outdoor Adventure Dads',
-    description:
-      'For dads who love hiking, camping, and exploring nature with their kids. Monthly outdoor excursions.',
-    memberCount: 67,
-    nextEvent: 'Next Sun',
-  },
-  {
-    id: 3,
-    title: 'Tech & Gaming Dads',
-    description:
-      'Connect over technology, gaming, and teaching kids to code. Virtual meetups and gaming sessions.',
-    memberCount: 89,
-  },
-  {
-    id: 4,
-    title: 'New Dads Support',
-    description:
-      'Just starting your fatherhood journey? Connect with other new dads navigating the early years together.',
-    memberCount: 53,
-    nextEvent: 'Thu 7pm',
-  },
-  {
-    id: 5,
-    title: 'Sports & Fitness Dads',
-    description:
-      'Stay active together! Organize pickup games, workout sessions, and teach kids about sports.',
-    memberCount: 78,
-    nextEvent: 'Sat 10am',
-  },
-  {
-    id: 6,
-    title: 'Creative Dads',
-    description:
-      'For fathers who love art, music, photography, and creative pursuits. Share projects and inspire each other.',
-    memberCount: 34,
-  },
-]
+const dads = []
 
+const communities = []
 
 const Discover = () => {
   const { toast } = useToast()
   const navigate = useNavigate()
   const { tab = 'dads' } = useParams<{ tab: string }>()
 
-  const {
-    joinedCommunities,
-    registeredEvents,
-    joinCommunity,
-    registerEvent,
-    unregisterEvent,
-  } = useGroups()
-
   const [eventFilter, setEventFilter] = useState<'all' | 'virtual' | 'local'>(
-    'all'
+    'all',
   )
   const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
   const [communitySearchQuery, setCommunitySearchQuery] = useState('')
@@ -158,89 +118,36 @@ const Discover = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
-  // Helper data
-  const stageOptions = [
-    'Expecting',
-    'Newborn (0–1 year)',
-    'Toddler (2–3 years)',
-    'Preschool (4–5 years)',
-    'Elementary (6–12 years)',
-    'Teen (13–17 years)',
-    'Adult (18+ years)',
-  ]
-  const interestOptions = [
-    'Sports',
-    'Cooking',
-    'Outdoors',
-    'Fitness',
-    'Gaming',
-    'Music',
-    'Reading',
-    'Travel',
-    'Tech',
-    'DIY',
-    'Photography',
-    'Art',
-    'Cars',
-    'Parenting',
-    'Mental Wellness',
-    'Movies',
-    'Coffee',
-    'Home Projects',
-    'Volunteering',
-    'Board Games',
-    'Faith',
-    'Entrepreneurship',
-    'Pets',
-    'Gardening',
-    'Podcasts',
-    'Finance',
-    'Writing',
-  ]
-  const provinces = [
-    'AB', // Alberta
-    'BC', // British Columbia
-    'MB', // Manitoba
-    'NB', // New Brunswick
-    'NL', // Newfoundland and Labrador
-    'NS', // Nova Scotia
-    'NT', // Northwest Territories
-    'NU', // Nunavut
-    'ON', // Ontario
-    'PE', // Prince Edward Island
-    'QC', // Quebec
-    'SK', // Saskatchewan
-    'YT', // Yukon
-  ]
-  const ageRanges = ['all', 'Under 25', '25-29', '30-34', '35-39', '40-44', '45-49', '50-59', '60+']
-
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
     setPendingChildrenAges((prev) =>
-      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage]
+      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage],
     )
   }
   const togglePendingInterest = (interest: string) => {
     setPendingInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+        : [...prev, interest],
     )
   }
   const togglePendingLocation = (location: string) => {
     setPendingLocations((prev) =>
       prev.includes(location)
         ? prev.filter((l) => l !== location)
-        : [...prev, location]
+        : [...prev, location],
     )
   }
   const togglePendingDadAge = (ageRange: string) => {
     setPendingDadAges((prev) =>
       prev.includes(ageRange)
         ? prev.filter((a) => a !== ageRange)
-        : [...prev, ageRange]
+        : [...prev, ageRange],
     )
   }
+
+  const registerEvent = (eventId: number) => {}
+  const unregisterEvent = (eventId: number) => {}
 
   const applyFilters = () => {
     setAppliedChildrenAges(pendingChildrenAges)
@@ -261,95 +168,22 @@ const Discover = () => {
     setAppliedDadAges([])
   }
 
-  const handleJoin = (communityId: number, title: string) => {
-    joinCommunity(communityId, title)
-    toast({
-      title: 'Joined community! 🎉',
-      description: `Welcome to ${title}!`,
-    })
-    navigate(communityChat(communityId) + '?from=discover')
-  }
+  const handleJoin = (communityId: number, title: string) => {}
 
-  const handleJoinEvent = (eventId: number, title: string) => {
-    if (registeredEvents.includes(eventId)) {
-      unregisterEvent(eventId)
-      toast({
-        title: 'Registration cancelled',
-        description: `You've cancelled your registration for ${title}.`,
-      })
-    } else {
-      registerEvent(eventId)
-      toast({
-        title: 'Registered for event! 🎉',
-        description: `You've registered for ${title}.`,
-      })
-    }
-  }
+  const handleJoinEvent = (eventId: number, title: string) => {}
 
-  const handleConnect = (name: string) => {
-    toast({
-      title: 'Connection sent! 🎉',
-      description: `Your connection request was sent to ${name}.`,
-    })
-  }
+  const handleConnect = (name: string) => {}
 
-  const handleRefresh = () => {
-    toast({
-      title: 'Refreshed',
-      description: 'Loading new connections...',
-    })
-  }
+  const handleRefresh = () => {}
 
   // Filter lists
-  const filteredDads = dads.filter((dad) => {
-    const matchesChildrenAge =
-      appliedChildrenAges.length === 0 ||
-      appliedChildrenAges.includes(dad.stage)
-    const matchesInterest =
-      appliedInterests.length === 0 ||
-      dad.interests.some((i) => appliedInterests.includes(i))
-    const matchesLocation =
-      appliedLocations.length === 0 || appliedLocations.includes(dad.province)
+  const filteredDads = []
 
-    let matchesAge = true
-    if (appliedDadAges.length > 0) {
-      matchesAge = appliedDadAges.some((range) => {
-        if (range === 'Under 30') return dad.age < 30
-        if (range === '30-35') return dad.age >= 30 && dad.age <= 35
-        if (range === '36-40') return dad.age >= 36 && dad.age <= 40
-        if (range === 'Over 40') return dad.age > 40
-        return false
-      })
-    }
+  const filteredCommunities = []
 
-    return (
-      matchesChildrenAge && matchesInterest && matchesLocation && matchesAge
-    )
-  })
+  const filteredEvents = []
 
-  const filteredCommunities = communities.filter(
-    (community) =>
-      !joinedCommunities.includes(community.id) &&
-      (community.title
-        .toLowerCase()
-        .includes(communitySearchQuery.toLowerCase()) ||
-        community.description
-          .toLowerCase()
-          .includes(communitySearchQuery.toLowerCase()))
-  )
-
-  const filteredEvents = sharedEvents.filter((event) => {
-    const matchesType =
-      eventFilter === 'all' || event.type.toLowerCase() === eventFilter
-    const matchesPrice =
-      priceFilter === 'all' ||
-      (priceFilter === 'free' && event.price === 'Free') ||
-      (priceFilter === 'paid' && event.price !== 'Free')
-    const matchesSearch =
-      event.title.toLowerCase().includes(eventSearchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(eventSearchQuery.toLowerCase())
-    return matchesType && matchesPrice && matchesSearch
-  })
+  const registeredEvents = []
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -374,7 +208,7 @@ const Discover = () => {
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'dads' && 'border-b-2 border-primary text-foreground',
-                tab !== 'dads' && 'text-muted-foreground'
+                tab !== 'dads' && 'text-muted-foreground',
               )}
             >
               Dads
@@ -385,7 +219,7 @@ const Discover = () => {
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'communities' &&
                   'border-b-2 border-primary text-foreground',
-                tab !== 'communities' && 'text-muted-foreground'
+                tab !== 'communities' && 'text-muted-foreground',
               )}
             >
               Communities
@@ -395,7 +229,7 @@ const Discover = () => {
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'events' && 'border-b-2 border-primary text-foreground',
-                tab !== 'events' && 'text-muted-foreground'
+                tab !== 'events' && 'text-muted-foreground',
               )}
             >
               Events
@@ -462,7 +296,7 @@ const Discover = () => {
                         <p className="text-xs text-muted-foreground">
                           Search and select interests
                         </p>
-                        
+
                         {/* Selected interests display */}
                         {pendingInterests.length > 0 && (
                           <div className="flex gap-2 flex-wrap mb-2">
@@ -478,26 +312,31 @@ const Discover = () => {
                             ))}
                           </div>
                         )}
-                        
+
                         {/* Interest search input */}
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
                             placeholder="Search interests..."
                             value={interestSearchQuery}
-                            onChange={(e) => setInterestSearchQuery(e.target.value)}
+                            onChange={(e) =>
+                              setInterestSearchQuery(e.target.value)
+                            }
                             className="pl-9"
                           />
                         </div>
-                        
+
                         {/* Filtered interest suggestions */}
                         {interestSearchQuery && (
                           <div className="max-h-40 overflow-y-auto border border-border rounded-md bg-card">
                             {interestOptions
                               .filter(
                                 (interest) =>
-                                  interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
-                                  !pendingInterests.includes(interest)
+                                  interest
+                                    .toLowerCase()
+                                    .includes(
+                                      interestSearchQuery.toLowerCase(),
+                                    ) && !pendingInterests.includes(interest),
                               )
                               .map((interest) => (
                                 <button
@@ -514,8 +353,11 @@ const Discover = () => {
                               ))}
                             {interestOptions.filter(
                               (interest) =>
-                                interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
-                                !pendingInterests.includes(interest)
+                                interest
+                                  .toLowerCase()
+                                  .includes(
+                                    interestSearchQuery.toLowerCase(),
+                                  ) && !pendingInterests.includes(interest),
                             ).length === 0 && (
                               <div className="px-3 py-2 text-sm text-muted-foreground">
                                 No matching interests

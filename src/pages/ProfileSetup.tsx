@@ -1,110 +1,126 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft } from "lucide-react";
-import { ROUTES } from "@/lib/routes";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { ArrowLeft } from 'lucide-react'
+import { ROUTES } from '@/lib/routes'
 
 const ProfileSetup = () => {
-  const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const totalSteps = 4;
-  
+  const navigate = useNavigate()
+  const [step, setStep] = useState(1)
+  const totalSteps = 4
+
   const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    city: "",
-    province: "",
-    bio: "",
+    name: '',
+    age: '',
+    city: '',
+    province: '',
+    bio: '',
     stages: [] as string[],
     interests: [] as string[],
-  });
+  })
 
-  const [customInterest, setCustomInterest] = useState("");
-  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customInterest, setCustomInterest] = useState('')
+  const [showCustomInput, setShowCustomInput] = useState(false)
 
   const interestOptions = [
-    "Sports", "Cooking", "Outdoors", "Fitness", "Gaming", "Music", "Reading", 
-    "Travel", "Tech", "DIY", "Photography", "Art", "Cars", "Parenting", 
-    "Mental Wellness", "Movies", "Coffee", "Home Projects", "Volunteering", 
-    "Board Games", "Faith", "Entrepreneurship", "Pets", "Gardening", 
-    "Podcasts", "Finance", "Writing"
-  ];
+    'Sports',
+    'Cooking',
+    'Outdoors',
+    'Fitness',
+    'Gaming',
+    'Music',
+    'Reading',
+    'Travel',
+    'Tech',
+    'DIY',
+    'Photography',
+    'Art',
+    'Cars',
+    'Parenting',
+    'Mental Wellness',
+    'Movies',
+    'Coffee',
+    'Home Projects',
+    'Volunteering',
+    'Board Games',
+    'Faith',
+    'Entrepreneurship',
+    'Pets',
+    'Gardening',
+    'Podcasts',
+    'Finance',
+    'Writing',
+  ]
 
   const stageOptions = [
-    { label: "Expecting (pregnant/adopting)", value: "Expecting" },
-    { label: "Newborn (0–1 year)", value: "Newborn (0–1 year)" },
-    { label: "Toddler (2–3 years)", value: "Toddler (2–3 years)" },
-    { label: "Preschool (4–5 years)", value: "Preschool (4–5 years)" },
-    { label: "Elementary (6–12 years)", value: "Elementary (6–12 years)" },
-    { label: "Teen (13–17 years)", value: "Teen (13–17 years)" },
-    { label: "Adult (18+ years)", value: "Adult (18+ years)" }
-  ];
+    { label: 'Expecting (pregnant/adopting)', value: 'Expecting' },
+    { label: 'Newborn (0–1 year)', value: 'Newborn (0–1 year)' },
+    { label: 'Toddler (2–3 years)', value: 'Toddler (2–3 years)' },
+    { label: 'Preschool (4–5 years)', value: 'Preschool (4–5 years)' },
+    { label: 'Elementary (6–12 years)', value: 'Elementary (6–12 years)' },
+    { label: 'Teen (13–17 years)', value: 'Teen (13–17 years)' },
+    { label: 'Adult (18+ years)', value: 'Adult (18+ years)' },
+  ]
 
   const toggleInterest = (interest: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       interests: prev.interests.includes(interest)
-        ? prev.interests.filter(i => i !== interest)
-        : [...prev.interests, interest]
-    }));
-  };
+        ? prev.interests.filter((i) => i !== interest)
+        : [...prev.interests, interest],
+    }))
+  }
 
   const toggleStage = (stage: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       stages: prev.stages.includes(stage)
-        ? prev.stages.filter(s => s !== stage)
-        : [...prev.stages, stage]
-    }));
-  };
+        ? prev.stages.filter((s) => s !== stage)
+        : [...prev.stages, stage],
+    }))
+  }
 
-  const handleAddCustomInterest = () => {
-    if (customInterest.trim() && !formData.interests.includes(customInterest.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        interests: [...prev.interests, customInterest.trim()]
-      }));
-      setCustomInterest("");
-      setShowCustomInput(false);
-    }
-  };
+  const handleAddCustomInterest = () => {}
 
   const handleNext = () => {
     if (step < totalSteps) {
-      setStep(step + 1);
+      setStep(step + 1)
     } else {
-      navigate(ROUTES.DISCOVER_DADS);
+      navigate(ROUTES.DISCOVER_DADS)
     }
-  };
+  }
 
   const handleBack = () => {
     if (step > 1) {
-      setStep(step - 1);
+      setStep(step - 1)
     } else {
-      navigate(ROUTES.WELCOME);
+      navigate(ROUTES.WELCOME)
     }
-  };
+  }
 
-  const progress = (step / totalSteps) * 100;
+  const progress = (step / totalSteps) * 100
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-4">
-            <button onClick={handleBack} className="text-muted-foreground">
+            <button
+              onClick={handleBack}
+              className="text-muted-foreground"
+            >
               <ArrowLeft className="w-6 h-6" />
             </button>
             <span className="text-sm font-medium text-muted-foreground">
               Step {step} of {totalSteps}
             </span>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => navigate(ROUTES.DISCOVER_DADS)}
               className="text-muted-foreground hover:text-foreground"
@@ -112,7 +128,10 @@ const ProfileSetup = () => {
               Skip
             </Button>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress
+            value={progress}
+            className="h-2"
+          />
         </div>
       </div>
 
@@ -135,7 +154,9 @@ const ProfileSetup = () => {
                   id="name"
                   placeholder="Your name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="rounded-lg"
                 />
               </div>
@@ -147,7 +168,9 @@ const ProfileSetup = () => {
                   type="number"
                   placeholder="Your age"
                   value={formData.age}
-                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, age: e.target.value })
+                  }
                   className="rounded-lg"
                 />
               </div>
@@ -158,7 +181,9 @@ const ProfileSetup = () => {
                   id="city"
                   placeholder="Your city"
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
                   className="rounded-lg"
                 />
               </div>
@@ -169,7 +194,9 @@ const ProfileSetup = () => {
                   id="province"
                   placeholder="Your province"
                   value={formData.province}
-                  onChange={(e) => setFormData({ ...formData, province: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, province: e.target.value })
+                  }
                   className="rounded-lg"
                 />
               </div>
@@ -197,7 +224,7 @@ const ProfileSetup = () => {
                   value={formData.bio}
                   onChange={(e) => {
                     if (e.target.value.length <= 120) {
-                      setFormData({ ...formData, bio: e.target.value });
+                      setFormData({ ...formData, bio: e.target.value })
                     }
                   }}
                   className="rounded-lg min-h-32"
@@ -215,7 +242,11 @@ const ProfileSetup = () => {
                   {stageOptions.map((stage) => (
                     <Badge
                       key={stage.value}
-                      variant={formData.stages.includes(stage.value) ? "default" : "soft"}
+                      variant={
+                        formData.stages.includes(stage.value)
+                          ? 'default'
+                          : 'soft'
+                      }
                       className="cursor-pointer rounded-full"
                       onClick={() => toggleStage(stage.value)}
                     >
@@ -243,22 +274,26 @@ const ProfileSetup = () => {
               {interestOptions.map((interest) => (
                 <Badge
                   key={interest}
-                  variant={formData.interests.includes(interest) ? "default" : "soft"}
+                  variant={
+                    formData.interests.includes(interest) ? 'default' : 'soft'
+                  }
                   className="cursor-pointer rounded-full"
                   onClick={() => toggleInterest(interest)}
                 >
                   {interest}
                 </Badge>
               ))}
-              {formData.interests.filter(i => !interestOptions.includes(i)).map((interest) => (
-                <Badge
-                  key={interest}
-                  variant="default"
-                  className="cursor-pointer rounded-full bg-gradient-gold"
-                >
-                  {interest}
-                </Badge>
-              ))}
+              {formData.interests
+                .filter((i) => !interestOptions.includes(i))
+                .map((interest) => (
+                  <Badge
+                    key={interest}
+                    variant="default"
+                    className="cursor-pointer rounded-full bg-gradient-gold"
+                  >
+                    {interest}
+                  </Badge>
+                ))}
               {!showCustomInput ? (
                 <Badge
                   variant="outline"
@@ -273,7 +308,9 @@ const ProfileSetup = () => {
                     placeholder="Type your interest..."
                     value={customInterest}
                     onChange={(e) => setCustomInterest(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddCustomInterest()}
+                    onKeyPress={(e) =>
+                      e.key === 'Enter' && handleAddCustomInterest()
+                    }
                     className="rounded-lg"
                     autoFocus
                   />
@@ -320,11 +357,11 @@ const ProfileSetup = () => {
           className="w-full rounded-full bg-gradient-gold font-semibold"
           onClick={handleNext}
         >
-          {step === totalSteps ? "Complete Profile" : "Continue"}
+          {step === totalSteps ? 'Complete Profile' : 'Continue'}
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ProfileSetup;
+export default ProfileSetup

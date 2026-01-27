@@ -2,8 +2,16 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { ArrowLeft, Calendar, Clock, MapPin, Users, User, Mail, Phone } from 'lucide-react'
-import { useGroups } from '@/contexts/GroupsContext'
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  User,
+  Mail,
+  Phone,
+} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { getEventById } from '@/data/events'
 import logo from '@/assets/logo.png'
@@ -15,38 +23,20 @@ const EventDetail = () => {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { registeredEvents, registerEvent, unregisterEvent } = useGroups()
 
-  const from = searchParams.get('from') as 'discover' | 'groups' | null
+  const registeredEvents = []
+
+  const from = searchParams.get('from') || 'groups'
+
+  const registerEvent = (eventId: number) => {}
+  const unregisterEvent = (eventId: number) => {}
 
   const event = eventId ? getEventById(parseInt(eventId)) : undefined
   const isRegistered = event ? registeredEvents.includes(event.id) : false
 
-  const handleBack = () => {
-    if (from === 'groups') {
-      navigate(ROUTES.GROUPS_EVENTS)
-    } else {
-      navigate(ROUTES.DISCOVER_EVENTS)
-    }
-  }
+  const handleBack = () => {}
 
-  const handleRegisterToggle = () => {
-    if (!event) return
-
-    if (isRegistered) {
-      unregisterEvent(event.id)
-      toast({
-        title: 'Unregistered from event',
-        description: `You've unregistered from ${event.title}.`,
-      })
-    } else {
-      registerEvent(event.id)
-      toast({
-        title: 'Registered for event! 🎉',
-        description: `You've registered for ${event.title}.`,
-      })
-    }
-  }
+  const handleRegisterToggle = () => {}
 
   if (!event) {
     return (
@@ -62,8 +52,14 @@ const EventDetail = () => {
           </h1>
         </div>
         <div className="max-w-md mx-auto px-6 py-6 text-center">
-          <p className="text-muted-foreground mb-4">This event could not be found.</p>
-          <Button onClick={handleBack} variant="outline" className="rounded-full">
+          <p className="text-muted-foreground mb-4">
+            This event could not be found.
+          </p>
+          <Button
+            onClick={handleBack}
+            variant="outline"
+            className="rounded-full"
+          >
             Go Back
           </Button>
         </div>
@@ -103,17 +99,15 @@ const EventDetail = () => {
                 <h2 className="text-xl font-heading font-bold text-foreground">
                   {event.title}
                 </h2>
-                <Badge 
+                <Badge
                   variant="outline"
                   className="shrink-0"
                 >
                   {event.type}
                 </Badge>
               </div>
-              
-              <p className="text-muted-foreground">
-                {event.description}
-              </p>
+
+              <p className="text-muted-foreground">{event.description}</p>
             </div>
 
             {/* Event Details */}
@@ -122,36 +116,44 @@ const EventDetail = () => {
                 <Calendar className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-xs text-muted-foreground">Date</p>
-                  <p className="text-sm font-medium text-foreground">{event.date}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {event.date}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-xs text-muted-foreground">Time</p>
-                  <p className="text-sm font-medium text-foreground">{event.time}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {event.time}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-xs text-muted-foreground">Location</p>
-                  <p className="text-sm font-medium text-foreground">{event.location}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {event.location}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-3">
                 <User className="w-5 h-5 text-primary mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-xs text-muted-foreground">Hosted by</p>
-                  <p className="text-sm font-medium text-foreground">{event.host}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {event.host}
+                  </p>
                   {(event.hostEmail || event.hostPhone) && (
                     <div className="pt-1 space-y-1">
                       {event.hostEmail && (
-                        <a 
-                          href={`mailto:${event.hostEmail}`} 
+                        <a
+                          href={`mailto:${event.hostEmail}`}
                           className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
                         >
                           <Mail className="w-3.5 h-3.5" />
@@ -159,8 +161,8 @@ const EventDetail = () => {
                         </a>
                       )}
                       {event.hostPhone && (
-                        <a 
-                          href={`tel:${event.hostPhone}`} 
+                        <a
+                          href={`tel:${event.hostPhone}`}
                           className="flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors"
                         >
                           <Phone className="w-3.5 h-3.5" />
@@ -176,7 +178,9 @@ const EventDetail = () => {
             {/* Price and Attendance */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold text-foreground">{event.price}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {event.price}
+                </p>
                 <p className="text-xs text-muted-foreground">Entry fee</p>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">

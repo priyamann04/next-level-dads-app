@@ -10,8 +10,7 @@ import { ROUTES } from '@/lib/routes'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 
-// Shared dad data - in a real app this would come from a data store/API
-const dadsData: Record<string, {
+interface Dad {
   id: string
   name: string
   age: number
@@ -21,52 +20,10 @@ const dadsData: Record<string, {
   bio: string
   interests: string[]
   avatarUrl: string
-}> = {
-  'dad-james': {
-    id: 'dad-james',
-    name: 'James Martinez',
-    age: 32,
-    city: 'Vancouver',
-    province: 'BC',
-    stage: 'Toddler (2–3 years)',
-    bio: 'Weekend warrior dad who loves trail running and teaching my little one about nature.',
-    interests: ['Fitness', 'Cooking', 'Outdoors'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  'dad-david': {
-    id: 'dad-david',
-    name: 'David Chen',
-    age: 38,
-    city: 'Toronto',
-    province: 'ON',
-    stage: 'Elementary (6–12 years)',
-    bio: 'Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.',
-    interests: ['Tech', 'Sports', 'Gaming'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  'dad-marcus': {
-    id: 'dad-marcus',
-    name: 'Marcus Johnson',
-    age: 35,
-    city: 'Calgary',
-    province: 'AB',
-    stage: 'Preschool (4–5 years)',
-    bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
-    interests: ['Music', 'Photography', 'Art'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  'dad-steve': {
-    id: 'dad-steve',
-    name: 'Steve Williams',
-    age: 40,
-    city: 'Montréal',
-    province: 'QC',
-    stage: 'Teen (13–17 years)',
-    bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
-    interests: ['Outdoors', 'Sports', 'Travel'],
-    avatarUrl: avatarDefaultGrey,
-  },
 }
+
+// Shared dad data - in a real app this would come from a data store/API
+const dadsData: Record<string, Dad> = {}
 
 const DadDetail = () => {
   const { dadId } = useParams<{ dadId: string }>()
@@ -109,22 +66,13 @@ const DadDetail = () => {
     )
   }
 
-  const initials = dad.name.split(' ').map(n => n[0]).join('').toUpperCase()
+  const initials = dad.name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
 
-  const handleConnect = () => {
-    setIsRequested(!isRequested)
-    if (!isRequested) {
-      toast({
-        title: 'Connection sent! 🎉',
-        description: `Your connection request was sent to ${dad.name}.`,
-      })
-    } else {
-      toast({
-        title: 'Request cancelled',
-        description: `Your connection request to ${dad.name} was cancelled.`,
-      })
-    }
-  }
+  const handleConnect = () => {}
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -161,8 +109,8 @@ const DadDetail = () => {
             {/* Avatar and basic info */}
             <div className="flex items-start gap-4">
               {dad.avatarUrl ? (
-                <img 
-                  src={dad.avatarUrl} 
+                <img
+                  src={dad.avatarUrl}
                   alt={dad.name}
                   className="w-24 h-24 rounded-lg object-cover flex-shrink-0 aspect-square"
                 />
@@ -171,16 +119,21 @@ const DadDetail = () => {
                   {initials}
                 </div>
               )}
-              
+
               <div className="flex-1 min-w-0">
                 <h2 className="text-xl font-heading font-semibold text-foreground">
                   {dad.name}, {dad.age}
                 </h2>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                   <MapPin className="w-4 h-4" />
-                  <span>{dad.city}, {dad.province}</span>
+                  <span>
+                    {dad.city}, {dad.province}
+                  </span>
                 </div>
-                <Badge variant="soft" className="rounded-full mt-2">
+                <Badge
+                  variant="soft"
+                  className="rounded-full mt-2"
+                >
                   {dad.stage}
                 </Badge>
               </div>
@@ -193,15 +146,17 @@ const DadDetail = () => {
                 {dad.bio}
               </p>
             </div>
-            
+
             {/* Interests */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-foreground">Interests</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                Interests
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {dad.interests.map((interest) => (
-                  <Badge 
-                    key={interest} 
-                    variant="outline" 
+                  <Badge
+                    key={interest}
+                    variant="outline"
                     className="rounded-full"
                     style={{ borderColor: '#D8A24A', color: '#D8A24A' }}
                   >
@@ -210,7 +165,7 @@ const DadDetail = () => {
                 ))}
               </div>
             </div>
-            
+
             {/* Connect button */}
             <Button
               className="w-full rounded-full font-semibold mt-4"

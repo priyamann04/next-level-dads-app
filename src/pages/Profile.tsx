@@ -10,346 +10,56 @@ import logo from '@/assets/logo.png'
 import { ROUTES, communityDetail } from '@/lib/routes'
 import { useToast } from '@/hooks/use-toast'
 
+interface Profile {
+  id: string
+  name: string
+  age: number
+  city: string
+  province: string
+  bio: string
+  stages: string[]
+  interests: string[]
+  avatar: string
+  stats?: {
+    connections: number
+    communities: number
+    events: number
+  }
+}
+
 const Profile = () => {
   const navigate = useNavigate()
   const { profileId } = useParams<{ profileId: string }>()
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
 
-  const handleShareProfile = async () => {
-    // Generate a shareable link using the user's profile ID
-    const profileUrl = `${window.location.origin}/profiles/own`
-    
-    try {
-      await navigator.clipboard.writeText(profileUrl)
-      toast({
-        title: "Link copied!",
-        description: "Your profile link has been copied to clipboard.",
-      })
-    } catch (err) {
-      // Fallback for browsers that don't support clipboard API
-      toast({
-        title: "Share your profile",
-        description: profileUrl,
-      })
-    }
-  }
+  const handleShareProfile = async () => {}
   const from = searchParams.get('from')
   const communityId = searchParams.get('communityId')
   // If no ID in URL, we're viewing our own profile
   const isOwnProfile = !profileId || profileId === '0'
 
   // Mock profiles data
-  const profiles: { [key: string]: any } = {
-    own: {
-      name: 'John',
-      age: 36,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Father of two amazing kids. Love staying active, cooking, and connecting with other dads. Always looking to learn and grow in this journey.',
-      stages: ['Elementary (6-12 years)', 'Teen (13-17 years)'],
-      interests: ['Cooking', 'Fitness', 'Outdoors', 'Tech'],
-      avatar: avatarDefaultGrey,
-      stats: {
-        connections: 12,
-        communities: 4,
-        events: 8,
-      },
-    },
-    'dad-james': {
-      name: 'James Martinez',
-      age: 32,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Weekend warrior dad who loves trail running and teaching my little one about nature.',
-      stages: ['Toddler (2-3 years)'],
-      interests: ['Fitness', 'Cooking', 'Outdoors'],
-      avatar: avatarDefaultGrey,
-    },
-    'dad-david': {
-      name: 'David Chen',
-      age: 38,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Tech', 'Sports', 'Gaming'],
-      avatar: avatarDefaultGrey,
-    },
-    'dad-marcus': {
-      name: 'Marcus Johnson',
-      age: 35,
-      city: 'Calgary',
-      province: 'AB',
-      bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
-      stages: ['Preschool (4-5 years)'],
-      interests: ['Music', 'Photography', 'Art'],
-      avatar: avatarDefaultGrey,
-    },
-    'dad-steve': {
-      name: 'Steve Williams',
-      age: 40,
-      city: 'Montréal',
-      province: 'QC',
-      bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
-      stages: ['Teen (13-17 years)'],
-      interests: ['Outdoors', 'Sports', 'Travel'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-michael': {
-      name: 'Michael Thompson',
-      age: 34,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Love getting outside with my boys and exploring new parks.',
-      stages: ['Toddler (2-3 years)'],
-      interests: ['Outdoors', 'Fitness', 'Cooking'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-robert': {
-      name: 'Robert Chen',
-      age: 39,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Tech guy who loves cooking and weekend adventures.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Tech', 'Cooking', 'Outdoors'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-anthony': {
-      name: 'Anthony Williams',
-      age: 36,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Fitness enthusiast and amateur photographer.',
-      stages: ['Preschool (4-5 years)'],
-      interests: ['Fitness', 'Photography', 'Art'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-james-outdoor': {
-      name: 'James Martinez',
-      age: 32,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Weekend warrior dad who loves trail running.',
-      stages: ['Toddler (2-3 years)'],
-      interests: ['Outdoors', 'Fitness', 'Sports'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-david-tech': {
-      name: 'David Chen',
-      age: 38,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Tech enthusiast and soccer coach.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Tech', 'Sports', 'Gaming'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-alex': {
-      name: 'Alex Johnson',
-      age: 29,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'New dad navigating parenthood.',
-      stages: ['Newborn (0-1 year)'],
-      interests: ['Reading', 'Tech', 'Music'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-chris': {
-      name: 'Chris Williams',
-      age: 35,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Coach and fitness enthusiast.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Sports', 'Fitness', 'Outdoors'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-daniel': {
-      name: 'Daniel Kim',
-      age: 42,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Photographer and musician.',
-      stages: ['Teen (13-17 years)'],
-      interests: ['Photography', 'Music', 'Art'],
-      avatar: avatarDefaultGrey,
-    },
-    'request-james': {
-      name: 'James Anderson',
-      age: 38,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'New to Toronto and looking to connect with local dads.',
-      stages: ['Preschool (4-5 years)'],
-      interests: ['Fitness', 'Photography', 'Coffee'],
-      avatar: avatarDefaultGrey,
-    },
-    'request-robert': {
-      name: 'Robert Lee',
-      age: 41,
-      city: 'Ottawa',
-      province: 'ON',
-      bio: 'Hockey dad who loves the outdoors and weekend camping trips.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Sports', 'Outdoors', 'Music'],
-      avatar: avatarDefaultGrey,
-    },
-    'request-chris': {
-      name: 'Chris Martinez',
-      age: 36,
-      city: 'Toronto',
-      province: 'ON',
-      bio: 'Entrepreneur and dad of two teens. Always learning something new.',
-      stages: ['Teen (13-17 years)'],
-      interests: ['Business', 'Reading', 'Tech'],
-      avatar: avatarDefaultGrey,
-    },
-    'chat-connection-mike': {
-      name: 'Mike Johnson',
-      age: 35,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Love hiking with my kids and trying out new recipes.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Cooking', 'Sports'],
-      avatar: avatarDefaultGrey,
-    },
-    'chat-connection-david': {
-      name: 'David Chen',
-      age: 42,
-      city: 'Calgary',
-      province: 'AB',
-      bio: 'Tech dad who enjoys gaming and teaching my kids to code.',
-      stages: ['Teen (13-17 years)'],
-      interests: ['Gaming', 'Tech', 'DIY'],
-      avatar: avatarDefaultGrey,
-    },
-    'chat-connection-steve': {
-      name: 'Steve Wilson',
-      age: 40,
-      city: 'Montréal',
-      province: 'QC',
-      bio: 'Outdoor adventure seeker and sports enthusiast.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Sports', 'Travel'],
-      avatar: avatarDefaultGrey,
-    },
-    'match-mike': {
-      name: 'Mike',
-      age: 35,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Love hiking with my kids and trying out new recipes. Always up for a weekend adventure or a good conversation over coffee.',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Cooking', 'Sports'],
-      avatar: avatarDefaultGrey,
-    },
-    'match-david': {
-      name: 'David',
-      age: 42,
-      city: 'Calgary',
-      province: 'AB',
-      bio: 'Tech dad who enjoys gaming and teaching my kids to code. Looking for other dads to share parenting wins and challenges.',
-      stages: ['Teen (13-17 years)'],
-      interests: ['Gaming', 'Tech', 'DIY'],
-      avatar: avatarDefaultGrey,
-    },
-    'match-james': {
-      name: 'James',
-      age: 38,
-      city: 'Halifax',
-      province: 'NS',
-      bio: 'Music lover and amateur photographer. My toddlers keep me busy but I\'d love to connect with dads in the area for playdates.',
-      stages: ['Toddler (2-3 years)'],
-      interests: ['Music', 'Photography', 'Art'],
-      avatar: avatarDefaultGrey,
-    },
-    'match-steve': {
-      name: 'Steve',
-      age: 40,
-      city: 'Montréal',
-      province: 'QC',
-      bio: 'Outdoor adventure seeker and sports enthusiast. Let\'s grab a beer and swap parenting stories!',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Sports', 'Travel'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-mike-priv': {
-      name: 'Mike',
-      age: 35,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Love hiking and cooking',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Cooking', 'Fitness'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-david-priv': {
-      name: 'David',
-      age: 42,
-      city: 'Calgary',
-      province: 'AB',
-      bio: 'Tech dad, gaming enthusiast',
-      stages: ['Elementary (6-12 years)', 'Teen (13-17 years)'],
-      interests: ['Tech', 'Gaming', 'Reading'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-james-priv': {
-      name: 'James',
-      age: 38,
-      city: 'Halifax',
-      province: 'NS',
-      bio: 'Music lover and photographer',
-      stages: ['Toddler (2-3 years)'],
-      interests: ['Music', 'Photography', 'Art'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-mike-pub': {
-      name: 'Mike',
-      age: 35,
-      city: 'Vancouver',
-      province: 'BC',
-      bio: 'Love hiking and cooking',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Cooking', 'Fitness'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-david-pub': {
-      name: 'David',
-      age: 42,
-      city: 'Calgary',
-      province: 'AB',
-      bio: 'Tech dad, gaming enthusiast',
-      stages: ['Elementary (6-12 years)', 'Teen (13-17 years)'],
-      interests: ['Tech', 'Gaming', 'Reading'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-james-pub': {
-      name: 'James',
-      age: 38,
-      city: 'Halifax',
-      province: 'NS',
-      bio: 'Music lover and photographer',
-      stages: ['Toddler (2-3 years)'],
-      interests: ['Music', 'Photography', 'Art'],
-      avatar: avatarDefaultGrey,
-    },
-    'member-steve-pub': {
-      name: 'Steve',
-      age: 40,
-      city: 'Montréal',
-      province: 'QC',
-      bio: 'Outdoor adventure seeker',
-      stages: ['Elementary (6-12 years)'],
-      interests: ['Outdoors', 'Sports', 'Travel'],
-      avatar: avatarDefaultGrey,
+  const profiles: Record<string, Profile> = {}
+
+  const userProfile = {
+    id: '0',
+    name: 'John Doe',
+    age: 35,
+    city: 'Toronto',
+    province: 'ON',
+    bio: 'I am a dedicated father who loves spending time with my kids and connecting with other dads.',
+    stages: ['Newborn', 'Toddler'],
+    interests: ['Parenting', 'Outdoors', 'Cooking'],
+    avatar: avatarDefaultGrey,
+    stats: {
+      connections: 120,
+      communities: 5,
+      events: 12,
     },
   }
 
-  const userProfile = isOwnProfile ? profiles['own'] : (profiles[profileId || 'dad-james'] || profiles['dad-james'])
-  const pendingRequestsCount = 3 // Mock pending requests
+  const pendingRequestsCount = 3
 
   return (
     <div className="min-h-screen bg-background pb-20">

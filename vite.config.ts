@@ -8,11 +8,11 @@ export default defineConfig(({ mode }) => ({
   appType: 'spa',
   server: {
     host: '::',
-    port: 8080,
+    port: 3000,
     allowedHosts: ['.ngrok-free.dev', 'localhost'],
   },
   plugins: [react(), mode === 'development' && componentTagger()].filter(
-    Boolean
+    Boolean,
   ),
   resolve: {
     alias: {

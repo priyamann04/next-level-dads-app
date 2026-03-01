@@ -7,6 +7,10 @@ import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { ROUTES } from '@/lib/routes'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/contexts/AuthContext'
+import axiosPrivate from '@/api/axiosPrivate'
+import { TIMEOUT_LENGTH_MS } from '@/config/constants'
+import { useState } from 'react'
 
 interface UserProfile {
   id: string
@@ -28,8 +32,28 @@ interface UserProfile {
 const MyProfile = () => {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { setAuth } = useAuth()
+  const [loading, setLoading] = useState(false)
 
   const handleShareProfile = async () => {}
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true)
+      await axiosPrivate.post(
+        '/api/auth/logout',
+        {},
+        {
+          timeout: TIMEOUT_LENGTH_MS,
+        },
+      )
+    } catch (err: any) {
+    } finally {
+      setAuth({ user: null, accessToken: null })
+      setLoading(false)
+      navigate(ROUTES.WELCOME)
+    }
+  }
 
   const userProfile: UserProfile = {
     id: '0',
@@ -181,6 +205,7 @@ const MyProfile = () => {
           variant="outline"
           className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
           onClick={() => navigate(ROUTES.EDIT_PROFILE)}
+          disabled={loading}
         >
           <Edit className="w-4 h-4 mr-2" />
           Edit Profile
@@ -190,6 +215,7 @@ const MyProfile = () => {
           variant="outline"
           className="w-full rounded-full border-2 border-primary hover:bg-primary hover:text-primary-foreground"
           onClick={handleShareProfile}
+          disabled={loading}
         >
           <Share2 className="w-4 h-4 mr-2" />
           Share Profile
@@ -198,7 +224,8 @@ const MyProfile = () => {
         <Button
           variant="outline"
           className="w-full rounded-full border-2 border-destructive text-destructive hover:bg-primary hover:text-primary-foreground hover:border-primary"
-          onClick={() => navigate(ROUTES.WELCOME)}
+          onClick={handleLogout}
+          disabled={loading}
         >
           <LogOut className="w-4 h-4 mr-2" />
           Log Out

@@ -4,9 +4,14 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ROUTES } from '@/lib/routes'
+import { AuthProvider } from '@/contexts/AuthContext'
 
-// Pages
 import Welcome from './pages/Welcome'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import VerifyEmail from './pages/VerifyEmail'
 import ProfileSetup from './pages/ProfileSetup'
 import Match from './pages/Match'
 import Chats from './pages/Chats'
@@ -25,39 +30,8 @@ import NotFound from './pages/NotFound'
 
 const queryClient = new QueryClient()
 
-/**
- * Application Route Structure
- *
- * / ........................... Welcome (landing)
- * /setup ...................... Profile Setup (onboarding)
- * /match ...................... Match Screen
- *
- * /discover ................... Redirect to /discover/dads
- * /discover/:tab .............. Discover (dads | communities | events)
- * /discover/dads/:id .......... ProfileDetail (discover context with Connect button)
- *
- * /communities/:communityId ... Community Detail
- * /communities/:communityId/members ... Members
- *
- * /groups ..................... Redirect to /groups/communities
- * /groups/:tab ................ My Groups (communities | events)
- * /groups/:groupId/members .... Members (normalized pattern)
- *
- * /chats ...................... Chats List
- * /chats/individual/:id ....... Chat (individual 1:1)
- * /chats/group/:id ............ Chat (private group)
- * /chats/community/:id ........ Chat (community)
- *
- * /profile .................... MyProfile (own profile with stats, edit, logout)
- * /profiles/:id ............... ProfileDetail (read-only other user view)
- * /connections ................ Connections List
- * /requests ................... Connection Requests
- *
- * /events/:eventId ............ Event Detail
- */
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const AppContent = () => {
+  return (
     <TooltipProvider>
       <Toaster />
       <Sonner />
@@ -67,6 +41,26 @@ const App = () => (
           <Route
             path={ROUTES.WELCOME}
             element={<Welcome />}
+          />
+          <Route
+            path={ROUTES.LOGIN}
+            element={<Login />}
+          />
+          <Route
+            path={ROUTES.REGISTER}
+            element={<Register />}
+          />
+          <Route
+            path={ROUTES.FORGOT_PASSWORD}
+            element={<ForgotPassword />}
+          />
+          <Route
+            path={ROUTES.RESET_PASSWORD}
+            element={<ResetPassword />}
+          />
+          <Route
+            path={ROUTES.VERIFY_EMAIL}
+            element={<VerifyEmail />}
           />
           <Route
             path={ROUTES.SETUP}
@@ -131,7 +125,7 @@ const App = () => (
             element={<Members />}
           />
 
-          {/* Chats (typed routes) */}
+          {/* Chats */}
           <Route
             path={ROUTES.CHATS}
             element={<Chats />}
@@ -179,6 +173,14 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+  )
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   </QueryClientProvider>
 )
 

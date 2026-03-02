@@ -43,3 +43,19 @@ export const STAGE_OPTIONS = [
   { label: 'Teen (13–17 years)', value: 'Teen (13–17 years)' },
   { label: 'Adult (18+ years)', value: 'Adult (18+ years)' },
 ]
+
+export const PROVINCE_OPTIONS = [
+  { label: 'Alberta', value: 'AB' },
+  { label: 'British Columbia', value: 'BC' },
+  { label: 'Manitoba', value: 'MB' },
+  { label: 'New Brunswick', value: 'NB' },
+  { label: 'Newfoundland and Labrador', value: 'NL' },
+  { label: 'Northwest Territories', value: 'NT' },
+  { label: 'Nova Scotia', value: 'NS' },
+  { label: 'Nunavut', value: 'NU' },
+  { label: 'Ontario', value: 'ON' },
+  { label: 'Prince Edward Island', value: 'PE' },
+  { label: 'Quebec', value: 'QC' },
+  { label: 'Saskatchewan', value: 'SK' },
+  { label: 'Yukon', value: 'YT' },
+]

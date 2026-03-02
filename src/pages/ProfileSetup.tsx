@@ -6,6 +6,13 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ArrowLeft } from 'lucide-react'
 import { ROUTES } from '@/lib/routes'
 import {
@@ -13,6 +20,7 @@ import {
   TIMEOUT_LENGTH_MS,
   INTEREST_OPTIONS,
   STAGE_OPTIONS,
+  PROVINCE_OPTIONS,
 } from '@/config/constants'
 import axiosPrivate from '@/api/axiosPrivate'
 import { useAuth } from '@/contexts/AuthContext'
@@ -77,10 +85,15 @@ const ProfileSetup = () => {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (loading) return
     const file = e.target.files?.[0] ?? null
-    setAvatar(file)
-    if (file) {
-      setAvatarPreview(URL.createObjectURL(file))
+    if (!file) return // user cancelled, keep existing selection
+
+    // revoke old preview URL
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview)
     }
+
+    setAvatar(file)
+    setAvatarPreview(URL.createObjectURL(file))
   }
 
   const handleNext = () => {
@@ -90,8 +103,7 @@ const ProfileSetup = () => {
       const name = formData.name.trim()
       const age = formData.age.trim()
       const city = formData.city.trim()
-      const province = formData.province.trim()
-      if (!name || !age || !city || !province) {
+      if (!name || !age || !city || !formData.province) {
         toast({
           title: 'Please fill out all required fields',
           description: 'Name, age, city, and province are required.',
@@ -284,16 +296,30 @@ const ProfileSetup = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="province">Province</Label>
-                <Input
-                  id="province"
-                  placeholder="Your province"
+                <Select
                   value={formData.province}
-                  onChange={(e) =>
-                    setFormData({ ...formData, province: e.target.value })
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, province: value })
                   }
-                  className="rounded-lg"
                   disabled={loading}
-                />
+                >
+                  <SelectTrigger
+                    id="province"
+                    className="rounded-lg"
+                  >
+                    <SelectValue placeholder="Select your province" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PROVINCE_OPTIONS.map((province) => (
+                      <SelectItem
+                        key={province.value}
+                        value={province.value}
+                      >
+                        {province.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -460,7 +486,7 @@ const ProfileSetup = () => {
               </div>
               <input
                 type="file"
-                accept="image/*"
+                accept=".png,.jpg,.jpeg"
                 id="avatar-upload"
                 className="hidden"
                 onChange={handleAvatarChange}
@@ -482,8 +508,17 @@ const ProfileSetup = () => {
                   size="sm"
                   className="text-muted-foreground"
                   onClick={() => {
+                    // revoke old preview URL
+                    if (avatarPreview) {
+                      URL.revokeObjectURL(avatarPreview)
+                    }
                     setAvatar(null)
                     setAvatarPreview(null)
+                    // reset input so the same file can be selected again
+                    const input = document.getElementById(
+                      'avatar-upload',
+                    ) as HTMLInputElement
+                    if (input) input.value = ''
                   }}
                   disabled={loading}
                 >

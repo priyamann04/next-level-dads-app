@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ROUTES } from '@/lib/routes'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { PublicRoute, ProtectedRoute, SetupRoute } from '@/components/RouteWrappers'
 
 import Welcome from './pages/Welcome'
 import Login from './pages/Login'
@@ -37,23 +38,24 @@ const AppContent = () => {
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Auth & Onboarding */}
+          {/* Public Routes - redirect to app if authenticated */}
           <Route
             path={ROUTES.WELCOME}
-            element={<Welcome />}
+            element={<PublicRoute><Welcome /></PublicRoute>}
           />
           <Route
             path={ROUTES.LOGIN}
-            element={<Login />}
+            element={<PublicRoute><Login /></PublicRoute>}
           />
           <Route
             path={ROUTES.REGISTER}
-            element={<Register />}
+            element={<PublicRoute><Register /></PublicRoute>}
           />
           <Route
             path={ROUTES.FORGOT_PASSWORD}
-            element={<ForgotPassword />}
+            element={<PublicRoute><ForgotPassword /></PublicRoute>}
           />
+          {/* Auth utility pages - always accessible regardless of auth state */}
           <Route
             path={ROUTES.RESET_PASSWORD}
             element={<ResetPassword />}
@@ -62,107 +64,101 @@ const AppContent = () => {
             path={ROUTES.VERIFY_EMAIL}
             element={<VerifyEmail />}
           />
+
+          {/* Profile Setup - requires token but no user profile yet */}
           <Route
             path={ROUTES.SETUP}
-            element={<ProfileSetup />}
+            element={<SetupRoute><ProfileSetup /></SetupRoute>}
           />
+
+          {/* Protected Routes - require full authentication */}
           <Route
             path={ROUTES.MATCH}
-            element={<Match />}
+            element={<ProtectedRoute><Match /></ProtectedRoute>}
           />
 
           {/* Discover (tabbed) */}
           <Route
             path={ROUTES.DISCOVER}
-            element={
-              <Navigate
-                to={ROUTES.DISCOVER_DADS}
-                replace
-              />
-            }
+            element={<ProtectedRoute><Navigate to={ROUTES.DISCOVER_DADS} replace /></ProtectedRoute>}
           />
           <Route
             path="/discover/dads/:id"
-            element={<ProfileDetail />}
+            element={<ProtectedRoute><ProfileDetail /></ProtectedRoute>}
           />
           <Route
             path="/discover/:tab"
-            element={<Discover />}
+            element={<ProtectedRoute><Discover /></ProtectedRoute>}
           />
 
           {/* Communities */}
           <Route
             path="/communities/:communityId"
-            element={<CommunityDetail />}
+            element={<ProtectedRoute><CommunityDetail /></ProtectedRoute>}
           />
           <Route
             path="/communities/:communityId/members"
-            element={<Members />}
+            element={<ProtectedRoute><Members /></ProtectedRoute>}
           />
 
           {/* Events */}
           <Route
             path="/events/:eventId"
-            element={<EventDetail />}
+            element={<ProtectedRoute><EventDetail /></ProtectedRoute>}
           />
 
           {/* My Groups (tabbed) */}
           <Route
             path={ROUTES.GROUPS}
-            element={
-              <Navigate
-                to={ROUTES.GROUPS_COMMUNITIES}
-                replace
-              />
-            }
+            element={<ProtectedRoute><Navigate to={ROUTES.GROUPS_COMMUNITIES} replace /></ProtectedRoute>}
           />
           <Route
             path="/groups/:tab"
-            element={<Groups />}
+            element={<ProtectedRoute><Groups /></ProtectedRoute>}
           />
           <Route
             path="/groups/:groupId/members"
-            element={<Members />}
+            element={<ProtectedRoute><Members /></ProtectedRoute>}
           />
 
           {/* Chats */}
           <Route
             path={ROUTES.CHATS}
-            element={<Chats />}
+            element={<ProtectedRoute><Chats /></ProtectedRoute>}
           />
           <Route
             path="/chats/individual/:id"
-            element={<Chat />}
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
           />
           <Route
             path="/chats/group/:id"
-            element={<Chat />}
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
           />
           <Route
             path="/chats/community/:id"
-            element={<Chat />}
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
           />
 
           {/* Profile */}
           <Route
             path={ROUTES.PROFILE}
-            element={<MyProfile />}
+            element={<ProtectedRoute><MyProfile /></ProtectedRoute>}
           />
           <Route
             path={ROUTES.EDIT_PROFILE}
-            element={<EditProfile />}
+            element={<ProtectedRoute><EditProfile /></ProtectedRoute>}
           />
           <Route
             path="/profiles/:id"
-            element={<ProfileDetail />}
+            element={<ProtectedRoute><ProfileDetail /></ProtectedRoute>}
           />
           <Route
             path={ROUTES.CONNECTIONS}
-            element={<Connections />}
+            element={<ProtectedRoute><Connections /></ProtectedRoute>}
           />
           <Route
             path={ROUTES.REQUESTS}
-            element={<Requests />}
+            element={<ProtectedRoute><Requests /></ProtectedRoute>}
           />
 
           {/* Catch-all */}

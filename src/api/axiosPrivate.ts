@@ -32,7 +32,7 @@ axiosPrivate.interceptors.response.use(
       error.config._isRetry = true
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_BACKEND_BASE_URL}/api/auth/refresh`,
+          `${import.meta.env.VITE_BACKEND_BASE_URL || ''}/api/auth/refresh`,
           {},
           { withCredentials: true },
         )

@@ -1,26 +1,11 @@
-import { MapPin } from "lucide-react";
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Card, CardContent } from "./ui/card";
-
-type CardVariant = 'discover' | 'connection' | 'request';
-
-interface DadCardProps {
-  id: string;
-  name: string;
-  age: number;
-  city: string;
-  province: string;
-  childAgeRange: string;
-  bio: string;
-  interests: string[];
-  avatarUrl?: string;
-  onClick?: () => void;
-  variant?: CardVariant;
-  onPrimaryAction?: () => void;
-  onSecondaryAction?: () => void;
-}
+import { MapPin } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
+import { Card, CardContent } from './ui/card'
+import { getStageDisplayLabel } from '@/utils/users'
+import { profileDetail } from '@/lib/routes'
+import type { Profile } from '@/types/users'
 
 const DadCard = ({
   id,
@@ -28,66 +13,147 @@ const DadCard = ({
   age,
   city,
   province,
-  childAgeRange,
-  bio,
+  children,
+  about,
   interests,
-  avatarUrl,
-  onClick,
-  variant = 'discover',
-  onPrimaryAction,
-  onSecondaryAction,
-}: DadCardProps) => {
-  const [isRequested, setIsRequested] = useState(false);
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
+  avatar_url,
+  connection_status,
+  created_at,
+}: Profile) => {
+  const navigate = useNavigate()
 
-  const handlePrimaryAction = () => {
-    if (variant === 'discover') {
-      setIsRequested(!isRequested);
+  const initials = name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+
+  const handleCardClick = () => {
+    navigate(profileDetail(id))
+  }
+
+  // Connection action handlers (stubs for now)
+  const handleConnect = () => {
+    // TODO: POST /api/connections/
+  }
+
+  const handleCancelRequest = () => {
+    // TODO: DELETE /api/connections/:id
+  }
+
+  const handleAccept = () => {
+    // TODO: PATCH /api/connections/:id
+  }
+
+  const handleIgnore = () => {
+    // TODO: DELETE /api/connections/:id
+  }
+
+  const handleChat = () => {
+    // TODO: navigate to chat
+  }
+
+  const handleUnconnect = () => {
+    // TODO: DELETE /api/connections/:id
+  }
+
+  const renderButtons = () => {
+    if (connection_status === 'blocked') return null
+
+    if (connection_status === 'connected') {
+      return (
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            style={{ backgroundColor: '#D8A24A' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleChat()
+            }}
+          >
+            Chat
+          </Button>
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleUnconnect()
+            }}
+          >
+            Unconnect
+          </Button>
+        </div>
+      )
     }
-    onPrimaryAction?.();
-  };
 
-  const getPrimaryButtonLabel = () => {
-    switch (variant) {
-      case 'discover':
-        return isRequested ? 'Requested ✓' : 'Connect';
-      case 'connection':
-        return 'Chat';
-      case 'request':
-        return 'Accept';
+    if (connection_status === 'pending_incoming') {
+      return (
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            style={{ backgroundColor: '#D8A24A' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleAccept()
+            }}
+          >
+            Accept
+          </Button>
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleIgnore()
+            }}
+          >
+            Ignore
+          </Button>
+        </div>
+      )
     }
-  };
 
-  const getSecondaryButtonLabel = () => {
-    switch (variant) {
-      case 'connection':
-        return 'Unconnect';
-      case 'request':
-        return 'Ignore';
-      default:
-        return '';
+    if (connection_status === 'pending_outgoing') {
+      return (
+        <Button
+          className="w-full rounded-full font-semibold"
+          style={{ backgroundColor: '#9ca3af' }}
+          onClick={(e) => {
+            e.stopPropagation()
+            handleCancelRequest()
+          }}
+        >
+          Requested
+        </Button>
+      )
     }
-  };
 
-  const getPrimaryButtonStyle = () => {
-    if (variant === 'discover' && isRequested) {
-      return { backgroundColor: '#9ca3af' };
-    }
-    return { backgroundColor: '#D8A24A' };
-  };
-
-  const hasSecondaryAction = variant === 'connection' || variant === 'request';
+    // connection_status === null
+    return (
+      <Button
+        className="w-full rounded-full font-semibold"
+        style={{ backgroundColor: '#D8A24A' }}
+        onClick={(e) => {
+          e.stopPropagation()
+          handleConnect()
+        }}
+      >
+        Connect
+      </Button>
+    )
+  }
 
   return (
     <Card
-      className={`overflow-hidden shadow-md${onClick ? ' cursor-pointer' : ''}`}
-      onClick={onClick}
+      className="overflow-hidden shadow-md cursor-pointer"
+      onClick={handleCardClick}
     >
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start gap-3">
-          {avatarUrl ? (
+          {avatar_url ? (
             <img
-              src={avatarUrl}
+              src={avatar_url}
               alt={name}
               className="w-20 h-20 rounded-lg object-cover flex-shrink-0 aspect-square"
             />
@@ -103,17 +169,25 @@ const DadCard = ({
             </h3>
             <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
               <MapPin className="w-3 h-3" />
-              <span>{city}, {province}</span>
+              <span>
+                {city}, {province}
+              </span>
             </div>
-            <Badge variant="soft" className="rounded-full mt-1.5 text-xs">
-              {childAgeRange}
-            </Badge>
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {children.map((child) => (
+                <Badge
+                  key={child}
+                  variant="soft"
+                  className="rounded-full text-xs"
+                >
+                  {getStageDisplayLabel(child)}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
 
-        <p className="text-foreground text-sm leading-relaxed">
-          {bio}
-        </p>
+        <p className="text-foreground text-sm leading-relaxed">{about}</p>
 
         <div className="flex flex-wrap gap-1.5">
           {interests.map((interest) => (
@@ -128,44 +202,10 @@ const DadCard = ({
           ))}
         </div>
 
-        {hasSecondaryAction ? (
-          <div className="flex gap-2">
-            <Button
-              className="flex-1 rounded-full font-semibold"
-              style={getPrimaryButtonStyle()}
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePrimaryAction();
-              }}
-            >
-              {getPrimaryButtonLabel()}
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 rounded-full font-semibold"
-              onClick={(e) => {
-                e.stopPropagation();
-                onSecondaryAction?.();
-              }}
-            >
-              {getSecondaryButtonLabel()}
-            </Button>
-          </div>
-        ) : (
-          <Button
-            className="w-full rounded-full font-semibold"
-            style={getPrimaryButtonStyle()}
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePrimaryAction();
-            }}
-          >
-            {getPrimaryButtonLabel()}
-          </Button>
-        )}
+        {renderButtons()}
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default DadCard;
+export default DadCard

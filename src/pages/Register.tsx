@@ -11,6 +11,7 @@ import axiosPublic from '@/api/axiosPublic'
 import { MIN_PASSWORD_LENGTH } from '@/config/constants'
 import validator from 'validator'
 import { TIMEOUT_LENGTH_MS } from '@/config/constants'
+import { isStrongPassword } from '@/utils/auth'
 
 const Register = () => {
   const navigate = useNavigate()
@@ -50,15 +51,7 @@ const Register = () => {
       })
       return
     }
-    if (
-      !validator.isStrongPassword(password, {
-        minLength: MIN_PASSWORD_LENGTH,
-        minUppercase: 1,
-        minLowercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-      })
-    ) {
+    if (!isStrongPassword(password)) {
       toast({
         title: 'Weak password',
         description: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long and include uppercase letters, lowercase letters, numbers, and special characters.`,

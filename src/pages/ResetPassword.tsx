@@ -8,8 +8,8 @@ import logo from '@/assets/logo.png'
 import { ROUTES } from '@/lib/routes'
 import { useToast } from '@/components/ui/use-toast'
 import { MIN_PASSWORD_LENGTH } from '@/config/constants'
-import validator from 'validator'
 import { supabase } from '@/lib/supabase'
+import { isStrongPassword } from '@/utils/auth'
 
 const ResetPassword = () => {
   const navigate = useNavigate()
@@ -39,15 +39,7 @@ const ResetPassword = () => {
       })
       return
     }
-    if (
-      !validator.isStrongPassword(newPassword, {
-        minLength: MIN_PASSWORD_LENGTH,
-        minUppercase: 1,
-        minLowercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-      })
-    ) {
+    if (!isStrongPassword(newPassword)) {
       toast({
         title: 'Weak password',
         description: `Password must be at least ${MIN_PASSWORD_LENGTH} characters long and include uppercase letters, lowercase letters, numbers, and special characters.`,

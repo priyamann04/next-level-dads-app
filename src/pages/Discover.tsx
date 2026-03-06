@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
@@ -7,7 +8,7 @@ import EventCard from '@/components/EventCard'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { RefreshCw, Search, SlidersHorizontal } from 'lucide-react'
+import { RefreshCw, Search, SlidersHorizontal, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   Sheet,
@@ -17,85 +18,51 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
-import { ROUTES, communityChat, dadDetail } from '@/lib/routes'
-import { events as sharedEvents } from '@/data/events'
+import { ROUTES } from '@/lib/routes'
+import axiosPrivate from '@/api/axiosPrivate'
+import {
+  TIMEOUT_LENGTH_MS,
+  DISCOVER_PROFILES_PAGE_LIMIT,
+  DISCOVER_DADS_FILTERS_AGE_RANGES,
+} from '@/config/constants'
+import { Profile, DiscoverDadsFilters, DiscoverDadsCursor } from '@/types/users'
+import { STAGE_OPTIONS, PROVINCE_OPTIONS } from '@/config/constants'
 
-// Helper data
-const stageOptions = [
-  'Expecting',
-  'Newborn (0–1 year)',
-  'Toddler (2–3 years)',
-  'Preschool (4–5 years)',
-  'Elementary (6–12 years)',
-  'Teen (13–17 years)',
-  'Adult (18+ years)',
-]
-const interestOptions = [
-  'Sports',
-  'Cooking',
-  'Outdoors',
-  'Fitness',
-  'Gaming',
-  'Music',
-  'Reading',
-  'Travel',
-  'Tech',
-  'DIY',
-  'Photography',
-  'Art',
-  'Cars',
-  'Parenting',
-  'Mental Wellness',
-  'Movies',
-  'Coffee',
-  'Home Projects',
-  'Volunteering',
-  'Board Games',
-  'Faith',
-  'Entrepreneurship',
-  'Pets',
-  'Gardening',
-  'Podcasts',
-  'Finance',
-  'Writing',
-]
-const provinces = [
-  'AB', // Alberta
-  'BC', // British Columbia
-  'MB', // Manitoba
-  'NB', // New Brunswick
-  'NL', // Newfoundland and Labrador
-  'NS', // Nova Scotia
-  'NT', // Northwest Territories
-  'NU', // Nunavut
-  'ON', // Ontario
-  'PE', // Prince Edward Island
-  'QC', // Quebec
-  'SK', // Saskatchewan
-  'YT', // Yukon
-]
-const ageRanges = [
-  'all',
-  'Under 25',
-  '25-29',
-  '30-34',
-  '35-39',
-  '40-44',
-  '45-49',
-  '50-59',
-  '60+',
-]
+async function fetchDiscoverProfiles(
+  filters: DiscoverDadsFilters,
+  cursor?: DiscoverDadsCursor,
+): Promise<Profile[]> {
+  const params = new URLSearchParams()
+  filters.interests.forEach((i) => params.append('interests', i))
+  filters.children_age_ranges.forEach((r) =>
+    params.append('children_age_ranges', r),
+  )
+  filters.provinces.forEach((p) => params.append('provinces', p))
+  filters.age_ranges.forEach((r) => params.append('age_ranges', r))
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_created_at', cursor.cursor_created_at)
+  }
+  const res = await axiosPrivate.get<Profile[]>('/api/users/', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
-const dads = []
+async function fetchInterests(): Promise<string[]> {
+  const res = await axiosPrivate.get<string[]>('/api/interests/', {
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
 const communities = []
 
 const Discover = () => {
   const { toast } = useToast()
-  const navigate = useNavigate()
   const { tab = 'dads' } = useParams<{ tab: string }>()
 
   const [eventFilter, setEventFilter] = useState<'all' | 'virtual' | 'local'>(
@@ -118,6 +85,69 @@ const Discover = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
+  // build filters
+  const filters: DiscoverDadsFilters = useMemo(
+    () => ({
+      interests: appliedInterests,
+      children_age_ranges: appliedChildrenAges,
+      provinces: appliedLocations,
+      age_ranges: appliedDadAges,
+    }),
+    [appliedInterests, appliedChildrenAges, appliedLocations, appliedDadAges],
+  )
+
+  // fetch discover profiles
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['discover', 'profiles', filters],
+    queryFn: ({ pageParam }) => fetchDiscoverProfiles(filters, pageParam),
+    initialPageParam: undefined as DiscoverDadsCursor | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < DISCOVER_PROFILES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_created_at: lastItem.created_at,
+      }
+    },
+  })
+
+  // fetch interests
+  const { data: interestOptions = [] } = useQuery({
+    queryKey: ['interests'],
+    queryFn: fetchInterests,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const profiles = useMemo(() => data?.pages.flat() ?? [], [data])
+
+  // infinite scroll sentinel
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
     setPendingChildrenAges((prev) =>
@@ -138,6 +168,7 @@ const Discover = () => {
         : [...prev, location],
     )
   }
+
   const togglePendingDadAge = (ageRange: string) => {
     setPendingDadAges((prev) =>
       prev.includes(ageRange)
@@ -172,13 +203,11 @@ const Discover = () => {
 
   const handleJoinEvent = (eventId: number, title: string) => {}
 
-  const handleConnect = (name: string) => {}
-
-  const handleRefresh = () => {}
+  const handleRefresh = () => {
+    refetch()
+  }
 
   // Filter lists
-  const filteredDads = []
-
   const filteredCommunities = []
 
   const filteredEvents = []
@@ -272,18 +301,20 @@ const Discover = () => {
                           Select all that apply
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {stageOptions.map((stage) => (
+                          {STAGE_OPTIONS.map((stage) => (
                             <Badge
-                              key={stage}
+                              key={stage.value}
                               variant={
-                                pendingChildrenAges.includes(stage)
+                                pendingChildrenAges.includes(stage.value)
                                   ? 'default'
                                   : 'outline'
                               }
                               className="cursor-pointer rounded-full"
-                              onClick={() => togglePendingChildrenAge(stage)}
+                              onClick={() =>
+                                togglePendingChildrenAge(stage.value)
+                              }
                             >
-                              {stage}
+                              {stage.label}
                             </Badge>
                           ))}
                         </div>
@@ -375,18 +406,20 @@ const Discover = () => {
                           Select all that apply
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {provinces.map((province) => (
+                          {PROVINCE_OPTIONS.map((province) => (
                             <Badge
-                              key={province}
+                              key={province.value}
                               variant={
-                                pendingLocations.includes(province)
+                                pendingLocations.includes(province.value)
                                   ? 'default'
                                   : 'outline'
                               }
                               className="cursor-pointer rounded-full"
-                              onClick={() => togglePendingLocation(province)}
+                              onClick={() =>
+                                togglePendingLocation(province.value)
+                              }
                             >
-                              {province}
+                              {province.label}
                             </Badge>
                           ))}
                         </div>
@@ -400,7 +433,7 @@ const Discover = () => {
                           Select all that apply
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {ageRanges.slice(1).map((range) => (
+                          {DISCOVER_DADS_FILTERS_AGE_RANGES.map((range) => (
                             <Badge
                               key={range}
                               variant={
@@ -438,23 +471,34 @@ const Discover = () => {
               </div>
 
               <div className="space-y-4">
-                {filteredDads.length > 0 ? (
-                  filteredDads.map((dad) => (
-                    <DadCard
-                      key={dad.id}
-                      id={dad.id}
-                      name={dad.name}
-                      age={dad.age}
-                      city={dad.city}
-                      province={dad.province}
-                      childAgeRange={dad.stage}
-                      bio={dad.bio}
-                      interests={dad.interests}
-                      avatarUrl={dad.avatarUrl}
-                      onPrimaryAction={() => handleConnect(dad.name)}
-                      onClick={() => navigate(dadDetail(dad.id))}
+                {isLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : isError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load profiles. Please try again.
+                    </p>
+                  </div>
+                ) : profiles.length > 0 ? (
+                  <>
+                    {profiles.map((profile) => (
+                      <DadCard
+                        key={profile.id}
+                        {...profile}
+                      />
+                    ))}
+                    <div
+                      ref={sentinelRef}
+                      className="h-4"
                     />
-                  ))
+                    {isFetchingNextPage && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">

@@ -36,13 +36,17 @@ export const INTEREST_OPTIONS = [
 
 export const STAGE_OPTIONS = [
   { label: 'Expecting (pregnant/adopting)', value: 'Expecting' },
-  { label: 'Newborn (0–1 year)', value: 'Newborn (0–1 year)' },
-  { label: 'Toddler (2–3 years)', value: 'Toddler (2–3 years)' },
-  { label: 'Preschool (4–5 years)', value: 'Preschool (4–5 years)' },
-  { label: 'Elementary (6–12 years)', value: 'Elementary (6–12 years)' },
-  { label: 'Teen (13–17 years)', value: 'Teen (13–17 years)' },
-  { label: 'Adult (18+ years)', value: 'Adult (18+ years)' },
+  { label: 'Newborn (0–1 year)', value: 'Newborn' },
+  { label: 'Toddler (2–3 years)', value: 'Toddler' },
+  { label: 'Preschool (4–5 years)', value: 'Preschool' },
+  { label: 'Elementary (6–12 years)', value: 'Elementary' },
+  { label: 'Teen (13–17 years)', value: 'Teen' },
+  { label: 'Adult (18+ years)', value: 'Adult' },
 ]
+
+export const STAGE_DISPLAY_MAP: Record<string, string> = Object.fromEntries(
+  STAGE_OPTIONS.map(({ label, value }) => [value, label]),
+)
 
 export const PROVINCE_OPTIONS = [
   { label: 'Alberta', value: 'AB' },
@@ -58,4 +62,17 @@ export const PROVINCE_OPTIONS = [
   { label: 'Quebec', value: 'QC' },
   { label: 'Saskatchewan', value: 'SK' },
   { label: 'Yukon', value: 'YT' },
+]
+
+export const DISCOVER_PROFILES_PAGE_LIMIT = 20
+
+export const DISCOVER_DADS_FILTERS_AGE_RANGES = [
+  'Under 25',
+  '25-29',
+  '30-34',
+  '35-39',
+  '40-44',
+  '45-49',
+  '50-59',
+  '60+',
 ]

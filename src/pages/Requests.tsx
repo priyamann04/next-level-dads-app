@@ -5,30 +5,14 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import DadCard from '@/components/DadCard'
-import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
-import { ROUTES, profileDetail } from '@/lib/routes'
+import { ROUTES } from '@/lib/routes'
+import { Profile } from '@/types/users'
 
-interface ConnectionRequest {
-  id: string
-  name: string
-  age: number
-  city: string
-  province: string
-  childAgeRange: string
-  bio: string
-  interests: string[]
-  avatarUrl: string
-}
-
-const initialRequests: ConnectionRequest[] = []
+const initialRequests: Profile[] = []
 
 const Requests = () => {
   const navigate = useNavigate()
   const [requests, setRequests] = useState(initialRequests)
-
-  const handleAccept = (id: string, name: string) => {}
-
-  const handleIgnore = (id: string, name: string) => {}
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -60,19 +44,7 @@ const Requests = () => {
           requests.map((request) => (
             <DadCard
               key={request.id}
-              id={request.id}
-              name={request.name}
-              age={request.age}
-              city={request.city}
-              province={request.province}
-              childAgeRange={request.childAgeRange}
-              bio={request.bio}
-              interests={request.interests}
-              avatarUrl={request.avatarUrl}
-              variant="request"
-              onPrimaryAction={() => handleAccept(request.id, request.name)}
-              onSecondaryAction={() => handleIgnore(request.id, request.name)}
-              onClick={() => navigate(profileDetail(request.id))}
+              {...request}
             />
           ))
         ) : (

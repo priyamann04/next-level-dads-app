@@ -5,30 +5,14 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import DadCard from '@/components/DadCard'
-import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
-import { ROUTES, profileDetail } from '@/lib/routes'
+import { ROUTES } from '@/lib/routes'
+import { Profile } from '@/types/users'
 
-interface Connection {
-  id: string
-  name: string
-  age: number
-  city: string
-  province: string
-  childAgeRange: string
-  bio: string
-  interests: string[]
-  avatarUrl: string
-}
-
-const initialConnections: Connection[] = []
+const initialConnections: Profile[] = []
 
 const Connections = () => {
   const navigate = useNavigate()
   const [connections, setConnections] = useState(initialConnections)
-
-  const handleChat = (id: string) => {}
-
-  const handleUnconnect = (id: string, name: string) => {}
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -60,19 +44,7 @@ const Connections = () => {
           connections.map((connection) => (
             <DadCard
               key={connection.id}
-              id={connection.id}
-              name={connection.name}
-              age={connection.age}
-              city={connection.city}
-              province={connection.province}
-              childAgeRange={connection.childAgeRange}
-              bio={connection.bio}
-              interests={connection.interests}
-              avatarUrl={connection.avatarUrl}
-              variant="connection"
-              onPrimaryAction={() => handleChat(connection.id)}
-              onSecondaryAction={() => handleUnconnect(connection.id, connection.name)}
-              onClick={() => navigate(profileDetail(connection.id))}
+              {...connection}
             />
           ))
         ) : (

@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -6,34 +8,28 @@ import { Edit, MapPin, Calendar, LogOut, Share2 } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { ROUTES } from '@/lib/routes'
-import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/contexts/AuthContext'
 import axiosPrivate from '@/api/axiosPrivate'
 import { TIMEOUT_LENGTH_MS } from '@/config/constants'
-import { useState } from 'react'
+import { ConnectionCounts } from '@/types/users'
+import { getStageDisplayLabel } from '@/utils/users'
 
-interface UserProfile {
-  id: string
-  name: string
-  age: number
-  city: string
-  province: string
-  bio: string
-  stages: string[]
-  interests: string[]
-  avatar: string
-  stats: {
-    connections: number
-    communities: number
-    events: number
-  }
+async function fetchConnectionCounts(): Promise<ConnectionCounts> {
+  const res = await axiosPrivate.get<ConnectionCounts>('/api/connections/count', {
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
 }
 
 const MyProfile = () => {
   const navigate = useNavigate()
-  const { toast } = useToast()
-  const { setAuth } = useAuth()
+  const { user, setAuth } = useAuth()
   const [loading, setLoading] = useState(false)
+
+  const { data: connectionCounts } = useQuery({
+    queryKey: ['connections', 'counts'],
+    queryFn: fetchConnectionCounts,
+  })
 
   const handleShareProfile = async () => {}
 
@@ -55,24 +51,15 @@ const MyProfile = () => {
     }
   }
 
-  const userProfile: UserProfile = {
-    id: '0',
-    name: 'John Doe',
-    age: 35,
-    city: 'Toronto',
-    province: 'ON',
-    bio: 'I am a dedicated father who loves spending time with my kids and connecting with other dads.',
-    stages: ['Newborn', 'Toddler'],
-    interests: ['Parenting', 'Outdoors', 'Cooking'],
-    avatar: avatarDefaultGrey,
-    stats: {
-      connections: 120,
-      communities: 5,
-      events: 12,
-    },
+  // Dummy stats for communities and events (API not available yet)
+  const dummyStats = {
+    communities: 5,
+    events: 12,
   }
 
-  const pendingRequestsCount = 3
+  if (!user) {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -94,20 +81,20 @@ const MyProfile = () => {
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="w-32 h-32 rounded-lg overflow-hidden border-4 border-primary/20">
             <img
-              src={userProfile.avatar}
-              alt={userProfile.name}
+              src={user.avatarUrl || avatarDefaultGrey}
+              alt={user.name}
               className="w-full h-full object-cover"
             />
           </div>
 
           <div>
             <h2 className="text-2xl font-heading font-semibold text-foreground">
-              {userProfile.name}, {userProfile.age}
+              {user.name}, {user.age}
             </h2>
             <div className="flex items-center justify-center gap-1 text-muted-foreground mt-1">
               <MapPin className="w-4 h-4" />
               <span>
-                {userProfile.city}, {userProfile.province}
+                {user.city}, {user.province}
               </span>
             </div>
           </div>
@@ -119,6 +106,9 @@ const MyProfile = () => {
               onClick={() => navigate(ROUTES.CONNECTIONS)}
             >
               Connections
+              {connectionCounts && connectionCounts.connections > 0 && (
+                <span className="ml-1">({connectionCounts.connections})</span>
+              )}
             </Button>
             <Button
               variant="outline"
@@ -126,9 +116,9 @@ const MyProfile = () => {
               onClick={() => navigate(ROUTES.REQUESTS)}
             >
               Requests
-              {pendingRequestsCount > 0 && (
+              {connectionCounts && connectionCounts.requests > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-semibold rounded-full h-5 w-5 flex items-center justify-center">
-                  {pendingRequestsCount}
+                  {connectionCounts.requests}
                 </span>
               )}
             </Button>
@@ -140,19 +130,19 @@ const MyProfile = () => {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <p className="text-2xl font-heading font-semibold text-primary">
-                {userProfile.stats.connections}
+                {connectionCounts?.connections ?? 0}
               </p>
               <p className="text-sm text-muted-foreground">Connections</p>
             </div>
             <div>
               <p className="text-2xl font-heading font-semibold text-primary">
-                {userProfile.stats.communities}
+                {dummyStats.communities}
               </p>
               <p className="text-sm text-muted-foreground">Communities</p>
             </div>
             <div>
               <p className="text-2xl font-heading font-semibold text-primary">
-                {userProfile.stats.events}
+                {dummyStats.events}
               </p>
               <p className="text-sm text-muted-foreground">Events</p>
             </div>
@@ -163,7 +153,7 @@ const MyProfile = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-2">About Me</h3>
             <p className="text-muted-foreground leading-relaxed">
-              {userProfile.bio}
+              {user.about}
             </p>
           </div>
 
@@ -172,14 +162,14 @@ const MyProfile = () => {
               Children's Age
             </h3>
             <div className="flex flex-wrap gap-2">
-              {userProfile.stages.map((stage) => (
+              {user.children_age_ranges.map((stage) => (
                 <Badge
                   key={stage}
                   variant="soft"
                   className="rounded-full"
                 >
                   <Calendar className="w-3 h-3 mr-1" />
-                  {stage}
+                  {getStageDisplayLabel(stage)}
                 </Badge>
               ))}
             </div>
@@ -188,7 +178,7 @@ const MyProfile = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-3">Interests</h3>
             <div className="flex flex-wrap gap-2">
-              {userProfile.interests.map((interest) => (
+              {user.interests.map((interest) => (
                 <Badge
                   key={interest}
                   variant="soft"

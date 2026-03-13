@@ -8,6 +8,7 @@ import { MapPin, Calendar, ArrowLeft } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { communityDetail, ROUTES } from '@/lib/routes'
+import { getStageDisplayLabel } from '@/utils/users'
 
 interface Profile {
   id: string
@@ -131,7 +132,7 @@ const ProfileDetail = () => {
                       variant="soft"
                       className="rounded-full mt-2"
                     >
-                      {profile.stages[0]}
+                      {getStageDisplayLabel(profile.stages[0])}
                     </Badge>
                   )}
                 </div>
@@ -251,7 +252,7 @@ const ProfileDetail = () => {
                   className="rounded-full"
                 >
                   <Calendar className="w-3 h-3 mr-1" />
-                  {stage}
+                  {getStageDisplayLabel(stage)}
                 </Badge>
               ))}
             </div>

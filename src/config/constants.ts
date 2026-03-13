@@ -2,7 +2,7 @@ export const MIN_PASSWORD_LENGTH = 8
 
 export const TIMEOUT_LENGTH_MS = 10000
 
-export const MAX_BIO_LENGTH = 200
+export const MAX_BIO_LENGTH = 500
 
 export const INTEREST_OPTIONS = [
   'Sports',
@@ -65,6 +65,8 @@ export const PROVINCE_OPTIONS = [
 ]
 
 export const DISCOVER_PROFILES_PAGE_LIMIT = 20
+export const DISCOVER_COMMUNITIES_PAGE_LIMIT = 20
+export const DISCOVER_EVENTS_PAGE_LIMIT = 20
 
 export const DISCOVER_DADS_FILTERS_AGE_RANGES = [
   'Under 25',
@@ -76,3 +78,5 @@ export const DISCOVER_DADS_FILTERS_AGE_RANGES = [
   '50-59',
   '60+',
 ]
+
+export const CONNECTIONS_PAGE_LIMIT = 20

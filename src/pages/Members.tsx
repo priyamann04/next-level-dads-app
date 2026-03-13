@@ -16,6 +16,7 @@ import { ArrowLeft, MessageCircle, Plus, Search, Check } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import { profileDetail } from '@/lib/routes'
+import { getStageDisplayLabel } from '@/utils/users'
 
 interface Member {
   id: string
@@ -258,7 +259,7 @@ const Members = () => {
                           variant="soft"
                           className="rounded-full text-xs"
                         >
-                          {stage}
+                          {getStageDisplayLabel(stage)}
                         </Badge>
                       ))}
                     </div>

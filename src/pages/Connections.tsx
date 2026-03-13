@@ -1,18 +1,100 @@
-import { useState } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import logo from '@/assets/logo.png'
 import DadCard from '@/components/DadCard'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ArrowLeft, Search, Loader2, RefreshCw } from 'lucide-react'
+import logo from '@/assets/logo.png'
 import { ROUTES } from '@/lib/routes'
-import { Profile } from '@/types/users'
+import axiosPrivate from '@/api/axiosPrivate'
+import { TIMEOUT_LENGTH_MS, CONNECTIONS_PAGE_LIMIT } from '@/config/constants'
+import {
+  ConnectionResponse,
+  ConnectionsFilters,
+  ConnectionsCursor,
+} from '@/types/users'
 
-const initialConnections: Profile[] = []
+async function fetchConnections(
+  filters: ConnectionsFilters,
+  cursor?: ConnectionsCursor,
+): Promise<ConnectionResponse[]> {
+  const params = new URLSearchParams()
+  if (filters.name) {
+    params.append('name', filters.name)
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_updated_at', cursor.cursor_updated_at)
+  }
+  const res = await axiosPrivate.get<ConnectionResponse[]>(
+    '/api/connections/connected',
+    {
+      params,
+      timeout: TIMEOUT_LENGTH_MS,
+    },
+  )
+  return res.data
+}
 
 const Connections = () => {
   const navigate = useNavigate()
-  const [connections, setConnections] = useState(initialConnections)
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
+
+  const filters: ConnectionsFilters = useMemo(
+    () => ({ name: appliedSearch }),
+    [appliedSearch],
+  )
+
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['connections', 'connected', filters],
+    queryFn: ({ pageParam }) => fetchConnections(filters, pageParam),
+    initialPageParam: undefined as ConnectionsCursor | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < CONNECTIONS_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.connection_id,
+        cursor_updated_at: lastItem.connection_updated_at,
+      }
+    },
+  })
+
+  const connections = useMemo(() => data?.pages.flat() ?? [], [data])
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  const handleSearch = () => {
+    setAppliedSearch(searchQuery)
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -40,18 +122,69 @@ const Connections = () => {
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6 space-y-4 animate-fade-in">
-        {connections.length > 0 ? (
-          connections.map((connection) => (
-            <DadCard
-              key={connection.id}
-              {...connection}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSearch()
+          }}
+        >
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input
+              placeholder="Search connections..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-full"
             />
-          ))
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No connections yet</p>
           </div>
-        )}
+        </form>
+
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : isError ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                Failed to load connections. Please try again.
+              </p>
+            </div>
+          ) : connections.length > 0 ? (
+            <>
+              {connections.map((connection) => (
+                <DadCard
+                  key={connection.id}
+                  {...connection}
+                />
+              ))}
+              <div
+                ref={sentinelRef}
+                className="h-4"
+              />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No connections yet</p>
+            </div>
+          )}
+        </div>
+
+        <div className="pt-4">
+          <Button
+            variant="outline"
+            className="w-full rounded-full"
+            onClick={() => refetch()}
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <BottomNav />

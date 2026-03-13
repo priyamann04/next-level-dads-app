@@ -7,6 +7,11 @@ import { getStageDisplayLabel } from '@/utils/users'
 import { profileDetail } from '@/lib/routes'
 import type { Profile } from '@/types/users'
 
+interface DadCardProps extends Profile {
+  connection_id?: string
+  connection_updated_at?: string
+}
+
 const DadCard = ({
   id,
   name,
@@ -19,7 +24,9 @@ const DadCard = ({
   avatar_url,
   connection_status,
   created_at,
-}: Profile) => {
+  connection_id,
+  connection_updated_at,
+}: DadCardProps) => {
   const navigate = useNavigate()
 
   const initials = name
@@ -34,19 +41,19 @@ const DadCard = ({
 
   // Connection action handlers (stubs for now)
   const handleConnect = () => {
-    // TODO: POST /api/connections/
+    // TODO: POST /api/connections/ with target user id
   }
 
   const handleCancelRequest = () => {
-    // TODO: DELETE /api/connections/:id
+    // TODO: DELETE /api/connections/${connection_id}
   }
 
   const handleAccept = () => {
-    // TODO: PATCH /api/connections/:id
+    // TODO: PATCH /api/connections/${connection_id}
   }
 
   const handleIgnore = () => {
-    // TODO: DELETE /api/connections/:id
+    // TODO: DELETE /api/connections/${connection_id}
   }
 
   const handleChat = () => {
@@ -54,7 +61,7 @@ const DadCard = ({
   }
 
   const handleUnconnect = () => {
-    // TODO: DELETE /api/connections/:id
+    // TODO: DELETE /api/connections/${connection_id}
   }
 
   const renderButtons = () => {

@@ -5,7 +5,6 @@ import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
 import EventCard from '@/components/EventCard'
-import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { RefreshCw, Search, SlidersHorizontal, Loader2 } from 'lucide-react'
@@ -25,10 +24,24 @@ import axiosPrivate from '@/api/axiosPrivate'
 import {
   TIMEOUT_LENGTH_MS,
   DISCOVER_PROFILES_PAGE_LIMIT,
+  DISCOVER_COMMUNITIES_PAGE_LIMIT,
+  DISCOVER_EVENTS_PAGE_LIMIT,
   DISCOVER_DADS_FILTERS_AGE_RANGES,
+  STAGE_OPTIONS,
+  PROVINCE_OPTIONS,
 } from '@/config/constants'
 import { Profile, DiscoverDadsFilters, DiscoverDadsCursor } from '@/types/users'
-import { STAGE_OPTIONS, PROVINCE_OPTIONS } from '@/config/constants'
+import {
+  Community,
+  DiscoverCommunitiesFilters,
+  DiscoverCommunitiesCursor,
+} from '@/types/communities'
+import {
+  Event,
+  EventType,
+  DiscoverEventsFilters,
+  DiscoverEventsCursor,
+} from '@/types/events'
 
 async function fetchDiscoverProfiles(
   filters: DiscoverDadsFilters,
@@ -59,34 +72,88 @@ async function fetchInterests(): Promise<string[]> {
   return res.data
 }
 
-const communities = []
+async function fetchDiscoverCommunities(
+  filters: DiscoverCommunitiesFilters,
+  cursor?: DiscoverCommunitiesCursor,
+): Promise<Community[]> {
+  const params = new URLSearchParams()
+  if (filters.name) {
+    params.append('name', filters.name)
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_created_at', cursor.cursor_created_at)
+  }
+  const res = await axiosPrivate.get<Community[]>('/api/communities/', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
+
+async function fetchDiscoverEvents(
+  filters: DiscoverEventsFilters,
+  cursor?: DiscoverEventsCursor,
+): Promise<Event[]> {
+  const params = new URLSearchParams()
+  if (filters.name) {
+    params.append('name', filters.name)
+  }
+  if (filters.type) {
+    params.append('type', filters.type)
+  }
+  if (filters.is_free !== null) {
+    params.append('is_free', String(filters.is_free))
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_created_at', cursor.cursor_created_at)
+  }
+  const res = await axiosPrivate.get<Event[]>('/api/events/', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
 const Discover = () => {
-  const { toast } = useToast()
   const { tab = 'dads' } = useParams<{ tab: string }>()
 
-  const [eventFilter, setEventFilter] = useState<'all' | 'virtual' | 'local'>(
-    'all',
-  )
-  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
-  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
-  const [eventSearchQuery, setEventSearchQuery] = useState('')
-
+  // Dads tab state
   const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([])
   const [pendingInterests, setPendingInterests] = useState<string[]>([])
   const [pendingLocations, setPendingLocations] = useState<string[]>([])
   const [pendingDadAges, setPendingDadAges] = useState<string[]>([])
-
   const [appliedChildrenAges, setAppliedChildrenAges] = useState<string[]>([])
   const [appliedInterests, setAppliedInterests] = useState<string[]>([])
   const [appliedLocations, setAppliedLocations] = useState<string[]>([])
   const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
-
   const [filtersOpen, setFiltersOpen] = useState(false)
+
+  // Reset pending filters to applied when sheet closes without applying
+  const handleFiltersOpenChange = (open: boolean) => {
+    if (!open) {
+      setPendingChildrenAges(appliedChildrenAges)
+      setPendingInterests(appliedInterests)
+      setPendingLocations(appliedLocations)
+      setPendingDadAges(appliedDadAges)
+    }
+    setFiltersOpen(open)
+  }
   const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
-  // build filters
-  const filters: DiscoverDadsFilters = useMemo(
+  // Communities tab state
+  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
+  const [appliedCommunitySearch, setAppliedCommunitySearch] = useState('')
+
+  // Events tab state
+  const [eventSearchQuery, setEventSearchQuery] = useState('')
+  const [appliedEventSearch, setAppliedEventSearch] = useState('')
+  const [eventTypeFilter, setEventTypeFilter] = useState<EventType | null>(null)
+  const [eventPriceFilter, setEventPriceFilter] = useState<boolean | null>(null)
+
+  // build dads filters
+  const dadsFilters: DiscoverDadsFilters = useMemo(
     () => ({
       interests: appliedInterests,
       children_age_ranges: appliedChildrenAges,
@@ -96,21 +163,84 @@ const Discover = () => {
     [appliedInterests, appliedChildrenAges, appliedLocations, appliedDadAges],
   )
 
+  // build communities filters
+  const communitiesFilters: DiscoverCommunitiesFilters = useMemo(
+    () => ({ name: appliedCommunitySearch }),
+    [appliedCommunitySearch],
+  )
+
+  // build events filters
+  const eventsFilters: DiscoverEventsFilters = useMemo(
+    () => ({
+      name: appliedEventSearch,
+      type: eventTypeFilter,
+      is_free: eventPriceFilter,
+    }),
+    [appliedEventSearch, eventTypeFilter, eventPriceFilter],
+  )
+
   // fetch discover profiles
   const {
-    data,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
+    data: dadsData,
+    isLoading: dadsLoading,
+    isError: dadsError,
+    fetchNextPage: fetchNextDads,
+    hasNextPage: hasNextDads,
+    isFetchingNextPage: isFetchingNextDads,
+    refetch: refetchDads,
   } = useInfiniteQuery({
-    queryKey: ['discover', 'profiles', filters],
-    queryFn: ({ pageParam }) => fetchDiscoverProfiles(filters, pageParam),
+    queryKey: ['discover', 'profiles', dadsFilters],
+    queryFn: ({ pageParam }) => fetchDiscoverProfiles(dadsFilters, pageParam),
     initialPageParam: undefined as DiscoverDadsCursor | undefined,
     getNextPageParam: (lastPage) => {
       if (lastPage.length < DISCOVER_PROFILES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_created_at: lastItem.created_at,
+      }
+    },
+  })
+
+  // fetch discover communities
+  const {
+    data: communitiesData,
+    isLoading: communitiesLoading,
+    isError: communitiesError,
+    fetchNextPage: fetchNextCommunities,
+    hasNextPage: hasNextCommunities,
+    isFetchingNextPage: isFetchingNextCommunities,
+    refetch: refetchCommunities,
+  } = useInfiniteQuery({
+    queryKey: ['discover', 'communities', communitiesFilters],
+    queryFn: ({ pageParam }) =>
+      fetchDiscoverCommunities(communitiesFilters, pageParam),
+    initialPageParam: undefined as DiscoverCommunitiesCursor | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < DISCOVER_COMMUNITIES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_created_at: lastItem.created_at,
+      }
+    },
+  })
+
+  // fetch discover events
+  const {
+    data: eventsData,
+    isLoading: eventsLoading,
+    isError: eventsError,
+    fetchNextPage: fetchNextEvents,
+    hasNextPage: hasNextEvents,
+    isFetchingNextPage: isFetchingNextEvents,
+    refetch: refetchEvents,
+  } = useInfiniteQuery({
+    queryKey: ['discover', 'events', eventsFilters],
+    queryFn: ({ pageParam }) => fetchDiscoverEvents(eventsFilters, pageParam),
+    initialPageParam: undefined as DiscoverEventsCursor | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < DISCOVER_EVENTS_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
       return {
         cursor_id: lastItem.id,
@@ -126,19 +256,27 @@ const Discover = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  const profiles = useMemo(() => data?.pages.flat() ?? [], [data])
+  const profiles = useMemo(() => dadsData?.pages.flat() ?? [], [dadsData])
+  const communities = useMemo(
+    () => communitiesData?.pages.flat() ?? [],
+    [communitiesData],
+  )
+  const events = useMemo(() => eventsData?.pages.flat() ?? [], [eventsData])
 
-  // infinite scroll sentinel
-  const sentinelRef = useRef<HTMLDivElement>(null)
+  // infinite scroll sentinels
+  const dadsSentinelRef = useRef<HTMLDivElement>(null)
+  const communitiesSentinelRef = useRef<HTMLDivElement>(null)
+  const eventsSentinelRef = useRef<HTMLDivElement>(null)
 
+  // dads infinite scroll
   useEffect(() => {
-    const sentinel = sentinelRef.current
+    const sentinel = dadsSentinelRef.current
     if (!sentinel) return
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
+        if (entries[0].isIntersecting && hasNextDads && !isFetchingNextDads) {
+          fetchNextDads()
         }
       },
       { threshold: 0.1 },
@@ -146,7 +284,51 @@ const Discover = () => {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  }, [hasNextDads, isFetchingNextDads, fetchNextDads])
+
+  // communities infinite scroll
+  useEffect(() => {
+    const sentinel = communitiesSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextCommunities &&
+          !isFetchingNextCommunities
+        ) {
+          fetchNextCommunities()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextCommunities, isFetchingNextCommunities, fetchNextCommunities])
+
+  // events infinite scroll
+  useEffect(() => {
+    const sentinel = eventsSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextEvents &&
+          !isFetchingNextEvents
+        ) {
+          fetchNextEvents()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextEvents, isFetchingNextEvents, fetchNextEvents])
 
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
@@ -177,10 +359,7 @@ const Discover = () => {
     )
   }
 
-  const registerEvent = (eventId: number) => {}
-  const unregisterEvent = (eventId: number) => {}
-
-  const applyFilters = () => {
+  const applyDadsFilters = () => {
     setAppliedChildrenAges(pendingChildrenAges)
     setAppliedInterests(pendingInterests)
     setAppliedLocations(pendingLocations)
@@ -188,7 +367,7 @@ const Discover = () => {
     setFiltersOpen(false)
   }
 
-  const clearAllFilters = () => {
+  const clearDadsFilters = () => {
     setPendingChildrenAges([])
     setPendingInterests([])
     setPendingLocations([])
@@ -199,20 +378,25 @@ const Discover = () => {
     setAppliedDadAges([])
   }
 
-  const handleJoin = (communityId: number, title: string) => {}
-
-  const handleJoinEvent = (eventId: number, title: string) => {}
-
-  const handleRefresh = () => {
-    refetch()
+  const handleCommunitySearch = () => {
+    setAppliedCommunitySearch(communitySearchQuery)
   }
 
-  // Filter lists
-  const filteredCommunities = []
+  const handleEventSearch = () => {
+    setAppliedEventSearch(eventSearchQuery)
+  }
 
-  const filteredEvents = []
+  const handleRefreshDads = () => {
+    refetchDads()
+  }
 
-  const registeredEvents = []
+  const handleRefreshCommunities = () => {
+    refetchCommunities()
+  }
+
+  const handleRefreshEvents = () => {
+    refetchEvents()
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -270,7 +454,7 @@ const Discover = () => {
               <div className="flex justify-end mb-4">
                 <Sheet
                   open={filtersOpen}
-                  onOpenChange={setFiltersOpen}
+                  onOpenChange={handleFiltersOpenChange}
                 >
                   <SheetTrigger asChild>
                     <Button
@@ -453,14 +637,14 @@ const Discover = () => {
                       <div className="pt-4 flex gap-3">
                         <Button
                           className="flex-1"
-                          onClick={applyFilters}
+                          onClick={applyDadsFilters}
                         >
                           Apply Filters
                         </Button>
                         <Button
                           variant="outline"
                           className="flex-1"
-                          onClick={clearAllFilters}
+                          onClick={clearDadsFilters}
                         >
                           Clear All
                         </Button>
@@ -471,11 +655,11 @@ const Discover = () => {
               </div>
 
               <div className="space-y-4">
-                {isLoading ? (
+                {dadsLoading ? (
                   <div className="flex justify-center py-12">
                     <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                   </div>
-                ) : isError ? (
+                ) : dadsError ? (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">
                       Failed to load profiles. Please try again.
@@ -490,10 +674,10 @@ const Discover = () => {
                       />
                     ))}
                     <div
-                      ref={sentinelRef}
+                      ref={dadsSentinelRef}
                       className="h-4"
                     />
-                    {isFetchingNextPage && (
+                    {isFetchingNextDads && (
                       <div className="flex justify-center py-4">
                         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                       </div>
@@ -512,7 +696,7 @@ const Discover = () => {
                 <Button
                   variant="outline"
                   className="w-full rounded-full"
-                  onClick={handleRefresh}
+                  onClick={handleRefreshDads}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
@@ -523,7 +707,13 @@ const Discover = () => {
 
           {tab === 'communities' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="relative mb-4">
+              <form
+                className="relative mb-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleCommunitySearch()
+                }}
+              >
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
                   placeholder="Search communities..."
@@ -531,22 +721,37 @@ const Discover = () => {
                   onChange={(e) => setCommunitySearchQuery(e.target.value)}
                   className="pl-10 rounded-full"
                 />
-              </div>
+              </form>
 
-              <div className="space-y-3">
-                {filteredCommunities.length > 0 ? (
-                  filteredCommunities.map((community) => (
-                    <div
-                      key={community.id}
-                      // onClick={() => {}}
-                      // className="cursor-pointer"
-                    >
+              <div className="space-y-4">
+                {communitiesLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : communitiesError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load communities. Please try again.
+                    </p>
+                  </div>
+                ) : communities.length > 0 ? (
+                  <>
+                    {communities.map((community) => (
                       <CommunityCard
+                        key={community.id}
                         {...community}
-                        onJoin={() => handleJoin(community.id, community.title)}
                       />
-                    </div>
-                  ))
+                    ))}
+                    <div
+                      ref={communitiesSentinelRef}
+                      className="h-4"
+                    />
+                    {isFetchingNextCommunities && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">
@@ -555,12 +760,29 @@ const Discover = () => {
                   </div>
                 )}
               </div>
+
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefreshCommunities}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           )}
 
           {tab === 'events' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="relative mb-4">
+              <form
+                className="relative mb-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleEventSearch()
+                }}
+              >
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
                   placeholder="Search events..."
@@ -568,14 +790,16 @@ const Discover = () => {
                   onChange={(e) => setEventSearchQuery(e.target.value)}
                   className="pl-10 rounded-full"
                 />
-              </div>
+              </form>
 
               <div className="py-4">
                 <Button
                   variant="outline"
                   className="w-full rounded-full font-semibold text-foreground bg-white"
                   style={{ borderColor: '#D8A24A' }}
-                  onClick={() => {}}
+                  onClick={() => {
+                    // TODO: navigate to create event page
+                  }}
                 >
                   Host Your Own Event
                 </Button>
@@ -583,74 +807,99 @@ const Discover = () => {
 
               <div className="flex gap-2 mb-4 flex-wrap">
                 <Badge
-                  variant={eventFilter === 'all' ? 'default' : 'outline'}
+                  variant={
+                    eventTypeFilter === 'virtual' ? 'default' : 'outline'
+                  }
                   className="cursor-pointer rounded-full"
-                  onClick={() => setEventFilter('all')}
-                >
-                  All
-                </Badge>
-                <Badge
-                  variant={eventFilter === 'virtual' ? 'default' : 'outline'}
-                  className="cursor-pointer rounded-full"
-                  onClick={() => setEventFilter('virtual')}
+                  onClick={() =>
+                    setEventTypeFilter(
+                      eventTypeFilter === 'virtual' ? null : 'virtual',
+                    )
+                  }
                 >
                   Virtual
                 </Badge>
                 <Badge
-                  variant={eventFilter === 'local' ? 'default' : 'outline'}
+                  variant={eventTypeFilter === 'local' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setEventFilter('local')}
+                  onClick={() =>
+                    setEventTypeFilter(
+                      eventTypeFilter === 'local' ? null : 'local',
+                    )
+                  }
                 >
                   Local
                 </Badge>
                 <Badge
-                  variant={priceFilter === 'free' ? 'default' : 'outline'}
+                  variant={eventPriceFilter === true ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setPriceFilter('free')}
+                  onClick={() =>
+                    setEventPriceFilter(eventPriceFilter === true ? null : true)
+                  }
                 >
                   Free
                 </Badge>
                 <Badge
-                  variant={priceFilter === 'paid' ? 'default' : 'outline'}
+                  variant={eventPriceFilter === false ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setPriceFilter('paid')}
+                  onClick={() =>
+                    setEventPriceFilter(
+                      eventPriceFilter === false ? null : false,
+                    )
+                  }
                 >
                   Paid
                 </Badge>
               </div>
 
-              {filteredEvents.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      isRegistered={registeredEvents.includes(event.id)}
-                      onRegister={() => {
-                        registerEvent(event.id)
-                        toast({
-                          title: 'Registered for event! 🎉',
-                          description: `You've registered for ${event.title}.`,
-                        })
-                      }}
-                      onUnregister={() => {
-                        unregisterEvent(event.id)
-                        toast({
-                          title: 'Registration cancelled',
-                          description: `You've cancelled your registration for ${event.title}.`,
-                        })
-                      }}
-                      context="discover"
+              <div className="space-y-4">
+                {eventsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : eventsError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load events. Please try again.
+                    </p>
+                  </div>
+                ) : events.length > 0 ? (
+                  <>
+                    {events.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        {...event}
+                      />
+                    ))}
+                    <div
+                      ref={eventsSentinelRef}
+                      className="h-4"
                     />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    No events match your filters
-                  </p>
-                </div>
-              )}
+                    {isFetchingNextEvents && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No events match your filters
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefreshEvents}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           )}
         </div>

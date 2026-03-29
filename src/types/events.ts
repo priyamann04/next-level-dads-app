@@ -30,5 +30,5 @@ export interface DiscoverEventsFilters {
 
 export interface DiscoverEventsCursor {
   cursor_id: string
-  cursor_created_at: string
+  cursor_starts_at: string
 }

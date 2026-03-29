@@ -1,49 +1,177 @@
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
+import CommunityCard from '@/components/CommunityCard'
 import EventCard from '@/components/EventCard'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Users as UsersIcon } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { Input } from '@/components/ui/input'
+import { Search, Loader2 } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
-import { ROUTES, communityChat } from '@/lib/routes'
-import { getEventsByIds } from '@/data/events'
+import { ROUTES } from '@/lib/routes'
+import axiosPrivate from '@/api/axiosPrivate'
+import {
+  TIMEOUT_LENGTH_MS,
+  COMMUNITIES_PAGE_LIMIT,
+  EVENTS_PAGE_LIMIT,
+} from '@/config/constants'
+import { Community, DiscoverCommunitiesCursor } from '@/types/communities'
+import { Event, DiscoverEventsCursor } from '@/types/events'
 
-const allCommunities = []
+async function fetchMyCommunities(
+  name: string,
+  cursor?: DiscoverCommunitiesCursor,
+): Promise<Community[]> {
+  const params = new URLSearchParams()
+  if (name) {
+    params.append('name', name)
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_created_at', cursor.cursor_created_at)
+  }
+  const res = await axiosPrivate.get<Community[]>('/api/users/me/communities', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
+
+async function fetchMyEvents(
+  name: string,
+  cursor?: DiscoverEventsCursor,
+): Promise<Event[]> {
+  const params = new URLSearchParams()
+  if (name) {
+    params.append('name', name)
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_starts_at', cursor.cursor_starts_at)
+  }
+  const res = await axiosPrivate.get<Event[]>('/api/users/me/events', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
 const Groups = () => {
-  const navigate = useNavigate()
-  const { toast } = useToast()
   const { tab = 'communities' } = useParams<{ tab: string }>()
 
-  const joinedCommunities = []
-  const registeredEvents = []
+  // Communities tab state
+  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
+  const [appliedCommunitySearch, setAppliedCommunitySearch] = useState('')
 
-  const leaveCommunity = (id: number) => {}
-  const registerEvent = (eventId: number) => {}
-  const unregisterEvent = (eventId: number) => {}
+  // Events tab state
+  const [eventSearchQuery, setEventSearchQuery] = useState('')
+  const [appliedEventSearch, setAppliedEventSearch] = useState('')
 
-  const myCommunities = allCommunities.filter((c) =>
-    joinedCommunities.includes(c.id),
+  // fetch my communities
+  const {
+    data: communitiesData,
+    isLoading: communitiesLoading,
+    isError: communitiesError,
+    fetchNextPage: fetchNextCommunities,
+    hasNextPage: hasNextCommunities,
+    isFetchingNextPage: isFetchingNextCommunities,
+  } = useInfiniteQuery({
+    queryKey: ['groups', 'communities', appliedCommunitySearch],
+    queryFn: ({ pageParam }) =>
+      fetchMyCommunities(appliedCommunitySearch, pageParam),
+    initialPageParam: undefined as DiscoverCommunitiesCursor | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < COMMUNITIES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_created_at: lastItem.created_at,
+      }
+    },
+  })
+
+  // fetch my events
+  const {
+    data: eventsData,
+    isLoading: eventsLoading,
+    isError: eventsError,
+    fetchNextPage: fetchNextEvents,
+    hasNextPage: hasNextEvents,
+    isFetchingNextPage: isFetchingNextEvents,
+  } = useInfiniteQuery({
+    queryKey: ['groups', 'events', appliedEventSearch],
+    queryFn: ({ pageParam }) => fetchMyEvents(appliedEventSearch, pageParam),
+    initialPageParam: undefined as DiscoverEventsCursor | undefined,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < EVENTS_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_starts_at: lastItem.starts_at,
+      }
+    },
+  })
+
+  const communities = useMemo(
+    () => communitiesData?.pages.flat() ?? [],
+    [communitiesData],
   )
-  const myEvents = getEventsByIds(registeredEvents)
+  const events = useMemo(() => eventsData?.pages.flat() ?? [], [eventsData])
 
-  const handleLeaveCommunity = (
-    id: number,
-    title: string,
-    e: React.MouseEvent,
-  ) => {
-    e.stopPropagation()
-    leaveCommunity(id)
-    toast({
-      title: 'Left community',
-      description: `You've left ${title}. The group chat has been removed.`,
-    })
+  // infinite scroll sentinels
+  const communitiesSentinelRef = useRef<HTMLDivElement>(null)
+  const eventsSentinelRef = useRef<HTMLDivElement>(null)
+
+  // communities infinite scroll
+  useEffect(() => {
+    const sentinel = communitiesSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextCommunities &&
+          !isFetchingNextCommunities
+        ) {
+          fetchNextCommunities()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextCommunities, isFetchingNextCommunities, fetchNextCommunities])
+
+  // events infinite scroll
+  useEffect(() => {
+    const sentinel = eventsSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextEvents &&
+          !isFetchingNextEvents
+        ) {
+          fetchNextEvents()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextEvents, isFetchingNextEvents, fetchNextEvents])
+
+  const handleCommunitySearch = () => {
+    setAppliedCommunitySearch(communitySearchQuery)
   }
 
-  const handleCommunityClick = (communityId: number) => {
-    navigate(communityChat(communityId, 'groups'))
+  const handleEventSearch = () => {
+    setAppliedEventSearch(eventSearchQuery)
   }
 
   return (
@@ -88,85 +216,118 @@ const Groups = () => {
           </div>
 
           {tab === 'communities' && (
-            <div className="space-y-3 animate-fade-in">
-              {myCommunities.length > 0 ? (
-                myCommunities.map((community) => (
-                  <Card
-                    key={community.id}
-                    className="hover:shadow-md transition-shadow"
-                  >
-                    <CardContent className="p-4 space-y-3">
-                      <div
-                        className="cursor-pointer space-y-2"
-                        onClick={() => handleCommunityClick(community.id)}
-                      >
-                        <h4 className="font-semibold text-foreground">
-                          {community.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {community.description}
-                        </p>
-                        <div className="flex items-center gap-2 pt-1">
-                          <UsersIcon className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">
-                            {community.memberCount} members
-                          </span>
-                        </div>
+            <div className="space-y-4 animate-fade-in">
+              <form
+                className="relative mb-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleCommunitySearch()
+                }}
+              >
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  placeholder="Search communities..."
+                  value={communitySearchQuery}
+                  onChange={(e) => setCommunitySearchQuery(e.target.value)}
+                  className="pl-10 rounded-full"
+                />
+              </form>
+
+              <div className="space-y-4">
+                {communitiesLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : communitiesError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load communities. Please try again.
+                    </p>
+                  </div>
+                ) : communities.length > 0 ? (
+                  <>
+                    {communities.map((community) => (
+                      <CommunityCard
+                        key={community.id}
+                        {...community}
+                      />
+                    ))}
+                    <div
+                      ref={communitiesSentinelRef}
+                      className="h-4"
+                    />
+                    {isFetchingNextCommunities && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                       </div>
-                      <Button
-                        variant="outline"
-                        className="w-full rounded-full"
-                        onClick={(e) =>
-                          handleLeaveCommunity(community.id, community.title, e)
-                        }
-                      >
-                        Leave Group
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    No joined communities yet
-                  </p>
-                </div>
-              )}
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No joined communities yet
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {tab === 'events' && (
             <div className="space-y-4 animate-fade-in">
-              {myEvents.length > 0 ? (
-                myEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isRegistered={true}
-                    onRegister={() => {
-                      registerEvent(event.id)
-                      toast({
-                        title: 'Registered for event! 🎉',
-                        description: `You've registered for ${event.title}.`,
-                      })
-                    }}
-                    onUnregister={() => {
-                      unregisterEvent(event.id)
-                      toast({
-                        title: 'Unregistered from event',
-                        description: `You've unregistered from ${event.title}.`,
-                      })
-                    }}
-                    context="groups"
-                  />
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    No registered events yet
-                  </p>
-                </div>
-              )}
+              <form
+                className="relative mb-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleEventSearch()
+                }}
+              >
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  placeholder="Search events..."
+                  value={eventSearchQuery}
+                  onChange={(e) => setEventSearchQuery(e.target.value)}
+                  className="pl-10 rounded-full"
+                />
+              </form>
+
+              <div className="space-y-4">
+                {eventsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : eventsError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load events. Please try again.
+                    </p>
+                  </div>
+                ) : events.length > 0 ? (
+                  <>
+                    {events.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        {...event}
+                      />
+                    ))}
+                    <div
+                      ref={eventsSentinelRef}
+                      className="h-4"
+                    />
+                    {isFetchingNextEvents && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No registered events yet
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

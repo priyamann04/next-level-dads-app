@@ -19,3 +19,23 @@ export interface DiscoverCommunitiesCursor {
   cursor_id: string
   cursor_created_at: string
 }
+
+export interface CommunityMemberResponse {
+  id: string
+  name: string
+  age: number
+  city: string
+  province: string
+  about: string
+  avatar_url: string | null
+  interests: string[]
+  children: string[]
+  created_at: string
+  joined_at: string
+  role: 'admin' | 'member'
+}
+
+export interface CommunityMembersCursor {
+  cursor_id: string
+  cursor_joined_at: string
+}

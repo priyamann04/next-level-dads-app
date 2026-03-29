@@ -64,9 +64,9 @@ export const PROVINCE_OPTIONS = [
   { label: 'Yukon', value: 'YT' },
 ]
 
-export const DISCOVER_PROFILES_PAGE_LIMIT = 20
-export const DISCOVER_COMMUNITIES_PAGE_LIMIT = 20
-export const DISCOVER_EVENTS_PAGE_LIMIT = 20
+export const PROFILES_PAGE_LIMIT = 20
+export const COMMUNITIES_PAGE_LIMIT = 20
+export const EVENTS_PAGE_LIMIT = 20
 
 export const DISCOVER_DADS_FILTERS_AGE_RANGES = [
   'Under 25',
@@ -78,5 +78,3 @@ export const DISCOVER_DADS_FILTERS_AGE_RANGES = [
   '50-59',
   '60+',
 ]
-
-export const CONNECTIONS_PAGE_LIMIT = 20

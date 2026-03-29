@@ -1,75 +1,217 @@
-import { useState } from 'react'
-import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { MapPin, Calendar, ArrowLeft } from 'lucide-react'
-import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
+import { MapPin, Calendar, ArrowLeft, Loader2 } from 'lucide-react'
 import logo from '@/assets/logo.png'
-import { communityDetail, ROUTES } from '@/lib/routes'
 import { getStageDisplayLabel } from '@/utils/users'
+import axiosPrivate from '@/api/axiosPrivate'
+import { TIMEOUT_LENGTH_MS } from '@/config/constants'
+import type { Profile } from '@/types/users'
 
-interface Profile {
-  id: string
-  name: string
-  age: number
-  city: string
-  province: string
-  bio: string
-  stages: string[]
-  interests: string[]
-  avatar: string
+async function fetchProfile(id: string): Promise<Profile> {
+  const res = await axiosPrivate.get<Profile>(`/api/users/${id}`, {
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
 }
-
-// Profile data (empty for pure UI shell)
-const profilesData: Record<string, Profile> = {}
 
 const ProfileDetail = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams<{ id: string }>()
-  const [searchParams] = useSearchParams()
-  const [isRequested, setIsRequested] = useState(false)
-
-  const from = searchParams.get('from')
-  const communityId = searchParams.get('communityId')
 
   // Derive context from route path
   const isFromDiscover = location.pathname.startsWith('/discover/dads')
 
-  // Get profile data or use placeholder
-  const profileId = id || ''
-  const profile: Profile = profilesData[profileId] || {
-    id: profileId,
-    name: 'Sample User',
-    age: 30,
-    city: 'Toronto',
-    province: 'ON',
-    bio: 'This is a sample bio for the user profile.',
-    stages: ['Toddler'],
-    interests: ['Parenting', 'Sports'],
-    avatar: avatarDefaultGrey,
-  }
+  const {
+    data: profile,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['profile', id],
+    queryFn: () => fetchProfile(id!),
+    enabled: !!id,
+  })
 
-  const initials = profile.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
+  const initials = profile
+    ? profile.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+    : ''
 
   const handleBack = () => {
-    if (isFromDiscover) {
-      navigate(ROUTES.DISCOVER_DADS)
-    } else if (from === 'community' && communityId) {
-      navigate(communityDetail(communityId))
-    } else {
-      navigate(-1)
-    }
+    navigate(-1)
   }
 
+  // Connection action handlers (stubs for now)
   const handleConnect = () => {
-    setIsRequested(!isRequested)
+    // TODO: POST /api/connections/ with target user id
+  }
+
+  const handleCancelRequest = () => {
+    // TODO: DELETE /api/connections/${connection_id}
+  }
+
+  const handleAccept = () => {
+    // TODO: PATCH /api/connections/${connection_id}
+  }
+
+  const handleIgnore = () => {
+    // TODO: DELETE /api/connections/${connection_id}
+  }
+
+  const handleChat = () => {
+    // TODO: navigate to chat
+  }
+
+  const handleUnconnect = () => {
+    // TODO: DELETE /api/connections/${connection_id}
+  }
+
+  const renderButtons = () => {
+    if (!profile) return null
+
+    const { connection_status } = profile
+
+    if (connection_status === 'blocked') return null
+
+    if (connection_status === 'connected') {
+      return (
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            style={{ backgroundColor: '#D8A24A' }}
+            onClick={handleChat}
+          >
+            Chat
+          </Button>
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            variant="outline"
+            onClick={handleUnconnect}
+          >
+            Unconnect
+          </Button>
+        </div>
+      )
+    }
+
+    if (connection_status === 'pending_incoming') {
+      return (
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            style={{ backgroundColor: '#D8A24A' }}
+            onClick={handleAccept}
+          >
+            Accept
+          </Button>
+          <Button
+            className="flex-1 rounded-full font-semibold"
+            variant="outline"
+            onClick={handleIgnore}
+          >
+            Ignore
+          </Button>
+        </div>
+      )
+    }
+
+    if (connection_status === 'pending_outgoing') {
+      return (
+        <Button
+          className="w-full rounded-full font-semibold"
+          style={{ backgroundColor: '#9ca3af' }}
+          onClick={handleCancelRequest}
+        >
+          Requested
+        </Button>
+      )
+    }
+
+    // connection_status === null
+    return (
+      <Button
+        className="w-full rounded-full font-semibold"
+        style={{ backgroundColor: '#D8A24A' }}
+        onClick={handleConnect}
+      >
+        Connect
+      </Button>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="bg-card border-b border-border px-6 py-5 relative">
+          <img
+            src={logo}
+            alt="Next Level Dads"
+            className="h-10 absolute top-4 left-3"
+          />
+          <div className="flex items-center justify-center h-full">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                className="rounded-full"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-2xl font-heading font-semibold text-foreground">
+                Profile
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+        <BottomNav />
+      </div>
+    )
+  }
+
+  if (isError || !profile) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <div className="bg-card border-b border-border px-6 py-5 relative">
+          <img
+            src={logo}
+            alt="Next Level Dads"
+            className="h-10 absolute top-4 left-3"
+          />
+          <div className="flex items-center justify-center h-full">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                className="rounded-full"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-2xl font-heading font-semibold text-foreground">
+                Profile
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            Failed to load profile. Please try again.
+          </p>
+        </div>
+        <BottomNav />
+      </div>
+    )
   }
 
   // Discover context: Card-based layout with Connect button (DadDetail style)
@@ -105,9 +247,9 @@ const ProfileDetail = () => {
             <CardContent className="p-6 space-y-4">
               {/* Avatar and basic info */}
               <div className="flex items-start gap-4">
-                {profile.avatar ? (
+                {profile.avatar_url ? (
                   <img
-                    src={profile.avatar}
+                    src={profile.avatar_url}
                     alt={profile.name}
                     className="w-24 h-24 rounded-lg object-cover flex-shrink-0 aspect-square"
                   />
@@ -127,12 +269,12 @@ const ProfileDetail = () => {
                       {profile.city}, {profile.province}
                     </span>
                   </div>
-                  {profile.stages.length > 0 && (
+                  {profile.children.length > 0 && (
                     <Badge
                       variant="soft"
                       className="rounded-full mt-2"
                     >
-                      {getStageDisplayLabel(profile.stages[0])}
+                      {getStageDisplayLabel(profile.children[0])}
                     </Badge>
                   )}
                 </div>
@@ -142,7 +284,7 @@ const ProfileDetail = () => {
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold text-foreground">About</h3>
                 <p className="text-foreground text-sm leading-relaxed">
-                  {profile.bio}
+                  {profile.about}
                 </p>
               </div>
 
@@ -165,14 +307,8 @@ const ProfileDetail = () => {
                 </div>
               </div>
 
-              {/* Connect button */}
-              <Button
-                className="w-full rounded-full font-semibold mt-4"
-                style={{ backgroundColor: isRequested ? '#9ca3af' : '#D8A24A' }}
-                onClick={handleConnect}
-              >
-                {isRequested ? 'Requested ✓' : 'Connect'}
-              </Button>
+              {/* Action buttons */}
+              <div className="mt-4">{renderButtons()}</div>
             </CardContent>
           </Card>
         </div>
@@ -212,11 +348,17 @@ const ProfileDetail = () => {
       <div className="max-w-md mx-auto px-6 py-8 space-y-6 animate-fade-in">
         <div className="flex flex-col items-center text-center space-y-4">
           <div className="w-32 h-32 rounded-lg overflow-hidden border-4 border-primary/20">
-            <img
-              src={profile.avatar}
-              alt={profile.name}
-              className="w-full h-full object-cover"
-            />
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-2xl">
+                {initials}
+              </div>
+            )}
           </div>
 
           <div>
@@ -236,7 +378,7 @@ const ProfileDetail = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-2">About Me</h3>
             <p className="text-muted-foreground leading-relaxed">
-              {profile.bio}
+              {profile.about}
             </p>
           </div>
 
@@ -245,14 +387,14 @@ const ProfileDetail = () => {
               Children's Age
             </h3>
             <div className="flex flex-wrap gap-2">
-              {profile.stages.map((stage) => (
+              {profile.children.map((child) => (
                 <Badge
-                  key={stage}
+                  key={child}
                   variant="soft"
                   className="rounded-full"
                 >
                   <Calendar className="w-3 h-3 mr-1" />
-                  {getStageDisplayLabel(stage)}
+                  {getStageDisplayLabel(child)}
                 </Badge>
               ))}
             </div>
@@ -273,6 +415,9 @@ const ProfileDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Action buttons */}
+        <div className="px-6">{renderButtons()}</div>
       </div>
 
       <BottomNav />

@@ -92,12 +92,8 @@ export const dadDetail = (id: string) =>
 /**
  * Get route for event detail page
  */
-export const eventDetail = (eventId: number | string, from?: 'discover' | 'groups') => {
-  const params = new URLSearchParams()
-  if (from) params.set('from', from)
-  const queryString = params.toString()
-  return queryString ? `/events/${eventId}?${queryString}` : `/events/${eventId}`
-}
+export const eventDetail = (eventId: number | string) =>
+  `/events/${eventId}` as const
 
 /**
  * Get route for a specific groups tab
@@ -166,22 +162,6 @@ export const communityChat = (id: number | string, from?: 'discover' | 'groups')
  */
 export const profileDetail = (id: string) =>
   `/profiles/${id}` as const
-
-/**
- * Get route for profile with return context
- */
-export const profileWithContext = (
-  id: string,
-  from?: 'community' | 'discover' | 'match',
-  communityId?: number | string
-) => {
-  let url = `/profiles/${id}`
-  const params = new URLSearchParams()
-  if (from) params.set('from', from)
-  if (communityId) params.set('communityId', String(communityId))
-  const queryString = params.toString()
-  return queryString ? `${url}?${queryString}` : url
-}
 
 // ============================================
 // Route Params Types

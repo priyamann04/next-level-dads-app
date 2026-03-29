@@ -23,9 +23,9 @@ import { ROUTES } from '@/lib/routes'
 import axiosPrivate from '@/api/axiosPrivate'
 import {
   TIMEOUT_LENGTH_MS,
-  DISCOVER_PROFILES_PAGE_LIMIT,
-  DISCOVER_COMMUNITIES_PAGE_LIMIT,
-  DISCOVER_EVENTS_PAGE_LIMIT,
+  PROFILES_PAGE_LIMIT,
+  COMMUNITIES_PAGE_LIMIT,
+  EVENTS_PAGE_LIMIT,
   DISCOVER_DADS_FILTERS_AGE_RANGES,
   STAGE_OPTIONS,
   PROVINCE_OPTIONS,
@@ -107,7 +107,7 @@ async function fetchDiscoverEvents(
   }
   if (cursor) {
     params.append('cursor_id', cursor.cursor_id)
-    params.append('cursor_created_at', cursor.cursor_created_at)
+    params.append('cursor_starts_at', cursor.cursor_starts_at)
   }
   const res = await axiosPrivate.get<Event[]>('/api/events/', {
     params,
@@ -193,7 +193,7 @@ const Discover = () => {
     queryFn: ({ pageParam }) => fetchDiscoverProfiles(dadsFilters, pageParam),
     initialPageParam: undefined as DiscoverDadsCursor | undefined,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length < DISCOVER_PROFILES_PAGE_LIMIT) return undefined
+      if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
       return {
         cursor_id: lastItem.id,
@@ -217,7 +217,7 @@ const Discover = () => {
       fetchDiscoverCommunities(communitiesFilters, pageParam),
     initialPageParam: undefined as DiscoverCommunitiesCursor | undefined,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length < DISCOVER_COMMUNITIES_PAGE_LIMIT) return undefined
+      if (lastPage.length < COMMUNITIES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
       return {
         cursor_id: lastItem.id,
@@ -240,11 +240,11 @@ const Discover = () => {
     queryFn: ({ pageParam }) => fetchDiscoverEvents(eventsFilters, pageParam),
     initialPageParam: undefined as DiscoverEventsCursor | undefined,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length < DISCOVER_EVENTS_PAGE_LIMIT) return undefined
+      if (lastPage.length < EVENTS_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
       return {
         cursor_id: lastItem.id,
-        cursor_created_at: lastItem.created_at,
+        cursor_starts_at: lastItem.starts_at,
       }
     },
   })

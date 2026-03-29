@@ -9,7 +9,7 @@ import { ArrowLeft, Search, Loader2, RefreshCw } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import { ROUTES } from '@/lib/routes'
 import axiosPrivate from '@/api/axiosPrivate'
-import { TIMEOUT_LENGTH_MS, CONNECTIONS_PAGE_LIMIT } from '@/config/constants'
+import { TIMEOUT_LENGTH_MS, PROFILES_PAGE_LIMIT } from '@/config/constants'
 import {
   ConnectionResponse,
   ConnectionsFilters,
@@ -62,7 +62,7 @@ const Requests = () => {
     queryFn: ({ pageParam }) => fetchRequests(filters, pageParam),
     initialPageParam: undefined as ConnectionsCursor | undefined,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length < CONNECTIONS_PAGE_LIMIT) return undefined
+      if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
       return {
         cursor_id: lastItem.connection_id,

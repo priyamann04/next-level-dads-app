@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,12 +23,14 @@ async function fetchConnectionCounts(): Promise<ConnectionCounts> {
 
 const MyProfile = () => {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { user, setAuth } = useAuth()
   const [loading, setLoading] = useState(false)
 
   const { data: connectionCounts } = useQuery({
     queryKey: ['connections', 'counts'],
     queryFn: fetchConnectionCounts,
+    staleTime: 0, // Always fresh fetch
   })
 
   const handleShareProfile = async () => {}
@@ -45,6 +47,7 @@ const MyProfile = () => {
       )
     } catch (err: any) {
     } finally {
+      queryClient.clear()
       setAuth({ user: null, accessToken: null })
       setLoading(false)
       navigate(ROUTES.WELCOME)

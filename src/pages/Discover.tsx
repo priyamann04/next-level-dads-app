@@ -1,6 +1,10 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
@@ -118,66 +122,108 @@ async function fetchDiscoverEvents(
 
 const Discover = () => {
   const { tab = 'dads' } = useParams<{ tab: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
 
-  // Dads tab state
-  const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([])
-  const [pendingInterests, setPendingInterests] = useState<string[]>([])
-  const [pendingLocations, setPendingLocations] = useState<string[]>([])
-  const [pendingDadAges, setPendingDadAges] = useState<string[]>([])
-  const [appliedChildrenAges, setAppliedChildrenAges] = useState<string[]>([])
-  const [appliedInterests, setAppliedInterests] = useState<string[]>([])
-  const [appliedLocations, setAppliedLocations] = useState<string[]>([])
-  const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
+  // Parse URL params for initial state
+  const getArrayParam = useCallback(
+    (key: string) => searchParams.getAll(key),
+    [searchParams],
+  )
+  const getStringParam = useCallback(
+    (key: string) => searchParams.get(key) || '',
+    [searchParams],
+  )
+
+  // Dads tab state - initialize from URL params
+  const urlChildrenAges = useMemo(
+    () => getArrayParam('children_age_ranges'),
+    [getArrayParam],
+  )
+  const urlInterests = useMemo(
+    () => getArrayParam('interests'),
+    [getArrayParam],
+  )
+  const urlProvinces = useMemo(
+    () => getArrayParam('provinces'),
+    [getArrayParam],
+  )
+  const urlAgeRanges = useMemo(
+    () => getArrayParam('age_ranges'),
+    [getArrayParam],
+  )
+
+  const [pendingChildrenAges, setPendingChildrenAges] =
+    useState<string[]>(urlChildrenAges)
+  const [pendingInterests, setPendingInterests] =
+    useState<string[]>(urlInterests)
+  const [pendingLocations, setPendingLocations] =
+    useState<string[]>(urlProvinces)
+  const [pendingDadAges, setPendingDadAges] = useState<string[]>(urlAgeRanges)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
-  // Reset pending filters to applied when sheet closes without applying
+  // Reset pending filters to URL state when sheet closes without applying
   const handleFiltersOpenChange = (open: boolean) => {
     if (!open) {
-      setPendingChildrenAges(appliedChildrenAges)
-      setPendingInterests(appliedInterests)
-      setPendingLocations(appliedLocations)
-      setPendingDadAges(appliedDadAges)
+      setPendingChildrenAges(urlChildrenAges)
+      setPendingInterests(urlInterests)
+      setPendingLocations(urlProvinces)
+      setPendingDadAges(urlAgeRanges)
     }
     setFiltersOpen(open)
   }
   const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
-  // Communities tab state
-  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
-  const [appliedCommunitySearch, setAppliedCommunitySearch] = useState('')
+  // Communities tab state - initialize from URL params
+  const urlCommunitySearch = getStringParam('community_name')
+  const [communitySearchQuery, setCommunitySearchQuery] =
+    useState(urlCommunitySearch)
 
-  // Events tab state
-  const [eventSearchQuery, setEventSearchQuery] = useState('')
-  const [appliedEventSearch, setAppliedEventSearch] = useState('')
-  const [eventTypeFilter, setEventTypeFilter] = useState<EventType | null>(null)
-  const [eventPriceFilter, setEventPriceFilter] = useState<boolean | null>(null)
+  // Events tab state - initialize from URL params
+  const urlEventSearch = getStringParam('event_name')
+  const urlEventType = getStringParam('type') as EventType | ''
+  const urlIsFree = searchParams.get('is_free')
+  const [eventSearchQuery, setEventSearchQuery] = useState(urlEventSearch)
 
-  // build dads filters
+  // build dads filters from URL params
   const dadsFilters: DiscoverDadsFilters = useMemo(
     () => ({
-      interests: appliedInterests,
-      children_age_ranges: appliedChildrenAges,
-      provinces: appliedLocations,
-      age_ranges: appliedDadAges,
+      interests: urlInterests,
+      children_age_ranges: urlChildrenAges,
+      provinces: urlProvinces,
+      age_ranges: urlAgeRanges,
     }),
-    [appliedInterests, appliedChildrenAges, appliedLocations, appliedDadAges],
+    [urlInterests, urlChildrenAges, urlProvinces, urlAgeRanges],
   )
 
-  // build communities filters
+  // build communities filters from URL params
   const communitiesFilters: DiscoverCommunitiesFilters = useMemo(
-    () => ({ name: appliedCommunitySearch }),
-    [appliedCommunitySearch],
+    () => ({ name: urlCommunitySearch }),
+    [urlCommunitySearch],
   )
 
-  // build events filters
+  // build events filters from URL params
   const eventsFilters: DiscoverEventsFilters = useMemo(
     () => ({
-      name: appliedEventSearch,
-      type: eventTypeFilter,
-      is_free: eventPriceFilter,
+      name: urlEventSearch,
+      type: urlEventType || null,
+      is_free: urlIsFree === null ? null : urlIsFree === 'true',
     }),
-    [appliedEventSearch, eventTypeFilter, eventPriceFilter],
+    [urlEventSearch, urlEventType, urlIsFree],
   )
+
+  // Reset Groups + Connections caches when entering Discover section
+  useLayoutEffect(() => {
+    // Reset connections caches (for profiles)
+    queryClient.removeQueries({ queryKey: ['connections', 'connected'] })
+    queryClient.removeQueries({ queryKey: ['connections', 'requests'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
+    // Reset groups caches (for communities/events)
+    queryClient.removeQueries({ queryKey: ['groups', 'communities'] })
+    queryClient.removeQueries({ queryKey: ['groups', 'events'] })
+    queryClient.removeQueries({ queryKey: ['community'] })
+    queryClient.removeQueries({ queryKey: ['event'] })
+  }, [queryClient])
 
   // fetch discover profiles
   const {
@@ -187,11 +233,12 @@ const Discover = () => {
     fetchNextPage: fetchNextDads,
     hasNextPage: hasNextDads,
     isFetchingNextPage: isFetchingNextDads,
-    refetch: refetchDads,
   } = useInfiniteQuery({
     queryKey: ['discover', 'profiles', dadsFilters],
     queryFn: ({ pageParam }) => fetchDiscoverProfiles(dadsFilters, pageParam),
     initialPageParam: undefined as DiscoverDadsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -210,12 +257,13 @@ const Discover = () => {
     fetchNextPage: fetchNextCommunities,
     hasNextPage: hasNextCommunities,
     isFetchingNextPage: isFetchingNextCommunities,
-    refetch: refetchCommunities,
   } = useInfiniteQuery({
     queryKey: ['discover', 'communities', communitiesFilters],
     queryFn: ({ pageParam }) =>
       fetchDiscoverCommunities(communitiesFilters, pageParam),
     initialPageParam: undefined as DiscoverCommunitiesCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       if (lastPage.length < COMMUNITIES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -234,11 +282,12 @@ const Discover = () => {
     fetchNextPage: fetchNextEvents,
     hasNextPage: hasNextEvents,
     isFetchingNextPage: isFetchingNextEvents,
-    refetch: refetchEvents,
   } = useInfiniteQuery({
     queryKey: ['discover', 'events', eventsFilters],
     queryFn: ({ pageParam }) => fetchDiscoverEvents(eventsFilters, pageParam),
     initialPageParam: undefined as DiscoverEventsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       if (lastPage.length < EVENTS_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -330,6 +379,23 @@ const Discover = () => {
     return () => observer.disconnect()
   }, [hasNextEvents, isFetchingNextEvents, fetchNextEvents])
 
+  // Sync input fields with URL params when navigating back
+  useEffect(() => {
+    setCommunitySearchQuery(urlCommunitySearch)
+  }, [urlCommunitySearch])
+
+  useEffect(() => {
+    setEventSearchQuery(urlEventSearch)
+  }, [urlEventSearch])
+
+  // Sync pending filters with URL params when navigating back
+  useEffect(() => {
+    setPendingChildrenAges(urlChildrenAges)
+    setPendingInterests(urlInterests)
+    setPendingLocations(urlProvinces)
+    setPendingDadAges(urlAgeRanges)
+  }, [urlChildrenAges, urlInterests, urlProvinces, urlAgeRanges])
+
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
     setPendingChildrenAges((prev) =>
@@ -360,10 +426,22 @@ const Discover = () => {
   }
 
   const applyDadsFilters = () => {
-    setAppliedChildrenAges(pendingChildrenAges)
-    setAppliedInterests(pendingInterests)
-    setAppliedLocations(pendingLocations)
-    setAppliedDadAges(pendingDadAges)
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      // Clear existing filter params
+      newParams.delete('children_age_ranges')
+      newParams.delete('interests')
+      newParams.delete('provinces')
+      newParams.delete('age_ranges')
+      // Add new filter params
+      pendingChildrenAges.forEach((v) =>
+        newParams.append('children_age_ranges', v),
+      )
+      pendingInterests.forEach((v) => newParams.append('interests', v))
+      pendingLocations.forEach((v) => newParams.append('provinces', v))
+      pendingDadAges.forEach((v) => newParams.append('age_ranges', v))
+      return newParams
+    })
     setFiltersOpen(false)
   }
 
@@ -372,30 +450,81 @@ const Discover = () => {
     setPendingInterests([])
     setPendingLocations([])
     setPendingDadAges([])
-    setAppliedChildrenAges([])
-    setAppliedInterests([])
-    setAppliedLocations([])
-    setAppliedDadAges([])
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      newParams.delete('children_age_ranges')
+      newParams.delete('interests')
+      newParams.delete('provinces')
+      newParams.delete('age_ranges')
+      return newParams
+    })
   }
 
   const handleCommunitySearch = () => {
-    setAppliedCommunitySearch(communitySearchQuery)
+    queryClient.removeQueries({ queryKey: ['discover', 'communities'] })
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (communitySearchQuery) {
+        newParams.set('community_name', communitySearchQuery)
+      } else {
+        newParams.delete('community_name')
+      }
+      return newParams
+    })
   }
 
   const handleEventSearch = () => {
-    setAppliedEventSearch(eventSearchQuery)
+    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (eventSearchQuery) {
+        newParams.set('event_name', eventSearchQuery)
+      } else {
+        newParams.delete('event_name')
+      }
+      return newParams
+    })
+  }
+
+  const handleEventTypeToggle = (type: EventType) => {
+    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (newParams.get('type') === type) {
+        newParams.delete('type')
+      } else {
+        newParams.set('type', type)
+      }
+      return newParams
+    })
+  }
+
+  const handleEventPriceToggle = (isFree: boolean) => {
+    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (newParams.get('is_free') === String(isFree)) {
+        newParams.delete('is_free')
+      } else {
+        newParams.set('is_free', String(isFree))
+      }
+      return newParams
+    })
   }
 
   const handleRefreshDads = () => {
-    refetchDads()
+    queryClient.removeQueries({ queryKey: ['discover', 'profiles'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
   }
 
   const handleRefreshCommunities = () => {
-    refetchCommunities()
+    queryClient.removeQueries({ queryKey: ['discover', 'communities'] })
+    queryClient.removeQueries({ queryKey: ['community'] })
   }
 
   const handleRefreshEvents = () => {
-    refetchEvents()
+    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
+    queryClient.removeQueries({ queryKey: ['event'] })
   }
 
   return (
@@ -807,46 +936,30 @@ const Discover = () => {
 
               <div className="flex gap-2 mb-4 flex-wrap">
                 <Badge
-                  variant={
-                    eventTypeFilter === 'virtual' ? 'default' : 'outline'
-                  }
+                  variant={urlEventType === 'virtual' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() =>
-                    setEventTypeFilter(
-                      eventTypeFilter === 'virtual' ? null : 'virtual',
-                    )
-                  }
+                  onClick={() => handleEventTypeToggle('virtual')}
                 >
                   Virtual
                 </Badge>
                 <Badge
-                  variant={eventTypeFilter === 'local' ? 'default' : 'outline'}
+                  variant={urlEventType === 'local' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() =>
-                    setEventTypeFilter(
-                      eventTypeFilter === 'local' ? null : 'local',
-                    )
-                  }
+                  onClick={() => handleEventTypeToggle('local')}
                 >
                   Local
                 </Badge>
                 <Badge
-                  variant={eventPriceFilter === true ? 'default' : 'outline'}
+                  variant={urlIsFree === 'true' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() =>
-                    setEventPriceFilter(eventPriceFilter === true ? null : true)
-                  }
+                  onClick={() => handleEventPriceToggle(true)}
                 >
                   Free
                 </Badge>
                 <Badge
-                  variant={eventPriceFilter === false ? 'default' : 'outline'}
+                  variant={urlIsFree === 'false' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() =>
-                    setEventPriceFilter(
-                      eventPriceFilter === false ? null : false,
-                    )
-                  }
+                  onClick={() => handleEventPriceToggle(false)}
                 >
                   Paid
                 </Badge>

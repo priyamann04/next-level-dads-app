@@ -1,6 +1,6 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import DadCard from '@/components/DadCard'
 import { Button } from '@/components/ui/button'
@@ -40,14 +40,29 @@ async function fetchConnections(
 
 const Connections = () => {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [appliedSearch, setAppliedSearch] = useState('')
+  // Parse URL params for initial state
+  const getStringParam = useCallback(
+    (key: string) => searchParams.get(key) || '',
+    [searchParams],
+  )
+
+  const urlSearch = getStringParam('name')
+  const [searchQuery, setSearchQuery] = useState(urlSearch)
 
   const filters: ConnectionsFilters = useMemo(
-    () => ({ name: appliedSearch }),
-    [appliedSearch],
+    () => ({ name: urlSearch }),
+    [urlSearch],
   )
+
+  // Reset other profile list caches when entering Connections section
+  useLayoutEffect(() => {
+    queryClient.removeQueries({ queryKey: ['discover', 'profiles'] })
+    queryClient.removeQueries({ queryKey: ['connections', 'requests'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
+  }, [queryClient])
 
   const {
     data,
@@ -56,11 +71,12 @@ const Connections = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ['connections', 'connected', filters],
     queryFn: ({ pageParam }) => fetchConnections(filters, pageParam),
     initialPageParam: undefined as ConnectionsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -92,8 +108,26 @@ const Connections = () => {
     return () => observer.disconnect()
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
+  // Sync input field with URL params when navigating back
+  useEffect(() => {
+    setSearchQuery(urlSearch)
+  }, [urlSearch])
+
   const handleSearch = () => {
-    setAppliedSearch(searchQuery)
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (searchQuery) {
+        newParams.set('name', searchQuery)
+      } else {
+        newParams.delete('name')
+      }
+      return newParams
+    })
+  }
+
+  const handleRefresh = () => {
+    queryClient.removeQueries({ queryKey: ['connections', 'connected'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
   }
 
   return (
@@ -179,7 +213,7 @@ const Connections = () => {
           <Button
             variant="outline"
             className="w-full rounded-full"
-            onClick={() => refetch()}
+            onClick={handleRefresh}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh

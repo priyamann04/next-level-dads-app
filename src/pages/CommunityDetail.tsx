@@ -1,6 +1,7 @@
 import { useRef, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import { ArrowLeft, Users, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,6 +10,8 @@ import BottomNav from '@/components/BottomNav'
 import logo from '@/assets/logo.png'
 import { profileDetail } from '@/lib/routes'
 import { getStageDisplayLabel } from '@/utils/users'
+import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/contexts/AuthContext'
 import axiosPrivate from '@/api/axiosPrivate'
 import { TIMEOUT_LENGTH_MS, PROFILES_PAGE_LIMIT } from '@/config/constants'
 import type {
@@ -46,6 +49,9 @@ async function fetchCommunityMembers(
 const CommunityDetail = () => {
   const navigate = useNavigate()
   const { communityId } = useParams<{ communityId: string }>()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+  const { user } = useAuth()
 
   const {
     data: community,
@@ -55,6 +61,7 @@ const CommunityDetail = () => {
     queryKey: ['community', communityId],
     queryFn: () => fetchCommunity(communityId!),
     enabled: !!communityId,
+    staleTime: 0, // Always fresh fetch
   })
 
   const {
@@ -68,6 +75,7 @@ const CommunityDetail = () => {
     queryKey: ['community', communityId, 'members'],
     queryFn: ({ pageParam }) => fetchCommunityMembers(communityId!, pageParam),
     initialPageParam: undefined as CommunityMembersCursor | undefined,
+    staleTime: 0, // Always fresh fetch
     getNextPageParam: (lastPage) => {
       if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -78,6 +86,50 @@ const CommunityDetail = () => {
     },
     enabled: !!communityId,
   })
+
+  // Update list caches when community is fetched
+  const updateCommunityInLists = (community: Community) => {
+    const { is_member } = community
+
+    // Update in discover communities - keep only if not member
+    queryClient.setQueriesData<InfiniteData<Community[]>>(
+      { queryKey: ['discover', 'communities'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            !is_member
+              ? page.map((c) => (c.id === communityId ? { ...c, ...community } : c))
+              : page.filter((c) => c.id !== communityId),
+          ),
+        }
+      },
+    )
+
+    // Update in groups communities - keep only if member
+    queryClient.setQueriesData<InfiniteData<Community[]>>(
+      { queryKey: ['groups', 'communities'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            is_member
+              ? page.map((c) => (c.id === communityId ? { ...c, ...community } : c))
+              : page.filter((c) => c.id !== communityId),
+          ),
+        }
+      },
+    )
+  }
+
+  // Update list caches when community is fetched
+  useEffect(() => {
+    if (community) {
+      updateCommunityInLists(community)
+    }
+  }, [community])
 
   const members = useMemo(
     () => membersData?.pages.flat() ?? [],
@@ -111,13 +163,140 @@ const CommunityDetail = () => {
     navigate(profileDetail(memberId))
   }
 
-  // Action handlers (stubs for now)
+  // Update membership status in all caches (from detail page)
+  const updateMembershipInCache = (isMember: boolean) => {
+    const countDelta = isMember ? 1 : -1
+
+    // Update community cache (is_member, member_count)
+    queryClient.setQueryData<Community>(['community', communityId], (oldData) => {
+      if (!oldData) return oldData
+      return {
+        ...oldData,
+        is_member: isMember,
+        member_count: oldData.member_count + countDelta,
+        role: isMember ? 'member' : null,
+      }
+    })
+
+    // Update members list (add/remove current user)
+    if (user) {
+      queryClient.setQueryData<InfiniteData<CommunityMemberResponse[]>>(
+        ['community', communityId, 'members'],
+        (oldData) => {
+          if (!oldData) return oldData
+
+          if (isMember) {
+            // Add current user to the front of the first page
+            const newMember: CommunityMemberResponse = {
+              id: user.id,
+              name: user.name,
+              age: user.age,
+              city: user.city,
+              province: user.province,
+              about: user.about,
+              avatar_url: user.avatarUrl,
+              interests: user.interests,
+              children: user.children_age_ranges,
+              created_at: new Date().toISOString(),
+              role: 'member',
+              joined_at: new Date().toISOString(),
+            }
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page, index) =>
+                index === 0 ? [newMember, ...page] : page,
+              ),
+            }
+          } else {
+            // Remove current user from the list
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page) =>
+                page.filter((member) => member.id !== user.id),
+              ),
+            }
+          }
+        },
+      )
+    }
+
+    // Update discover communities - remove if now a member
+    queryClient.setQueriesData<InfiniteData<Community[]>>(
+      { queryKey: ['discover', 'communities'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            isMember
+              ? page.filter((c) => c.id !== communityId)
+              : page.map((c) =>
+                  c.id === communityId
+                    ? { ...c, is_member: isMember, member_count: c.member_count + countDelta }
+                    : c,
+                ),
+          ),
+        }
+      },
+    )
+
+    // Update groups communities - remove if no longer a member
+    queryClient.setQueriesData<InfiniteData<Community[]>>(
+      { queryKey: ['groups', 'communities'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            !isMember
+              ? page.filter((c) => c.id !== communityId)
+              : page.map((c) =>
+                  c.id === communityId
+                    ? { ...c, is_member: isMember, member_count: c.member_count + countDelta }
+                    : c,
+                ),
+          ),
+        }
+      },
+    )
+  }
+
+  // POST /api/communities/{id}/members - Join community
+  const joinCommunity = useMutation({
+    mutationFn: () => axiosPrivate.post(`/api/communities/${communityId}/members`),
+    onSuccess: () => {
+      updateMembershipInCache(true)
+    },
+    onError: (err: AxiosError) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to join community. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  // DELETE /api/communities/{id}/members - Leave community
+  const leaveCommunity = useMutation({
+    mutationFn: () => axiosPrivate.delete(`/api/communities/${communityId}/members`),
+    onSuccess: () => {
+      updateMembershipInCache(false)
+    },
+    onError: (err: AxiosError) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to leave community. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const handleJoin = () => {
-    // TODO: POST /api/communities/:id/join
+    joinCommunity.mutate()
   }
 
   const handleLeave = () => {
-    // TODO: DELETE /api/communities/:id/leave
+    leaveCommunity.mutate()
   }
 
   const handleManage = () => {
@@ -174,20 +353,15 @@ const CommunityDetail = () => {
   if (communityLoading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="bg-card border-b border-border sticky top-0 z-10">
-          <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBack}
-              className="rounded-full"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-heading font-semibold text-foreground">
-              Community
-            </h1>
-          </div>
+        <div className="relative bg-card border-b border-border px-6 py-5 flex items-center justify-center">
+          <img
+            src={logo}
+            alt="Next Level Dads"
+            className="h-10 absolute top-4 left-3"
+          />
+          <h1 className="text-2xl font-heading font-semibold text-foreground">
+            Community
+          </h1>
         </div>
         <div className="flex justify-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
@@ -200,20 +374,15 @@ const CommunityDetail = () => {
   if (communityError || !community) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <div className="bg-card border-b border-border sticky top-0 z-10">
-          <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleBack}
-              className="rounded-full"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-heading font-semibold text-foreground">
-              Community
-            </h1>
-          </div>
+        <div className="relative bg-card border-b border-border px-6 py-5 flex items-center justify-center">
+          <img
+            src={logo}
+            alt="Next Level Dads"
+            className="h-10 absolute top-4 left-3"
+          />
+          <h1 className="text-2xl font-heading font-semibold text-foreground">
+            Community
+          </h1>
         </div>
         <div className="text-center py-12">
           <p className="text-muted-foreground">
@@ -227,23 +396,26 @@ const CommunityDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="bg-card border-b border-border sticky top-0 z-10">
-        <div className="max-w-md mx-auto px-6 py-4 flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleBack}
-            className="rounded-full"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="text-xl font-heading font-semibold text-foreground">
-            {community.name}
-          </h1>
-        </div>
+      <div className="relative bg-card border-b border-border px-6 py-5 flex items-center justify-center">
+        <img
+          src={logo}
+          alt="Next Level Dads"
+          className="h-10 absolute top-4 left-3"
+        />
+        <h1 className="text-2xl font-heading font-semibold text-foreground">
+          {community.name}
+        </h1>
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6 space-y-6">
+        <Button
+          variant="ghost"
+          onClick={handleBack}
+          className="-ml-2 text-muted-foreground"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
         {/* Community info */}
         <div className="space-y-4">
           {community.description && (

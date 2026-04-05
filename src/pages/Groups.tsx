@@ -1,11 +1,12 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { useInfiniteQuery } from '@tanstack/react-query'
+import { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import EventCard from '@/components/EventCard'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Loader2 } from 'lucide-react'
+import { Search, Loader2, RefreshCw } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/routes'
@@ -58,16 +59,33 @@ async function fetchMyEvents(
 
 const Groups = () => {
   const { tab = 'communities' } = useParams<{ tab: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
 
-  // Communities tab state
-  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
-  const [appliedCommunitySearch, setAppliedCommunitySearch] = useState('')
+  // Parse URL params for initial state
+  const getStringParam = useCallback(
+    (key: string) => searchParams.get(key) || '',
+    [searchParams],
+  )
 
-  // Events tab state
-  const [eventSearchQuery, setEventSearchQuery] = useState('')
-  const [appliedEventSearch, setAppliedEventSearch] = useState('')
+  // Communities tab state - initialize from URL params
+  const urlCommunitySearch = getStringParam('community_name')
+  const [communitySearchQuery, setCommunitySearchQuery] =
+    useState(urlCommunitySearch)
 
-  // fetch my communities
+  // Events tab state - initialize from URL params
+  const urlEventSearch = getStringParam('event_name')
+  const [eventSearchQuery, setEventSearchQuery] = useState(urlEventSearch)
+
+  // Reset Discover communities/events caches when entering Groups section
+  useLayoutEffect(() => {
+    queryClient.removeQueries({ queryKey: ['discover', 'communities'] })
+    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
+    queryClient.removeQueries({ queryKey: ['community'] })
+    queryClient.removeQueries({ queryKey: ['event'] })
+  }, [queryClient])
+
+  // fetch my communities using URL params
   const {
     data: communitiesData,
     isLoading: communitiesLoading,
@@ -76,10 +94,12 @@ const Groups = () => {
     hasNextPage: hasNextCommunities,
     isFetchingNextPage: isFetchingNextCommunities,
   } = useInfiniteQuery({
-    queryKey: ['groups', 'communities', appliedCommunitySearch],
+    queryKey: ['groups', 'communities', urlCommunitySearch],
     queryFn: ({ pageParam }) =>
-      fetchMyCommunities(appliedCommunitySearch, pageParam),
+      fetchMyCommunities(urlCommunitySearch, pageParam),
     initialPageParam: undefined as DiscoverCommunitiesCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       if (lastPage.length < COMMUNITIES_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -90,7 +110,7 @@ const Groups = () => {
     },
   })
 
-  // fetch my events
+  // fetch my events using URL params
   const {
     data: eventsData,
     isLoading: eventsLoading,
@@ -99,9 +119,11 @@ const Groups = () => {
     hasNextPage: hasNextEvents,
     isFetchingNextPage: isFetchingNextEvents,
   } = useInfiniteQuery({
-    queryKey: ['groups', 'events', appliedEventSearch],
-    queryFn: ({ pageParam }) => fetchMyEvents(appliedEventSearch, pageParam),
+    queryKey: ['groups', 'events', urlEventSearch],
+    queryFn: ({ pageParam }) => fetchMyEvents(urlEventSearch, pageParam),
     initialPageParam: undefined as DiscoverEventsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
     getNextPageParam: (lastPage) => {
       if (lastPage.length < EVENTS_PAGE_LIMIT) return undefined
       const lastItem = lastPage[lastPage.length - 1]
@@ -166,12 +188,47 @@ const Groups = () => {
     return () => observer.disconnect()
   }, [hasNextEvents, isFetchingNextEvents, fetchNextEvents])
 
+  // Sync input fields with URL params when navigating back
+  useEffect(() => {
+    setCommunitySearchQuery(urlCommunitySearch)
+  }, [urlCommunitySearch])
+
+  useEffect(() => {
+    setEventSearchQuery(urlEventSearch)
+  }, [urlEventSearch])
+
   const handleCommunitySearch = () => {
-    setAppliedCommunitySearch(communitySearchQuery)
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (communitySearchQuery) {
+        newParams.set('community_name', communitySearchQuery)
+      } else {
+        newParams.delete('community_name')
+      }
+      return newParams
+    })
   }
 
   const handleEventSearch = () => {
-    setAppliedEventSearch(eventSearchQuery)
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (eventSearchQuery) {
+        newParams.set('event_name', eventSearchQuery)
+      } else {
+        newParams.delete('event_name')
+      }
+      return newParams
+    })
+  }
+
+  const handleRefreshCommunities = () => {
+    queryClient.removeQueries({ queryKey: ['groups', 'communities'] })
+    queryClient.removeQueries({ queryKey: ['community'] })
+  }
+
+  const handleRefreshEvents = () => {
+    queryClient.removeQueries({ queryKey: ['groups', 'events'] })
+    queryClient.removeQueries({ queryKey: ['event'] })
   }
 
   return (
@@ -270,6 +327,17 @@ const Groups = () => {
                   </div>
                 )}
               </div>
+
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefreshCommunities}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           )}
 
@@ -327,6 +395,17 @@ const Groups = () => {
                     </p>
                   </div>
                 )}
+              </div>
+
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefreshEvents}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
               </div>
             </div>
           )}

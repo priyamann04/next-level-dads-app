@@ -1,10 +1,16 @@
 import { Users } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Card, CardContent } from './ui/card'
+import { useToast } from '@/hooks/use-toast'
 import { communityDetail } from '@/lib/routes'
+import axiosPrivate from '@/api/axiosPrivate'
 import type { Community } from '@/types/communities'
+
+type ListContext = 'discover' | 'groups'
 
 const CommunityCard = ({
   id,
@@ -15,18 +21,96 @@ const CommunityCard = ({
   role,
 }: Community) => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  // Determine which list context we're in based on route
+  const getListContext = (): ListContext => {
+    const { pathname } = location
+    if (pathname.startsWith('/groups')) return 'groups'
+    return 'discover'
+  }
+
+  const listContext = getListContext()
 
   const handleCardClick = () => {
     navigate(communityDetail(id))
   }
 
-  // Action handlers (stubs for now)
+  // Update membership status in current list's cache only (from card)
+  const updateMembershipInCache = (isMember: boolean) => {
+    if (listContext === 'discover') {
+      // Remove from discover cache (user just joined)
+      queryClient.setQueriesData<InfiniteData<Community[]>>(
+        { queryKey: ['discover', 'communities'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.filter((community) => community.id !== id),
+            ),
+          }
+        },
+      )
+    } else {
+      // Remove from groups cache (user just left)
+      queryClient.setQueriesData<InfiniteData<Community[]>>(
+        { queryKey: ['groups', 'communities'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              page.filter((community) => community.id !== id),
+            ),
+          }
+        },
+      )
+    }
+
+    // Remove detail page caches so they fetch fresh on navigation
+    queryClient.removeQueries({ queryKey: ['community', id] })
+    queryClient.removeQueries({ queryKey: ['community', id, 'members'] })
+  }
+
+  // POST /api/communities/{id}/members - Join community
+  const joinCommunity = useMutation({
+    mutationFn: () => axiosPrivate.post(`/api/communities/${id}/members`),
+    onSuccess: () => {
+      updateMembershipInCache(true)
+    },
+    onError: (err: AxiosError) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to join community. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  // DELETE /api/communities/{id}/members - Leave community
+  const leaveCommunity = useMutation({
+    mutationFn: () => axiosPrivate.delete(`/api/communities/${id}/members`),
+    onSuccess: () => {
+      updateMembershipInCache(false)
+    },
+    onError: (err: AxiosError) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to leave community. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const handleJoin = () => {
-    // TODO: POST /api/communities/:id/join
+    joinCommunity.mutate()
   }
 
   const handleLeave = () => {
-    // TODO: DELETE /api/communities/:id/leave
+    leaveCommunity.mutate()
   }
 
   const handleManage = () => {

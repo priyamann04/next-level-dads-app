@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,6 +18,7 @@ import {
 } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import BottomNav from '@/components/BottomNav'
+import { useToast } from '@/hooks/use-toast'
 import axiosPrivate from '@/api/axiosPrivate'
 import { TIMEOUT_LENGTH_MS } from '@/config/constants'
 import type { Event } from '@/types/events'
@@ -53,6 +56,8 @@ const formatPrice = (price: string) => {
 const EventDetail = () => {
   const { eventId } = useParams<{ eventId: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const {
     data: event,
@@ -62,19 +67,162 @@ const EventDetail = () => {
     queryKey: ['event', eventId],
     queryFn: () => fetchEvent(eventId!),
     enabled: !!eventId,
+    staleTime: 0, // Always fresh fetch
   })
+
+  // Update list caches when event is fetched
+  const updateEventInLists = (event: Event) => {
+    const { is_attending } = event
+
+    // Update in discover events - keep only if not attending
+    queryClient.setQueriesData<InfiniteData<Event[]>>(
+      { queryKey: ['discover', 'events'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            !is_attending
+              ? page.map((e) => (e.id === eventId ? { ...e, ...event } : e))
+              : page.filter((e) => e.id !== eventId),
+          ),
+        }
+      },
+    )
+
+    // Update in groups events - keep only if attending
+    queryClient.setQueriesData<InfiniteData<Event[]>>(
+      { queryKey: ['groups', 'events'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            is_attending
+              ? page.map((e) => (e.id === eventId ? { ...e, ...event } : e))
+              : page.filter((e) => e.id !== eventId),
+          ),
+        }
+      },
+    )
+  }
+
+  // Update list caches when event is fetched
+  useEffect(() => {
+    if (event) {
+      updateEventInLists(event)
+    }
+  }, [event])
 
   const handleBack = () => {
     navigate(-1)
   }
 
-  // Action handlers (stubs for now)
+  // Update attendance status in all caches (from detail page)
+  const updateAttendanceInCache = (isAttending: boolean) => {
+    const countDelta = isAttending ? 1 : -1
+
+    // Update event cache (is_attending, attendee_count)
+    queryClient.setQueryData<Event>(['event', eventId], (oldData) => {
+      if (!oldData) return oldData
+      return {
+        ...oldData,
+        is_attending: isAttending,
+        attendee_count: oldData.attendee_count + countDelta,
+      }
+    })
+
+    // Update discover events - remove if now attending
+    queryClient.setQueriesData<InfiniteData<Event[]>>(
+      { queryKey: ['discover', 'events'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            isAttending
+              ? page.filter((e) => e.id !== eventId)
+              : page.map((e) =>
+                  e.id === eventId
+                    ? { ...e, is_attending: isAttending, attendee_count: e.attendee_count + countDelta }
+                    : e,
+                ),
+          ),
+        }
+      },
+    )
+
+    // Update groups events - remove if no longer attending
+    queryClient.setQueriesData<InfiniteData<Event[]>>(
+      { queryKey: ['groups', 'events'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            !isAttending
+              ? page.filter((e) => e.id !== eventId)
+              : page.map((e) =>
+                  e.id === eventId
+                    ? { ...e, is_attending: isAttending, attendee_count: e.attendee_count + countDelta }
+                    : e,
+                ),
+          ),
+        }
+      },
+    )
+  }
+
+  // POST /api/events/{id}/attendees - Register for event
+  const registerForEvent = useMutation({
+    mutationFn: () => axiosPrivate.post(`/api/events/${eventId}/attendees`),
+    onSuccess: () => {
+      updateAttendanceInCache(true)
+    },
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 403) {
+        toast({
+          title: 'Paid Event',
+          description: 'This is a paid event. Please register through the event page.',
+          variant: 'destructive',
+        })
+      } else if (err.response?.status === 404) {
+        toast({
+          title: 'Not Found',
+          description: 'This event could not be found.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to register for event. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    },
+  })
+
+  // DELETE /api/events/{id}/attendees - Unregister from event
+  const unregisterFromEvent = useMutation({
+    mutationFn: () => axiosPrivate.delete(`/api/events/${eventId}/attendees`),
+    onSuccess: () => {
+      updateAttendanceInCache(false)
+    },
+    onError: (err: AxiosError) => {
+      toast({
+        title: 'Error',
+        description: 'Failed to unregister from event. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const handleRegister = () => {
-    // TODO: POST /api/events/:id/register
+    registerForEvent.mutate()
   }
 
   const handleUnregister = () => {
-    // TODO: DELETE /api/events/:id/unregister
+    unregisterFromEvent.mutate()
   }
 
   const getHostDisplay = () => {

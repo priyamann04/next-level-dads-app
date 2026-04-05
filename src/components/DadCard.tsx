@@ -1,11 +1,21 @@
 import { MapPin } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import {
+  useMutation,
+  useQueryClient,
+  InfiniteData,
+} from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import { Card, CardContent } from './ui/card'
 import { getStageDisplayLabel } from '@/utils/users'
 import { profileDetail } from '@/lib/routes'
-import type { Profile } from '@/types/users'
+import { useToast } from '@/hooks/use-toast'
+import axiosPrivate from '@/api/axiosPrivate'
+import type { Profile, ConnectionStatus } from '@/types/users'
+
+type ListContext = 'discover' | 'connections' | 'requests'
 
 interface DadCardProps extends Profile {
   connection_id?: string
@@ -23,11 +33,22 @@ const DadCard = ({
   interests,
   avatar_url,
   connection_status,
-  created_at,
-  connection_id,
-  connection_updated_at,
 }: DadCardProps) => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  // Determine which list context we're in based on route
+  const getListContext = (): ListContext => {
+    const { pathname } = location
+    if (pathname.startsWith('/discover')) return 'discover'
+    if (pathname.startsWith('/connections')) return 'connections'
+    if (pathname.startsWith('/requests')) return 'requests'
+    return 'discover' // fallback
+  }
+
+  const listContext = getListContext()
 
   const initials = name
     .split(' ')
@@ -39,21 +60,147 @@ const DadCard = ({
     navigate(profileDetail(id))
   }
 
-  // Connection action handlers (stubs for now)
+  // Update connection status in current list's cache only (from card)
+  const updateStatusInCache = (newStatus: ConnectionStatus) => {
+    if (listContext === 'discover') {
+      // Update in discover profiles - keep only if null or pending_outgoing
+      queryClient.setQueriesData<InfiniteData<Profile[]>>(
+        { queryKey: ['discover', 'profiles'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              newStatus === null || newStatus === 'pending_outgoing'
+                ? page.map((profile) =>
+                    profile.id === id
+                      ? { ...profile, connection_status: newStatus }
+                      : profile,
+                  )
+                : page.filter((profile) => profile.id !== id),
+            ),
+          }
+        },
+      )
+    } else if (listContext === 'connections') {
+      // Update in connections list - remove if not connected
+      queryClient.setQueriesData<InfiniteData<Profile[]>>(
+        { queryKey: ['connections', 'connected'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              newStatus === 'connected'
+                ? page.map((profile) =>
+                    profile.id === id
+                      ? { ...profile, connection_status: newStatus }
+                      : profile,
+                  )
+                : page.filter((profile) => profile.id !== id),
+            ),
+          }
+        },
+      )
+    } else if (listContext === 'requests') {
+      // Update in requests list - remove if not pending_incoming
+      queryClient.setQueriesData<InfiniteData<Profile[]>>(
+        { queryKey: ['connections', 'requests'] },
+        (oldData) => {
+          if (!oldData) return oldData
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) =>
+              newStatus === 'pending_incoming'
+                ? page.map((profile) =>
+                    profile.id === id
+                      ? { ...profile, connection_status: newStatus }
+                      : profile,
+                  )
+                : page.filter((profile) => profile.id !== id),
+            ),
+          }
+        },
+      )
+    }
+
+    // Remove detail page cache so it fetches fresh on navigation
+    queryClient.removeQueries({ queryKey: ['profile', id] })
+  }
+
+  // POST /api/connections/{id} - Send connection request
+  const sendConnectionRequest = useMutation({
+    mutationFn: () =>
+      axiosPrivate.post<{ connection_status: ConnectionStatus }>(
+        `/api/connections/${id}`,
+      ),
+    onSuccess: (res) => {
+      updateStatusInCache(res.data.connection_status)
+    },
+    onError: (err: AxiosError<{ connection_status: ConnectionStatus }>) => {
+      if (
+        err.response?.status === 409 &&
+        err.response.data?.connection_status
+      ) {
+        updateStatusInCache(err.response.data.connection_status)
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to send connection request. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    },
+  })
+
+  // PATCH /api/connections/{id} - Accept connection request
+  const acceptConnectionRequest = useMutation({
+    mutationFn: () => axiosPrivate.patch(`/api/connections/${id}`),
+    onSuccess: () => {
+      updateStatusInCache('connected')
+    },
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 404) {
+        updateStatusInCache(null)
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to accept connection. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    },
+  })
+
+  // DELETE /api/connections/{id} - Remove/cancel/decline connection
+  const removeConnection = useMutation({
+    mutationFn: () => axiosPrivate.delete(`/api/connections/${id}`),
+    onSuccess: () => {
+      updateStatusInCache(null)
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to update connection. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const handleConnect = () => {
-    // TODO: POST /api/connections/ with target user id
+    sendConnectionRequest.mutate()
   }
 
   const handleCancelRequest = () => {
-    // TODO: DELETE /api/connections/${connection_id}
+    removeConnection.mutate()
   }
 
   const handleAccept = () => {
-    // TODO: PATCH /api/connections/${connection_id}
+    acceptConnectionRequest.mutate()
   }
 
   const handleIgnore = () => {
-    // TODO: DELETE /api/connections/${connection_id}
+    removeConnection.mutate()
   }
 
   const handleChat = () => {
@@ -61,8 +208,13 @@ const DadCard = ({
   }
 
   const handleUnconnect = () => {
-    // TODO: DELETE /api/connections/${connection_id}
+    removeConnection.mutate()
   }
+
+  const isLoading =
+    sendConnectionRequest.isPending ||
+    acceptConnectionRequest.isPending ||
+    removeConnection.isPending
 
   const renderButtons = () => {
     if (connection_status === 'blocked') return null
@@ -83,6 +235,7 @@ const DadCard = ({
           <Button
             className="flex-1 rounded-full font-semibold"
             variant="outline"
+            disabled={isLoading}
             onClick={(e) => {
               e.stopPropagation()
               handleUnconnect()
@@ -100,6 +253,7 @@ const DadCard = ({
           <Button
             className="flex-1 rounded-full font-semibold"
             style={{ backgroundColor: '#D8A24A' }}
+            disabled={isLoading}
             onClick={(e) => {
               e.stopPropagation()
               handleAccept()
@@ -110,6 +264,7 @@ const DadCard = ({
           <Button
             className="flex-1 rounded-full font-semibold"
             variant="outline"
+            disabled={isLoading}
             onClick={(e) => {
               e.stopPropagation()
               handleIgnore()
@@ -126,6 +281,7 @@ const DadCard = ({
         <Button
           className="w-full rounded-full font-semibold"
           style={{ backgroundColor: '#9ca3af' }}
+          disabled={isLoading}
           onClick={(e) => {
             e.stopPropagation()
             handleCancelRequest()
@@ -141,6 +297,7 @@ const DadCard = ({
       <Button
         className="w-full rounded-full font-semibold"
         style={{ backgroundColor: '#D8A24A' }}
+        disabled={isLoading}
         onClick={(e) => {
           e.stopPropagation()
           handleConnect()

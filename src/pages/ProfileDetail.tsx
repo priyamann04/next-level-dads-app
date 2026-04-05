@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 import BottomNav from '@/components/BottomNav'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,8 +10,9 @@ import { MapPin, Calendar, ArrowLeft, Loader2 } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import { getStageDisplayLabel } from '@/utils/users'
 import axiosPrivate from '@/api/axiosPrivate'
+import { useToast } from '@/hooks/use-toast'
 import { TIMEOUT_LENGTH_MS } from '@/config/constants'
-import type { Profile } from '@/types/users'
+import type { Profile, ConnectionStatus } from '@/types/users'
 
 async function fetchProfile(id: string): Promise<Profile> {
   const res = await axiosPrivate.get<Profile>(`/api/users/${id}`, {
@@ -22,9 +25,64 @@ const ProfileDetail = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { id } = useParams<{ id: string }>()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   // Derive context from route path
   const isFromDiscover = location.pathname.startsWith('/discover/dads')
+
+  // Update profile in all list caches
+  const updateProfileInLists = (profile: Profile) => {
+    const { connection_status } = profile
+
+    // Update in discover profiles - keep only if null or pending_outgoing
+    queryClient.setQueriesData<InfiniteData<Profile[]>>(
+      { queryKey: ['discover', 'profiles'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            connection_status === null || connection_status === 'pending_outgoing'
+              ? page.map((p) => (p.id === id ? { ...p, ...profile } : p))
+              : page.filter((p) => p.id !== id),
+          ),
+        }
+      },
+    )
+
+    // Update in connections list - keep only if connected
+    queryClient.setQueriesData<InfiniteData<Profile[]>>(
+      { queryKey: ['connections', 'connected'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            connection_status === 'connected'
+              ? page.map((p) => (p.id === id ? { ...p, ...profile } : p))
+              : page.filter((p) => p.id !== id),
+          ),
+        }
+      },
+    )
+
+    // Update in requests list - keep only if pending_incoming
+    queryClient.setQueriesData<InfiniteData<Profile[]>>(
+      { queryKey: ['connections', 'requests'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            connection_status === 'pending_incoming'
+              ? page.map((p) => (p.id === id ? { ...p, ...profile } : p))
+              : page.filter((p) => p.id !== id),
+          ),
+        }
+      },
+    )
+  }
 
   const {
     data: profile,
@@ -34,7 +92,15 @@ const ProfileDetail = () => {
     queryKey: ['profile', id],
     queryFn: () => fetchProfile(id!),
     enabled: !!id,
+    staleTime: 0, // Always fresh fetch
   })
+
+  // Update list caches when profile is fetched
+  useEffect(() => {
+    if (profile) {
+      updateProfileInLists(profile)
+    }
+  }, [profile])
 
   const initials = profile
     ? profile.name
@@ -48,21 +114,145 @@ const ProfileDetail = () => {
     navigate(-1)
   }
 
-  // Connection action handlers (stubs for now)
+  // Update connection status in all relevant caches
+  const updateStatusInCache = (newStatus: ConnectionStatus) => {
+    // Update the profile query directly
+    queryClient.setQueryData<Profile>(['profile', id], (oldData) => {
+      if (!oldData) return oldData
+      return { ...oldData, connection_status: newStatus }
+    })
+
+    // Update in discover profiles - keep only if null or pending_outgoing
+    queryClient.setQueriesData<InfiniteData<Profile[]>>(
+      { queryKey: ['discover', 'profiles'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            newStatus === null || newStatus === 'pending_outgoing'
+              ? page.map((profile) =>
+                  profile.id === id
+                    ? { ...profile, connection_status: newStatus }
+                    : profile,
+                )
+              : page.filter((profile) => profile.id !== id),
+          ),
+        }
+      },
+    )
+
+    // Update in connections list - update status, remove if not connected
+    queryClient.setQueriesData<InfiniteData<Profile[]>>(
+      { queryKey: ['connections', 'connected'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            newStatus === 'connected'
+              ? page.map((profile) =>
+                  profile.id === id
+                    ? { ...profile, connection_status: newStatus }
+                    : profile,
+                )
+              : page.filter((profile) => profile.id !== id),
+          ),
+        }
+      },
+    )
+
+    // Update in requests list - update status, remove if not pending_incoming
+    queryClient.setQueriesData<InfiniteData<Profile[]>>(
+      { queryKey: ['connections', 'requests'] },
+      (oldData) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) =>
+            newStatus === 'pending_incoming'
+              ? page.map((profile) =>
+                  profile.id === id
+                    ? { ...profile, connection_status: newStatus }
+                    : profile,
+                )
+              : page.filter((profile) => profile.id !== id),
+          ),
+        }
+      },
+    )
+  }
+
+  // POST /api/connections/{id} - Send connection request
+  const sendConnectionRequest = useMutation({
+    mutationFn: () =>
+      axiosPrivate.post<{ connection_status: ConnectionStatus }>(
+        `/api/connections/${id}`,
+      ),
+    onSuccess: (res) => {
+      updateStatusInCache(res.data.connection_status)
+    },
+    onError: (err: AxiosError<{ connection_status: ConnectionStatus }>) => {
+      if (err.response?.status === 409 && err.response.data?.connection_status) {
+        updateStatusInCache(err.response.data.connection_status)
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to send connection request. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    },
+  })
+
+  // PATCH /api/connections/{id} - Accept connection request
+  const acceptConnectionRequest = useMutation({
+    mutationFn: () => axiosPrivate.patch(`/api/connections/${id}`),
+    onSuccess: () => {
+      updateStatusInCache('connected')
+    },
+    onError: (err: AxiosError) => {
+      if (err.response?.status === 404) {
+        updateStatusInCache(null)
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to accept connection. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    },
+  })
+
+  // DELETE /api/connections/{id} - Remove/cancel/decline connection
+  const removeConnection = useMutation({
+    mutationFn: () => axiosPrivate.delete(`/api/connections/${id}`),
+    onSuccess: () => {
+      updateStatusInCache(null)
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to update connection. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
   const handleConnect = () => {
-    // TODO: POST /api/connections/ with target user id
+    sendConnectionRequest.mutate()
   }
 
   const handleCancelRequest = () => {
-    // TODO: DELETE /api/connections/${connection_id}
+    removeConnection.mutate()
   }
 
   const handleAccept = () => {
-    // TODO: PATCH /api/connections/${connection_id}
+    acceptConnectionRequest.mutate()
   }
 
   const handleIgnore = () => {
-    // TODO: DELETE /api/connections/${connection_id}
+    removeConnection.mutate()
   }
 
   const handleChat = () => {
@@ -70,8 +260,13 @@ const ProfileDetail = () => {
   }
 
   const handleUnconnect = () => {
-    // TODO: DELETE /api/connections/${connection_id}
+    removeConnection.mutate()
   }
+
+  const isMutating =
+    sendConnectionRequest.isPending ||
+    acceptConnectionRequest.isPending ||
+    removeConnection.isPending
 
   const renderButtons = () => {
     if (!profile) return null
@@ -93,6 +288,7 @@ const ProfileDetail = () => {
           <Button
             className="flex-1 rounded-full font-semibold"
             variant="outline"
+            disabled={isMutating}
             onClick={handleUnconnect}
           >
             Unconnect
@@ -107,6 +303,7 @@ const ProfileDetail = () => {
           <Button
             className="flex-1 rounded-full font-semibold"
             style={{ backgroundColor: '#D8A24A' }}
+            disabled={isMutating}
             onClick={handleAccept}
           >
             Accept
@@ -114,6 +311,7 @@ const ProfileDetail = () => {
           <Button
             className="flex-1 rounded-full font-semibold"
             variant="outline"
+            disabled={isMutating}
             onClick={handleIgnore}
           >
             Ignore
@@ -127,6 +325,7 @@ const ProfileDetail = () => {
         <Button
           className="w-full rounded-full font-semibold"
           style={{ backgroundColor: '#9ca3af' }}
+          disabled={isMutating}
           onClick={handleCancelRequest}
         >
           Requested
@@ -139,6 +338,7 @@ const ProfileDetail = () => {
       <Button
         className="w-full rounded-full font-semibold"
         style={{ backgroundColor: '#D8A24A' }}
+        disabled={isMutating}
         onClick={handleConnect}
       >
         Connect

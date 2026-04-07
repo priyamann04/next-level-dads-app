@@ -24,7 +24,6 @@ import CommunityDetail from './pages/CommunityDetail'
 import Members from './pages/Members'
 import MyProfile from './pages/MyProfile'
 import ProfileDetail from './pages/ProfileDetail'
-import EditProfile from './pages/EditProfile'
 import Connections from './pages/Connections'
 import Requests from './pages/Requests'
 import EventDetail from './pages/EventDetail'
@@ -142,10 +141,6 @@ const AppContent = () => {
           <Route
             path={ROUTES.PROFILE}
             element={<ProtectedRoute><MyProfile /></ProtectedRoute>}
-          />
-          <Route
-            path={ROUTES.EDIT_PROFILE}
-            element={<ProtectedRoute><EditProfile /></ProtectedRoute>}
           />
           <Route
             path="/profiles/:id"

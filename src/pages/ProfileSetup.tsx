@@ -142,12 +142,26 @@ const ProfileSetup = () => {
     setStep(step + 1)
   }
 
-  const handleBack = () => {
+  const handleBack = async () => {
     if (loading) return
     if (step > 1) {
       setStep(step - 1)
     } else {
-      navigate(ROUTES.WELCOME)
+      // if we're at step 1, treat back as a cancel and log the user out
+      try {
+        await axiosPrivate.post(
+          '/api/auth/logout',
+          {},
+          {
+            timeout: TIMEOUT_LENGTH_MS,
+          },
+        )
+      } catch {
+        // logout locally even if server call fails
+      } finally {
+        setAuth({ user: null, accessToken: null })
+        navigate(ROUTES.WELCOME)
+      }
     }
   }
 
@@ -220,7 +234,7 @@ const ProfileSetup = () => {
             <span className="text-sm font-medium text-muted-foreground">
               Step {step} of {totalSteps}
             </span>
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate(ROUTES.DISCOVER_DADS)}
@@ -228,7 +242,7 @@ const ProfileSetup = () => {
               disabled={loading}
             >
               Skip
-            </Button>
+            </Button> */}
           </div>
           <Progress
             value={progress}

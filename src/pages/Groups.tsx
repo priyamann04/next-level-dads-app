@@ -1,12 +1,22 @@
 import { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
-import { useParams, Link, useSearchParams } from 'react-router-dom'
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import EventCard from '@/components/EventCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Loader2, RefreshCw } from 'lucide-react'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import { Search, Loader2, RefreshCw, Plus } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+import { communityDetail } from '@/lib/routes'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/routes'
@@ -61,6 +71,8 @@ const Groups = () => {
   const { tab = 'communities' } = useParams<{ tab: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   // Parse URL params for initial state
   const getStringParam = useCallback(
@@ -76,6 +88,46 @@ const Groups = () => {
   // Events tab state - initialize from URL params
   const urlEventSearch = getStringParam('event_name')
   const [eventSearchQuery, setEventSearchQuery] = useState(urlEventSearch)
+
+  // Create community modal state
+  const [isCreateCommunityOpen, setIsCreateCommunityOpen] = useState(false)
+  const [newCommunityName, setNewCommunityName] = useState('')
+  const [newCommunityDescription, setNewCommunityDescription] = useState('')
+
+  const handleCreateCommunityOpenChange = (open: boolean) => {
+    setIsCreateCommunityOpen(open)
+    if (!open) {
+      setNewCommunityName('')
+      setNewCommunityDescription('')
+    }
+  }
+
+  const createCommunity = useMutation({
+    mutationFn: (data: { name: string; description?: string }) =>
+      axiosPrivate.post<{ id: string }>('/api/communities/', data, {
+        timeout: TIMEOUT_LENGTH_MS,
+      }),
+    onSuccess: (res) => {
+      queryClient.removeQueries({ queryKey: ['groups', 'communities'] })
+      handleCreateCommunityOpenChange(false)
+      navigate(communityDetail(res.data.id))
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'Failed to create community. Please try again.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const handleCreateCommunity = () => {
+    if (!newCommunityName.trim()) return
+    createCommunity.mutate({
+      name: newCommunityName.trim(),
+      description: newCommunityDescription.trim() || undefined,
+    })
+  }
 
   // Reset Discover communities/events caches when entering Groups section
   useLayoutEffect(() => {
@@ -274,6 +326,75 @@ const Groups = () => {
 
           {tab === 'communities' && (
             <div className="space-y-4 animate-fade-in">
+              <Dialog
+                open={isCreateCommunityOpen}
+                onOpenChange={handleCreateCommunityOpenChange}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-full font-semibold text-foreground bg-white"
+                    style={{ borderColor: '#D8A24A' }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Community
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Create Community</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="community-name"
+                        className="text-sm font-medium text-foreground"
+                      >
+                        Name <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        id="community-name"
+                        placeholder="Community name"
+                        value={newCommunityName}
+                        onChange={(e) => setNewCommunityName(e.target.value)}
+                        maxLength={100}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="community-description"
+                        className="text-sm font-medium text-foreground"
+                      >
+                        Description
+                      </label>
+                      <Textarea
+                        id="community-description"
+                        placeholder="What is this community about?"
+                        value={newCommunityDescription}
+                        onChange={(e) => setNewCommunityDescription(e.target.value)}
+                        maxLength={500}
+                        className="mt-1 min-h-24"
+                      />
+                    </div>
+                    <Button
+                      className="w-full"
+                      onClick={handleCreateCommunity}
+                      disabled={!newCommunityName.trim() || createCommunity.isPending}
+                    >
+                      {createCommunity.isPending ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        'Create'
+                      )}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               <form
                 className="relative mb-4"
                 onSubmit={(e) => {

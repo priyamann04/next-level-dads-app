@@ -1,4 +1,11 @@
-import { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from 'react'
 import { useParams, Link, useSearchParams } from 'react-router-dom'
 import {
   useInfiniteQuery,
@@ -461,7 +468,6 @@ const Discover = () => {
   }
 
   const handleCommunitySearch = () => {
-    queryClient.removeQueries({ queryKey: ['discover', 'communities'] })
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev)
       if (communitySearchQuery) {
@@ -474,7 +480,6 @@ const Discover = () => {
   }
 
   const handleEventSearch = () => {
-    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev)
       if (eventSearchQuery) {
@@ -487,7 +492,6 @@ const Discover = () => {
   }
 
   const handleEventTypeToggle = (type: EventType) => {
-    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev)
       if (newParams.get('type') === type) {
@@ -500,7 +504,6 @@ const Discover = () => {
   }
 
   const handleEventPriceToggle = (isFree: boolean) => {
-    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
     setSearchParams((prev) => {
       const newParams = new URLSearchParams(prev)
       if (newParams.get('is_free') === String(isFree)) {
@@ -921,7 +924,7 @@ const Discover = () => {
                 />
               </form>
 
-              <div className="py-4">
+              {/* <div className="py-4">
                 <Button
                   variant="outline"
                   className="w-full rounded-full font-semibold text-foreground bg-white"
@@ -932,7 +935,7 @@ const Discover = () => {
                 >
                   Host Your Own Event
                 </Button>
-              </div>
+              </div> */}
 
               <div className="flex gap-2 mb-4 flex-wrap">
                 <Badge

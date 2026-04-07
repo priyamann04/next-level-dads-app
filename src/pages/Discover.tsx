@@ -1,18 +1,24 @@
-import { useState, useMemo } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  useCallback,
+  useLayoutEffect,
+} from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 import BottomNav from '@/components/BottomNav'
 import CommunityCard from '@/components/CommunityCard'
 import DadCard from '@/components/DadCard'
 import EventCard from '@/components/EventCard'
-import { useToast } from '@/hooks/use-toast'
-import { useGroups } from '@/contexts/GroupsContext'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  RefreshCw,
-  Search,
-  SlidersHorizontal,
-} from 'lucide-react'
+import { RefreshCw, Search, SlidersHorizontal, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   Sheet,
@@ -22,334 +28,507 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
-import { ROUTES, communityChat, dadDetail } from '@/lib/routes'
-import { events as sharedEvents } from '@/data/events'
+import { ROUTES } from '@/lib/routes'
+import axiosPrivate from '@/api/axiosPrivate'
+import {
+  TIMEOUT_LENGTH_MS,
+  PROFILES_PAGE_LIMIT,
+  COMMUNITIES_PAGE_LIMIT,
+  EVENTS_PAGE_LIMIT,
+  DISCOVER_DADS_FILTERS_AGE_RANGES,
+  STAGE_OPTIONS,
+  PROVINCE_OPTIONS,
+} from '@/config/constants'
+import { Profile, DiscoverDadsFilters, DiscoverDadsCursor } from '@/types/users'
+import {
+  Community,
+  DiscoverCommunitiesFilters,
+  DiscoverCommunitiesCursor,
+} from '@/types/communities'
+import {
+  Event,
+  EventType,
+  DiscoverEventsFilters,
+  DiscoverEventsCursor,
+} from '@/types/events'
 
-const dads = [
-  {
-    id: 'dad-james',
-    name: 'James Martinez',
-    age: 32,
-    city: 'Vancouver',
-    province: 'BC',
-    stage: 'Toddler (2–3 years)',
-    bio: 'Weekend warrior dad who loves trail running and teaching my little one about nature.',
-    interests: ['Fitness', 'Cooking', 'Outdoors'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: 'dad-david',
-    name: 'David Chen',
-    age: 38,
-    city: 'Toronto',
-    province: 'ON',
-    stage: 'Elementary (6–12 years)',
-    bio: 'Tech enthusiast and soccer coach. Always looking for ways to keep the kids active and learning.',
-    interests: ['Tech', 'Sports', 'Gaming'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: 'dad-marcus',
-    name: 'Marcus Johnson',
-    age: 35,
-    city: 'Calgary',
-    province: 'AB',
-    stage: 'Preschool (4–5 years)',
-    bio: "Music lover and amateur photographer. My kids keep me busy but I'd love to connect with local dads.",
-    interests: ['Music', 'Photography', 'Art'],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: 'dad-steve',
-    name: 'Steve Williams',
-    age: 40,
-    city: 'Montréal',
-    province: 'QC',
-    stage: 'Teen (13–17 years)',
-    bio: "Outdoor adventure seeker and sports enthusiast. Let's connect and share parenting stories!",
-    interests: ['Outdoors', 'Sports', 'Travel'],
-    avatarUrl: avatarDefaultGrey,
-  },
-]
+async function fetchDiscoverProfiles(
+  filters: DiscoverDadsFilters,
+  cursor?: DiscoverDadsCursor,
+): Promise<Profile[]> {
+  const params = new URLSearchParams()
+  filters.interests.forEach((i) => params.append('interests', i))
+  filters.children_age_ranges.forEach((r) =>
+    params.append('children_age_ranges', r),
+  )
+  filters.provinces.forEach((p) => params.append('provinces', p))
+  filters.age_ranges.forEach((r) => params.append('age_ranges', r))
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_created_at', cursor.cursor_created_at)
+  }
+  const res = await axiosPrivate.get<Profile[]>('/api/users/', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
-const communities = [
-  {
-    id: 1,
-    title: 'Saturday Coffee Dads',
-    description:
-      'Weekly Saturday morning meetups at local coffee shops. Share stories, swap advice, and build lasting friendships.',
-    memberCount: 42,
-    nextEvent: 'Sat 9am',
-  },
-  {
-    id: 2,
-    title: 'Outdoor Adventure Dads',
-    description:
-      'For dads who love hiking, camping, and exploring nature with their kids. Monthly outdoor excursions.',
-    memberCount: 67,
-    nextEvent: 'Next Sun',
-  },
-  {
-    id: 3,
-    title: 'Tech & Gaming Dads',
-    description:
-      'Connect over technology, gaming, and teaching kids to code. Virtual meetups and gaming sessions.',
-    memberCount: 89,
-  },
-  {
-    id: 4,
-    title: 'New Dads Support',
-    description:
-      'Just starting your fatherhood journey? Connect with other new dads navigating the early years together.',
-    memberCount: 53,
-    nextEvent: 'Thu 7pm',
-  },
-  {
-    id: 5,
-    title: 'Sports & Fitness Dads',
-    description:
-      'Stay active together! Organize pickup games, workout sessions, and teach kids about sports.',
-    memberCount: 78,
-    nextEvent: 'Sat 10am',
-  },
-  {
-    id: 6,
-    title: 'Creative Dads',
-    description:
-      'For fathers who love art, music, photography, and creative pursuits. Share projects and inspire each other.',
-    memberCount: 34,
-  },
-]
+async function fetchInterests(): Promise<string[]> {
+  const res = await axiosPrivate.get<string[]>('/api/interests/', {
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
+async function fetchDiscoverCommunities(
+  filters: DiscoverCommunitiesFilters,
+  cursor?: DiscoverCommunitiesCursor,
+): Promise<Community[]> {
+  const params = new URLSearchParams()
+  if (filters.name) {
+    params.append('name', filters.name)
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_created_at', cursor.cursor_created_at)
+  }
+  const res = await axiosPrivate.get<Community[]>('/api/communities/', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
+
+async function fetchDiscoverEvents(
+  filters: DiscoverEventsFilters,
+  cursor?: DiscoverEventsCursor,
+): Promise<Event[]> {
+  const params = new URLSearchParams()
+  if (filters.name) {
+    params.append('name', filters.name)
+  }
+  if (filters.type) {
+    params.append('type', filters.type)
+  }
+  if (filters.is_free !== null) {
+    params.append('is_free', String(filters.is_free))
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_starts_at', cursor.cursor_starts_at)
+  }
+  const res = await axiosPrivate.get<Event[]>('/api/events/', {
+    params,
+    timeout: TIMEOUT_LENGTH_MS,
+  })
+  return res.data
+}
 
 const Discover = () => {
-  const { toast } = useToast()
-  const navigate = useNavigate()
   const { tab = 'dads' } = useParams<{ tab: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
 
-  const {
-    joinedCommunities,
-    registeredEvents,
-    joinCommunity,
-    registerEvent,
-    unregisterEvent,
-  } = useGroups()
-
-  const [eventFilter, setEventFilter] = useState<'all' | 'virtual' | 'local'>(
-    'all'
+  // Parse URL params for initial state
+  const getArrayParam = useCallback(
+    (key: string) => searchParams.getAll(key),
+    [searchParams],
   )
-  const [priceFilter, setPriceFilter] = useState<'all' | 'free' | 'paid'>('all')
-  const [communitySearchQuery, setCommunitySearchQuery] = useState('')
-  const [eventSearchQuery, setEventSearchQuery] = useState('')
+  const getStringParam = useCallback(
+    (key: string) => searchParams.get(key) || '',
+    [searchParams],
+  )
 
-  const [pendingChildrenAges, setPendingChildrenAges] = useState<string[]>([])
-  const [pendingInterests, setPendingInterests] = useState<string[]>([])
-  const [pendingLocations, setPendingLocations] = useState<string[]>([])
-  const [pendingDadAges, setPendingDadAges] = useState<string[]>([])
+  // Dads tab state - initialize from URL params
+  const urlChildrenAges = useMemo(
+    () => getArrayParam('children_age_ranges'),
+    [getArrayParam],
+  )
+  const urlInterests = useMemo(
+    () => getArrayParam('interests'),
+    [getArrayParam],
+  )
+  const urlProvinces = useMemo(
+    () => getArrayParam('provinces'),
+    [getArrayParam],
+  )
+  const urlAgeRanges = useMemo(
+    () => getArrayParam('age_ranges'),
+    [getArrayParam],
+  )
 
-  const [appliedChildrenAges, setAppliedChildrenAges] = useState<string[]>([])
-  const [appliedInterests, setAppliedInterests] = useState<string[]>([])
-  const [appliedLocations, setAppliedLocations] = useState<string[]>([])
-  const [appliedDadAges, setAppliedDadAges] = useState<string[]>([])
-
+  const [pendingChildrenAges, setPendingChildrenAges] =
+    useState<string[]>(urlChildrenAges)
+  const [pendingInterests, setPendingInterests] =
+    useState<string[]>(urlInterests)
+  const [pendingLocations, setPendingLocations] =
+    useState<string[]>(urlProvinces)
+  const [pendingDadAges, setPendingDadAges] = useState<string[]>(urlAgeRanges)
   const [filtersOpen, setFiltersOpen] = useState(false)
+
+  // Reset pending filters to URL state when sheet closes without applying
+  const handleFiltersOpenChange = (open: boolean) => {
+    if (!open) {
+      setPendingChildrenAges(urlChildrenAges)
+      setPendingInterests(urlInterests)
+      setPendingLocations(urlProvinces)
+      setPendingDadAges(urlAgeRanges)
+    }
+    setFiltersOpen(open)
+  }
   const [interestSearchQuery, setInterestSearchQuery] = useState('')
 
-  // Helper data
-  const stageOptions = [
-    'Expecting',
-    'Newborn (0–1 year)',
-    'Toddler (2–3 years)',
-    'Preschool (4–5 years)',
-    'Elementary (6–12 years)',
-    'Teen (13–17 years)',
-    'Adult (18+ years)',
-  ]
-  const interestOptions = [
-    'Sports',
-    'Cooking',
-    'Outdoors',
-    'Fitness',
-    'Gaming',
-    'Music',
-    'Reading',
-    'Travel',
-    'Tech',
-    'DIY',
-    'Photography',
-    'Art',
-    'Cars',
-    'Parenting',
-    'Mental Wellness',
-    'Movies',
-    'Coffee',
-    'Home Projects',
-    'Volunteering',
-    'Board Games',
-    'Faith',
-    'Entrepreneurship',
-    'Pets',
-    'Gardening',
-    'Podcasts',
-    'Finance',
-    'Writing',
-  ]
-  const provinces = [
-    'AB', // Alberta
-    'BC', // British Columbia
-    'MB', // Manitoba
-    'NB', // New Brunswick
-    'NL', // Newfoundland and Labrador
-    'NS', // Nova Scotia
-    'NT', // Northwest Territories
-    'NU', // Nunavut
-    'ON', // Ontario
-    'PE', // Prince Edward Island
-    'QC', // Quebec
-    'SK', // Saskatchewan
-    'YT', // Yukon
-  ]
-  const ageRanges = ['all', 'Under 25', '25-29', '30-34', '35-39', '40-44', '45-49', '50-59', '60+']
+  // Communities tab state - initialize from URL params
+  const urlCommunitySearch = getStringParam('community_name')
+  const [communitySearchQuery, setCommunitySearchQuery] =
+    useState(urlCommunitySearch)
+
+  // Events tab state - initialize from URL params
+  const urlEventSearch = getStringParam('event_name')
+  const urlEventType = getStringParam('type') as EventType | ''
+  const urlIsFree = searchParams.get('is_free')
+  const [eventSearchQuery, setEventSearchQuery] = useState(urlEventSearch)
+
+  // build dads filters from URL params
+  const dadsFilters: DiscoverDadsFilters = useMemo(
+    () => ({
+      interests: urlInterests,
+      children_age_ranges: urlChildrenAges,
+      provinces: urlProvinces,
+      age_ranges: urlAgeRanges,
+    }),
+    [urlInterests, urlChildrenAges, urlProvinces, urlAgeRanges],
+  )
+
+  // build communities filters from URL params
+  const communitiesFilters: DiscoverCommunitiesFilters = useMemo(
+    () => ({ name: urlCommunitySearch }),
+    [urlCommunitySearch],
+  )
+
+  // build events filters from URL params
+  const eventsFilters: DiscoverEventsFilters = useMemo(
+    () => ({
+      name: urlEventSearch,
+      type: urlEventType || null,
+      is_free: urlIsFree === null ? null : urlIsFree === 'true',
+    }),
+    [urlEventSearch, urlEventType, urlIsFree],
+  )
+
+  // Reset Groups + Connections caches when entering Discover section
+  useLayoutEffect(() => {
+    // Reset connections caches (for profiles)
+    queryClient.removeQueries({ queryKey: ['connections', 'connected'] })
+    queryClient.removeQueries({ queryKey: ['connections', 'requests'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
+    // Reset groups caches (for communities/events)
+    queryClient.removeQueries({ queryKey: ['groups', 'communities'] })
+    queryClient.removeQueries({ queryKey: ['groups', 'events'] })
+    queryClient.removeQueries({ queryKey: ['community'] })
+    queryClient.removeQueries({ queryKey: ['event'] })
+  }, [queryClient])
+
+  // fetch discover profiles
+  const {
+    data: dadsData,
+    isLoading: dadsLoading,
+    isError: dadsError,
+    fetchNextPage: fetchNextDads,
+    hasNextPage: hasNextDads,
+    isFetchingNextPage: isFetchingNextDads,
+  } = useInfiniteQuery({
+    queryKey: ['discover', 'profiles', dadsFilters],
+    queryFn: ({ pageParam }) => fetchDiscoverProfiles(dadsFilters, pageParam),
+    initialPageParam: undefined as DiscoverDadsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_created_at: lastItem.created_at,
+      }
+    },
+  })
+
+  // fetch discover communities
+  const {
+    data: communitiesData,
+    isLoading: communitiesLoading,
+    isError: communitiesError,
+    fetchNextPage: fetchNextCommunities,
+    hasNextPage: hasNextCommunities,
+    isFetchingNextPage: isFetchingNextCommunities,
+  } = useInfiniteQuery({
+    queryKey: ['discover', 'communities', communitiesFilters],
+    queryFn: ({ pageParam }) =>
+      fetchDiscoverCommunities(communitiesFilters, pageParam),
+    initialPageParam: undefined as DiscoverCommunitiesCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < COMMUNITIES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_created_at: lastItem.created_at,
+      }
+    },
+  })
+
+  // fetch discover events
+  const {
+    data: eventsData,
+    isLoading: eventsLoading,
+    isError: eventsError,
+    fetchNextPage: fetchNextEvents,
+    hasNextPage: hasNextEvents,
+    isFetchingNextPage: isFetchingNextEvents,
+  } = useInfiniteQuery({
+    queryKey: ['discover', 'events', eventsFilters],
+    queryFn: ({ pageParam }) => fetchDiscoverEvents(eventsFilters, pageParam),
+    initialPageParam: undefined as DiscoverEventsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < EVENTS_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.id,
+        cursor_starts_at: lastItem.starts_at,
+      }
+    },
+  })
+
+  // fetch interests
+  const { data: interestOptions = [] } = useQuery({
+    queryKey: ['interests'],
+    queryFn: fetchInterests,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const profiles = useMemo(() => dadsData?.pages.flat() ?? [], [dadsData])
+  const communities = useMemo(
+    () => communitiesData?.pages.flat() ?? [],
+    [communitiesData],
+  )
+  const events = useMemo(() => eventsData?.pages.flat() ?? [], [eventsData])
+
+  // infinite scroll sentinels
+  const dadsSentinelRef = useRef<HTMLDivElement>(null)
+  const communitiesSentinelRef = useRef<HTMLDivElement>(null)
+  const eventsSentinelRef = useRef<HTMLDivElement>(null)
+
+  // dads infinite scroll
+  useEffect(() => {
+    const sentinel = dadsSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextDads && !isFetchingNextDads) {
+          fetchNextDads()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextDads, isFetchingNextDads, fetchNextDads])
+
+  // communities infinite scroll
+  useEffect(() => {
+    const sentinel = communitiesSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextCommunities &&
+          !isFetchingNextCommunities
+        ) {
+          fetchNextCommunities()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextCommunities, isFetchingNextCommunities, fetchNextCommunities])
+
+  // events infinite scroll
+  useEffect(() => {
+    const sentinel = eventsSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextEvents &&
+          !isFetchingNextEvents
+        ) {
+          fetchNextEvents()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextEvents, isFetchingNextEvents, fetchNextEvents])
+
+  // Sync input fields with URL params when navigating back
+  useEffect(() => {
+    setCommunitySearchQuery(urlCommunitySearch)
+  }, [urlCommunitySearch])
+
+  useEffect(() => {
+    setEventSearchQuery(urlEventSearch)
+  }, [urlEventSearch])
+
+  // Sync pending filters with URL params when navigating back
+  useEffect(() => {
+    setPendingChildrenAges(urlChildrenAges)
+    setPendingInterests(urlInterests)
+    setPendingLocations(urlProvinces)
+    setPendingDadAges(urlAgeRanges)
+  }, [urlChildrenAges, urlInterests, urlProvinces, urlAgeRanges])
 
   // Filter toggle functions
   const togglePendingChildrenAge = (stage: string) => {
     setPendingChildrenAges((prev) =>
-      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage]
+      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage],
     )
   }
   const togglePendingInterest = (interest: string) => {
     setPendingInterests((prev) =>
       prev.includes(interest)
         ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
+        : [...prev, interest],
     )
   }
   const togglePendingLocation = (location: string) => {
     setPendingLocations((prev) =>
       prev.includes(location)
         ? prev.filter((l) => l !== location)
-        : [...prev, location]
+        : [...prev, location],
     )
   }
+
   const togglePendingDadAge = (ageRange: string) => {
     setPendingDadAges((prev) =>
       prev.includes(ageRange)
         ? prev.filter((a) => a !== ageRange)
-        : [...prev, ageRange]
+        : [...prev, ageRange],
     )
   }
 
-  const applyFilters = () => {
-    setAppliedChildrenAges(pendingChildrenAges)
-    setAppliedInterests(pendingInterests)
-    setAppliedLocations(pendingLocations)
-    setAppliedDadAges(pendingDadAges)
+  const applyDadsFilters = () => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      // Clear existing filter params
+      newParams.delete('children_age_ranges')
+      newParams.delete('interests')
+      newParams.delete('provinces')
+      newParams.delete('age_ranges')
+      // Add new filter params
+      pendingChildrenAges.forEach((v) =>
+        newParams.append('children_age_ranges', v),
+      )
+      pendingInterests.forEach((v) => newParams.append('interests', v))
+      pendingLocations.forEach((v) => newParams.append('provinces', v))
+      pendingDadAges.forEach((v) => newParams.append('age_ranges', v))
+      return newParams
+    })
     setFiltersOpen(false)
   }
 
-  const clearAllFilters = () => {
+  const clearDadsFilters = () => {
     setPendingChildrenAges([])
     setPendingInterests([])
     setPendingLocations([])
     setPendingDadAges([])
-    setAppliedChildrenAges([])
-    setAppliedInterests([])
-    setAppliedLocations([])
-    setAppliedDadAges([])
-  }
-
-  const handleJoin = (communityId: number, title: string) => {
-    joinCommunity(communityId, title)
-    toast({
-      title: 'Joined community! 🎉',
-      description: `Welcome to ${title}!`,
-    })
-    navigate(communityChat(communityId) + '?from=discover')
-  }
-
-  const handleJoinEvent = (eventId: number, title: string) => {
-    if (registeredEvents.includes(eventId)) {
-      unregisterEvent(eventId)
-      toast({
-        title: 'Registration cancelled',
-        description: `You've cancelled your registration for ${title}.`,
-      })
-    } else {
-      registerEvent(eventId)
-      toast({
-        title: 'Registered for event! 🎉',
-        description: `You've registered for ${title}.`,
-      })
-    }
-  }
-
-  const handleConnect = (name: string) => {
-    toast({
-      title: 'Connection sent! 🎉',
-      description: `Your connection request was sent to ${name}.`,
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      newParams.delete('children_age_ranges')
+      newParams.delete('interests')
+      newParams.delete('provinces')
+      newParams.delete('age_ranges')
+      return newParams
     })
   }
 
-  const handleRefresh = () => {
-    toast({
-      title: 'Refreshed',
-      description: 'Loading new connections...',
+  const handleCommunitySearch = () => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (communitySearchQuery) {
+        newParams.set('community_name', communitySearchQuery)
+      } else {
+        newParams.delete('community_name')
+      }
+      return newParams
     })
   }
 
-  // Filter lists
-  const filteredDads = dads.filter((dad) => {
-    const matchesChildrenAge =
-      appliedChildrenAges.length === 0 ||
-      appliedChildrenAges.includes(dad.stage)
-    const matchesInterest =
-      appliedInterests.length === 0 ||
-      dad.interests.some((i) => appliedInterests.includes(i))
-    const matchesLocation =
-      appliedLocations.length === 0 || appliedLocations.includes(dad.province)
+  const handleEventSearch = () => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (eventSearchQuery) {
+        newParams.set('event_name', eventSearchQuery)
+      } else {
+        newParams.delete('event_name')
+      }
+      return newParams
+    })
+  }
 
-    let matchesAge = true
-    if (appliedDadAges.length > 0) {
-      matchesAge = appliedDadAges.some((range) => {
-        if (range === 'Under 30') return dad.age < 30
-        if (range === '30-35') return dad.age >= 30 && dad.age <= 35
-        if (range === '36-40') return dad.age >= 36 && dad.age <= 40
-        if (range === 'Over 40') return dad.age > 40
-        return false
-      })
-    }
+  const handleEventTypeToggle = (type: EventType) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (newParams.get('type') === type) {
+        newParams.delete('type')
+      } else {
+        newParams.set('type', type)
+      }
+      return newParams
+    })
+  }
 
-    return (
-      matchesChildrenAge && matchesInterest && matchesLocation && matchesAge
-    )
-  })
+  const handleEventPriceToggle = (isFree: boolean) => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (newParams.get('is_free') === String(isFree)) {
+        newParams.delete('is_free')
+      } else {
+        newParams.set('is_free', String(isFree))
+      }
+      return newParams
+    })
+  }
 
-  const filteredCommunities = communities.filter(
-    (community) =>
-      !joinedCommunities.includes(community.id) &&
-      (community.title
-        .toLowerCase()
-        .includes(communitySearchQuery.toLowerCase()) ||
-        community.description
-          .toLowerCase()
-          .includes(communitySearchQuery.toLowerCase()))
-  )
+  const handleRefreshDads = () => {
+    queryClient.removeQueries({ queryKey: ['discover', 'profiles'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
+  }
 
-  const filteredEvents = sharedEvents.filter((event) => {
-    const matchesType =
-      eventFilter === 'all' || event.type.toLowerCase() === eventFilter
-    const matchesPrice =
-      priceFilter === 'all' ||
-      (priceFilter === 'free' && event.price === 'Free') ||
-      (priceFilter === 'paid' && event.price !== 'Free')
-    const matchesSearch =
-      event.title.toLowerCase().includes(eventSearchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(eventSearchQuery.toLowerCase())
-    return matchesType && matchesPrice && matchesSearch
-  })
+  const handleRefreshCommunities = () => {
+    queryClient.removeQueries({ queryKey: ['discover', 'communities'] })
+    queryClient.removeQueries({ queryKey: ['community'] })
+  }
+
+  const handleRefreshEvents = () => {
+    queryClient.removeQueries({ queryKey: ['discover', 'events'] })
+    queryClient.removeQueries({ queryKey: ['event'] })
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -374,7 +553,7 @@ const Discover = () => {
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'dads' && 'border-b-2 border-primary text-foreground',
-                tab !== 'dads' && 'text-muted-foreground'
+                tab !== 'dads' && 'text-muted-foreground',
               )}
             >
               Dads
@@ -385,7 +564,7 @@ const Discover = () => {
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'communities' &&
                   'border-b-2 border-primary text-foreground',
-                tab !== 'communities' && 'text-muted-foreground'
+                tab !== 'communities' && 'text-muted-foreground',
               )}
             >
               Communities
@@ -395,7 +574,7 @@ const Discover = () => {
               className={cn(
                 'inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all',
                 tab === 'events' && 'border-b-2 border-primary text-foreground',
-                tab !== 'events' && 'text-muted-foreground'
+                tab !== 'events' && 'text-muted-foreground',
               )}
             >
               Events
@@ -407,7 +586,7 @@ const Discover = () => {
               <div className="flex justify-end mb-4">
                 <Sheet
                   open={filtersOpen}
-                  onOpenChange={setFiltersOpen}
+                  onOpenChange={handleFiltersOpenChange}
                 >
                   <SheetTrigger asChild>
                     <Button
@@ -438,18 +617,20 @@ const Discover = () => {
                           Select all that apply
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {stageOptions.map((stage) => (
+                          {STAGE_OPTIONS.map((stage) => (
                             <Badge
-                              key={stage}
+                              key={stage.value}
                               variant={
-                                pendingChildrenAges.includes(stage)
+                                pendingChildrenAges.includes(stage.value)
                                   ? 'default'
                                   : 'outline'
                               }
                               className="cursor-pointer rounded-full"
-                              onClick={() => togglePendingChildrenAge(stage)}
+                              onClick={() =>
+                                togglePendingChildrenAge(stage.value)
+                              }
                             >
-                              {stage}
+                              {stage.label}
                             </Badge>
                           ))}
                         </div>
@@ -462,7 +643,7 @@ const Discover = () => {
                         <p className="text-xs text-muted-foreground">
                           Search and select interests
                         </p>
-                        
+
                         {/* Selected interests display */}
                         {pendingInterests.length > 0 && (
                           <div className="flex gap-2 flex-wrap mb-2">
@@ -478,26 +659,31 @@ const Discover = () => {
                             ))}
                           </div>
                         )}
-                        
+
                         {/* Interest search input */}
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input
                             placeholder="Search interests..."
                             value={interestSearchQuery}
-                            onChange={(e) => setInterestSearchQuery(e.target.value)}
+                            onChange={(e) =>
+                              setInterestSearchQuery(e.target.value)
+                            }
                             className="pl-9"
                           />
                         </div>
-                        
+
                         {/* Filtered interest suggestions */}
                         {interestSearchQuery && (
                           <div className="max-h-40 overflow-y-auto border border-border rounded-md bg-card">
                             {interestOptions
                               .filter(
                                 (interest) =>
-                                  interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
-                                  !pendingInterests.includes(interest)
+                                  interest
+                                    .toLowerCase()
+                                    .includes(
+                                      interestSearchQuery.toLowerCase(),
+                                    ) && !pendingInterests.includes(interest),
                               )
                               .map((interest) => (
                                 <button
@@ -514,8 +700,11 @@ const Discover = () => {
                               ))}
                             {interestOptions.filter(
                               (interest) =>
-                                interest.toLowerCase().includes(interestSearchQuery.toLowerCase()) &&
-                                !pendingInterests.includes(interest)
+                                interest
+                                  .toLowerCase()
+                                  .includes(
+                                    interestSearchQuery.toLowerCase(),
+                                  ) && !pendingInterests.includes(interest),
                             ).length === 0 && (
                               <div className="px-3 py-2 text-sm text-muted-foreground">
                                 No matching interests
@@ -533,18 +722,20 @@ const Discover = () => {
                           Select all that apply
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {provinces.map((province) => (
+                          {PROVINCE_OPTIONS.map((province) => (
                             <Badge
-                              key={province}
+                              key={province.value}
                               variant={
-                                pendingLocations.includes(province)
+                                pendingLocations.includes(province.value)
                                   ? 'default'
                                   : 'outline'
                               }
                               className="cursor-pointer rounded-full"
-                              onClick={() => togglePendingLocation(province)}
+                              onClick={() =>
+                                togglePendingLocation(province.value)
+                              }
                             >
-                              {province}
+                              {province.label}
                             </Badge>
                           ))}
                         </div>
@@ -558,7 +749,7 @@ const Discover = () => {
                           Select all that apply
                         </p>
                         <div className="flex gap-2 flex-wrap">
-                          {ageRanges.slice(1).map((range) => (
+                          {DISCOVER_DADS_FILTERS_AGE_RANGES.map((range) => (
                             <Badge
                               key={range}
                               variant={
@@ -578,14 +769,14 @@ const Discover = () => {
                       <div className="pt-4 flex gap-3">
                         <Button
                           className="flex-1"
-                          onClick={applyFilters}
+                          onClick={applyDadsFilters}
                         >
                           Apply Filters
                         </Button>
                         <Button
                           variant="outline"
                           className="flex-1"
-                          onClick={clearAllFilters}
+                          onClick={clearDadsFilters}
                         >
                           Clear All
                         </Button>
@@ -596,15 +787,34 @@ const Discover = () => {
               </div>
 
               <div className="space-y-4">
-                {filteredDads.length > 0 ? (
-                  filteredDads.map((dad) => (
-                    <DadCard
-                      key={dad.id}
-                      {...dad}
-                      onConnect={() => handleConnect(dad.name)}
-                      onClick={() => navigate(dadDetail(dad.id))}
+                {dadsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : dadsError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load profiles. Please try again.
+                    </p>
+                  </div>
+                ) : profiles.length > 0 ? (
+                  <>
+                    {profiles.map((profile) => (
+                      <DadCard
+                        key={profile.id}
+                        {...profile}
+                      />
+                    ))}
+                    <div
+                      ref={dadsSentinelRef}
+                      className="h-4"
                     />
-                  ))
+                    {isFetchingNextDads && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">
@@ -618,7 +828,7 @@ const Discover = () => {
                 <Button
                   variant="outline"
                   className="w-full rounded-full"
-                  onClick={handleRefresh}
+                  onClick={handleRefreshDads}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
@@ -629,7 +839,13 @@ const Discover = () => {
 
           {tab === 'communities' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="relative mb-4">
+              <form
+                className="relative mb-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleCommunitySearch()
+                }}
+              >
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
                   placeholder="Search communities..."
@@ -637,22 +853,37 @@ const Discover = () => {
                   onChange={(e) => setCommunitySearchQuery(e.target.value)}
                   className="pl-10 rounded-full"
                 />
-              </div>
+              </form>
 
-              <div className="space-y-3">
-                {filteredCommunities.length > 0 ? (
-                  filteredCommunities.map((community) => (
-                    <div
-                      key={community.id}
-                      // onClick={() => {}}
-                      // className="cursor-pointer"
-                    >
+              <div className="space-y-4">
+                {communitiesLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : communitiesError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load communities. Please try again.
+                    </p>
+                  </div>
+                ) : communities.length > 0 ? (
+                  <>
+                    {communities.map((community) => (
                       <CommunityCard
+                        key={community.id}
                         {...community}
-                        onJoin={() => handleJoin(community.id, community.title)}
                       />
-                    </div>
-                  ))
+                    ))}
+                    <div
+                      ref={communitiesSentinelRef}
+                      className="h-4"
+                    />
+                    {isFetchingNextCommunities && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-12">
                     <p className="text-muted-foreground">
@@ -661,12 +892,29 @@ const Discover = () => {
                   </div>
                 )}
               </div>
+
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefreshCommunities}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           )}
 
           {tab === 'events' && (
             <div className="space-y-4 animate-fade-in">
-              <div className="relative mb-4">
+              <form
+                className="relative mb-4"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleEventSearch()
+                }}
+              >
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
                   placeholder="Search events..."
@@ -674,89 +922,100 @@ const Discover = () => {
                   onChange={(e) => setEventSearchQuery(e.target.value)}
                   className="pl-10 rounded-full"
                 />
-              </div>
+              </form>
 
-              <div className="py-4">
+              {/* <div className="py-4">
                 <Button
                   variant="outline"
                   className="w-full rounded-full font-semibold text-foreground bg-white"
                   style={{ borderColor: '#D8A24A' }}
-                  onClick={() => {}}
+                  onClick={() => {
+                    // TODO: navigate to create event page
+                  }}
                 >
                   Host Your Own Event
                 </Button>
-              </div>
+              </div> */}
 
               <div className="flex gap-2 mb-4 flex-wrap">
                 <Badge
-                  variant={eventFilter === 'all' ? 'default' : 'outline'}
+                  variant={urlEventType === 'virtual' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setEventFilter('all')}
-                >
-                  All
-                </Badge>
-                <Badge
-                  variant={eventFilter === 'virtual' ? 'default' : 'outline'}
-                  className="cursor-pointer rounded-full"
-                  onClick={() => setEventFilter('virtual')}
+                  onClick={() => handleEventTypeToggle('virtual')}
                 >
                   Virtual
                 </Badge>
                 <Badge
-                  variant={eventFilter === 'local' ? 'default' : 'outline'}
+                  variant={urlEventType === 'local' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setEventFilter('local')}
+                  onClick={() => handleEventTypeToggle('local')}
                 >
                   Local
                 </Badge>
                 <Badge
-                  variant={priceFilter === 'free' ? 'default' : 'outline'}
+                  variant={urlIsFree === 'true' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setPriceFilter('free')}
+                  onClick={() => handleEventPriceToggle(true)}
                 >
                   Free
                 </Badge>
                 <Badge
-                  variant={priceFilter === 'paid' ? 'default' : 'outline'}
+                  variant={urlIsFree === 'false' ? 'default' : 'outline'}
                   className="cursor-pointer rounded-full"
-                  onClick={() => setPriceFilter('paid')}
+                  onClick={() => handleEventPriceToggle(false)}
                 >
                   Paid
                 </Badge>
               </div>
 
-              {filteredEvents.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      isRegistered={registeredEvents.includes(event.id)}
-                      onRegister={() => {
-                        registerEvent(event.id)
-                        toast({
-                          title: 'Registered for event! 🎉',
-                          description: `You've registered for ${event.title}.`,
-                        })
-                      }}
-                      onUnregister={() => {
-                        unregisterEvent(event.id)
-                        toast({
-                          title: 'Registration cancelled',
-                          description: `You've cancelled your registration for ${event.title}.`,
-                        })
-                      }}
-                      context="discover"
+              <div className="space-y-4">
+                {eventsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : eventsError ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      Failed to load events. Please try again.
+                    </p>
+                  </div>
+                ) : events.length > 0 ? (
+                  <>
+                    {events.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        {...event}
+                      />
+                    ))}
+                    <div
+                      ref={eventsSentinelRef}
+                      className="h-4"
                     />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    No events match your filters
-                  </p>
-                </div>
-              )}
+                    {isFetchingNextEvents && (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">
+                      No events match your filters
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={handleRefreshEvents}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </div>
           )}
         </div>

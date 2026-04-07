@@ -5,13 +5,20 @@ import { componentTagger } from 'lovable-tagger'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  appType: 'spa',
   server: {
     host: '::',
-    port: 8080,
+    port: 3000,
     allowedHosts: ['.ngrok-free.dev', 'localhost'],
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [react(), mode === 'development' && componentTagger()].filter(
-    Boolean
+    Boolean,
   ),
   resolve: {
     alias: {

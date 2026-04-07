@@ -1,70 +1,145 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import BottomNav from "@/components/BottomNav";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import logo from "@/assets/logo.png";
-import ConnectionRequestCard from "@/components/ConnectionRequestCard";
-import avatarDefaultGrey from "@/assets/avatar-default-grey.png";
-import { toast } from "sonner";
-import { ROUTES, profileDetail } from "@/lib/routes";
+import { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import BottomNav from '@/components/BottomNav'
+import DadCard from '@/components/DadCard'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ArrowLeft, Search, Loader2, RefreshCw } from 'lucide-react'
+import logo from '@/assets/logo.png'
+import { ROUTES } from '@/lib/routes'
+import axiosPrivate from '@/api/axiosPrivate'
+import { TIMEOUT_LENGTH_MS, PROFILES_PAGE_LIMIT } from '@/config/constants'
+import {
+  ConnectionResponse,
+  ConnectionsFilters,
+  ConnectionsCursor,
+} from '@/types/users'
 
-const initialRequests = [
-  {
-    id: "request-james",
-    name: "James Anderson",
-    age: 38,
-    city: "Toronto",
-    province: "ON",
-    childAgeRange: "Preschool (4-5 years)",
-    bio: "New to Toronto and looking to connect with local dads.",
-    interests: ["Fitness", "Photography", "Coffee"],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: "request-robert",
-    name: "Robert Lee",
-    age: 41,
-    city: "Ottawa",
-    province: "ON",
-    childAgeRange: "Elementary (6-12 years)",
-    bio: "Hockey dad who loves the outdoors and weekend camping trips.",
-    interests: ["Sports", "Outdoors", "Music"],
-    avatarUrl: avatarDefaultGrey,
-  },
-  {
-    id: "request-chris",
-    name: "Chris Martinez",
-    age: 36,
-    city: "Toronto",
-    province: "ON",
-    childAgeRange: "Teen (13-17 years)",
-    bio: "Entrepreneur and dad of two teens. Always learning something new.",
-    interests: ["Business", "Reading", "Tech"],
-    avatarUrl: avatarDefaultGrey,
-  },
-];
+async function fetchRequests(
+  filters: ConnectionsFilters,
+  cursor?: ConnectionsCursor,
+): Promise<ConnectionResponse[]> {
+  const params = new URLSearchParams()
+  if (filters.name) {
+    params.append('name', filters.name)
+  }
+  if (cursor) {
+    params.append('cursor_id', cursor.cursor_id)
+    params.append('cursor_updated_at', cursor.cursor_updated_at)
+  }
+  const res = await axiosPrivate.get<ConnectionResponse[]>(
+    '/api/connections/requests',
+    {
+      params,
+      timeout: TIMEOUT_LENGTH_MS,
+    },
+  )
+  return res.data
+}
 
 const Requests = () => {
-  const navigate = useNavigate();
-  const [requests, setRequests] = useState(initialRequests);
+  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const queryClient = useQueryClient()
 
-  const handleAccept = (id: string, name: string) => {
-    setRequests(prev => prev.filter(r => r.id !== id));
-    toast.success(`Accepted connection request from ${name}`);
-  };
+  // Parse URL params for initial state
+  const getStringParam = useCallback(
+    (key: string) => searchParams.get(key) || '',
+    [searchParams],
+  )
 
-  const handleIgnore = (id: string, name: string) => {
-    setRequests(prev => prev.filter(r => r.id !== id));
-    toast.success(`Ignored connection request from ${name}`);
-  };
+  const urlSearch = getStringParam('name')
+  const [searchQuery, setSearchQuery] = useState(urlSearch)
+
+  const filters: ConnectionsFilters = useMemo(
+    () => ({ name: urlSearch }),
+    [urlSearch],
+  )
+
+  // Reset other profile list caches when entering Requests section
+  useLayoutEffect(() => {
+    queryClient.removeQueries({ queryKey: ['discover', 'profiles'] })
+    queryClient.removeQueries({ queryKey: ['connections', 'connected'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
+  }, [queryClient])
+
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['connections', 'requests', filters],
+    queryFn: ({ pageParam }) => fetchRequests(filters, pageParam),
+    initialPageParam: undefined as ConnectionsCursor | undefined,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    gcTime: 1000 * 60 * 5, // 5 minutes
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length < PROFILES_PAGE_LIMIT) return undefined
+      const lastItem = lastPage[lastPage.length - 1]
+      return {
+        cursor_id: lastItem.connection_id,
+        cursor_updated_at: lastItem.connection_updated_at,
+      }
+    },
+  })
+
+  const requests = useMemo(() => data?.pages.flat() ?? [], [data])
+
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  // Sync input field with URL params when navigating back
+  useEffect(() => {
+    setSearchQuery(urlSearch)
+  }, [urlSearch])
+
+  const handleSearch = () => {
+    setSearchParams((prev) => {
+      const newParams = new URLSearchParams(prev)
+      if (searchQuery) {
+        newParams.set('name', searchQuery)
+      } else {
+        newParams.delete('name')
+      }
+      return newParams
+    })
+  }
+
+  const handleRefresh = () => {
+    queryClient.removeQueries({ queryKey: ['connections', 'requests'] })
+    queryClient.removeQueries({ queryKey: ['profile'] })
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="bg-card border-b border-border">
         <div className="max-w-md mx-auto px-6 py-6 flex items-center justify-between">
           <div className="flex items-center gap-4 flex-1">
-            <img src={logo} alt="Next Level Dads" className="h-8" />
+            <img
+              src={logo}
+              alt="Next Level Dads"
+              className="h-8"
+            />
             <Button
               variant="ghost"
               size="icon"
@@ -81,26 +156,74 @@ const Requests = () => {
       </div>
 
       <div className="max-w-md mx-auto px-6 py-6 space-y-4 animate-fade-in">
-        {requests.length > 0 ? (
-          requests.map((request) => (
-            <ConnectionRequestCard
-              key={request.id}
-              {...request}
-              onAccept={() => handleAccept(request.id, request.name)}
-              onIgnore={() => handleIgnore(request.id, request.name)}
-              onClick={() => navigate(profileDetail(request.id))}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSearch()
+          }}
+        >
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input
+              placeholder="Search requests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-full"
             />
-          ))
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No pending requests</p>
           </div>
-        )}
+        </form>
+
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : isError ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                Failed to load requests. Please try again.
+              </p>
+            </div>
+          ) : requests.length > 0 ? (
+            <>
+              {requests.map((request) => (
+                <DadCard
+                  key={request.id}
+                  {...request}
+                />
+              ))}
+              <div
+                ref={sentinelRef}
+                className="h-4"
+              />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No pending requests</p>
+            </div>
+          )}
+        </div>
+
+        <div className="pt-4">
+          <Button
+            variant="outline"
+            className="w-full rounded-full"
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <BottomNav />
     </div>
-  );
-};
+  )
+}
 
-export default Requests;
+export default Requests

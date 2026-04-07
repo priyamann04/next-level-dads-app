@@ -4,71 +4,18 @@ import BottomNav from '@/components/BottomNav'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Search, Users, Plus, Check } from 'lucide-react'
 import avatarDefaultGrey from '@/assets/avatar-default-grey.png'
 import logo from '@/assets/logo.png'
-import { useGroups } from '@/contexts/GroupsContext'
-import { chatDetail } from '@/lib/routes'
+import { individualChat, groupChat, communityChat } from '@/lib/routes'
 import { toast } from 'sonner'
-
-// Mock connections for creating new chats
-const userConnections = [
-  {
-    id: 'chat-connection-mike',
-    name: 'Mike Johnson',
-    avatar: avatarDefaultGrey,
-  },
-  {
-    id: 'chat-connection-david',
-    name: 'David Chen',
-    avatar: avatarDefaultGrey,
-  },
-  {
-    id: 'chat-connection-steve',
-    name: 'Steve Wilson',
-    avatar: avatarDefaultGrey,
-  },
-]
-
-const mockChats = [
-  {
-    id: 'chat-mike',
-    name: 'Mike',
-    lastMessage: "That sounds great! Let's plan for Saturday.",
-    timestamp: '2m ago',
-    unread: 2,
-    avatar: avatarDefaultGrey,
-    isGroup: false,
-  },
-  {
-    id: 'group-toronto',
-    name: 'Toronto Dads Meetup',
-    lastMessage: 'Alex: Anyone free for coffee this weekend?',
-    timestamp: '45m ago',
-    unread: 5,
-    avatar: avatarDefaultGrey,
-    isGroup: true,
-  },
-  {
-    id: 'chat-david',
-    name: 'David',
-    lastMessage: 'Thanks for the advice about the school situation!',
-    timestamp: '1h ago',
-    unread: 0,
-    avatar: avatarDefaultGrey,
-    isGroup: false,
-  },
-  {
-    id: 'chat-james',
-    name: 'James',
-    lastMessage: 'The kids had a great time at the playdate',
-    timestamp: '3h ago',
-    unread: 0,
-    avatar: avatarDefaultGrey,
-    isGroup: false,
-  },
-]
 
 const Chats = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -76,77 +23,22 @@ const Chats = () => {
   const [newChatSearch, setNewChatSearch] = useState('')
   const [selectedConnections, setSelectedConnections] = useState<string[]>([])
   const [groupName, setGroupName] = useState('')
-  
+
   const navigate = useNavigate()
-  const { communityChats } = useGroups()
 
-  // Combine community chats with mock chats
-  const communityGroupChats = communityChats.map((chat) => ({
-    id: `community-${chat.communityId}`,
-    name: chat.communityName,
-    lastMessage: 'Community chat started',
-    timestamp: 'New',
-    unread: 0,
-    avatar: avatarDefaultGrey,
-    isGroup: true,
-  }))
+  const toggleConnectionSelection = (id: string) => {}
 
-  const allChats = [...communityGroupChats, ...mockChats]
+  const handleCreateChat = () => {}
 
-  const filteredChats = allChats.filter((chat) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  // Filter connections for new chat dialog
-  const filteredConnections = userConnections.filter((connection) =>
-    connection.name.toLowerCase().includes(newChatSearch.toLowerCase())
-  )
-
-  const toggleConnectionSelection = (id: string) => {
-    setSelectedConnections(prev => 
-      prev.includes(id) 
-        ? prev.filter(c => c !== id)
-        : [...prev, id]
-    )
-  }
-
-  const handleCreateChat = () => {
-    if (selectedConnections.length === 0) return
-
-    if (selectedConnections.length === 1) {
-      // Individual chat - navigate directly
-      navigate(chatDetail(selectedConnections[0], 'individual'))
-      setIsNewChatOpen(false)
-      setSelectedConnections([])
-      setNewChatSearch('')
-    } else {
-      // Group chat - need a name
-      if (!groupName.trim()) {
-        toast.error('Please enter a group name')
-        return
-      }
-      
-      // Generate a unique group ID
-      const groupId = `group-${Date.now()}`
-      toast.success(`Group "${groupName}" created!`)
-      navigate(chatDetail(groupId, 'private-group'))
-      setIsNewChatOpen(false)
-      setSelectedConnections([])
-      setGroupName('')
-      setNewChatSearch('')
-    }
-  }
-
-  const handleDialogClose = (open: boolean) => {
-    setIsNewChatOpen(open)
-    if (!open) {
-      setSelectedConnections([])
-      setGroupName('')
-      setNewChatSearch('')
-    }
-  }
+  const handleDialogClose = (open: boolean) => {}
 
   const isGroupChat = selectedConnections.length > 1
+
+  const userConnections = []
+
+  const filteredConnections = []
+
+  const filteredChats = []
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -177,7 +69,10 @@ const Chats = () => {
               className="pl-10 rounded-full"
             />
           </div>
-          <Dialog open={isNewChatOpen} onOpenChange={handleDialogClose}>
+          <Dialog
+            open={isNewChatOpen}
+            onOpenChange={handleDialogClose}
+          >
             <DialogTrigger asChild>
               <Button
                 variant="ghost"
@@ -205,7 +100,9 @@ const Chats = () => {
                 {selectedConnections.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {selectedConnections.map((id) => {
-                      const connection = userConnections.find(c => c.id === id)
+                      const connection = userConnections.find(
+                        (c) => c.id === id,
+                      )
                       return connection ? (
                         <div
                           key={id}
@@ -228,7 +125,7 @@ const Chats = () => {
                     className="rounded-full"
                   />
                 )}
-                
+
                 <div className="max-h-60 overflow-y-auto space-y-2">
                   {filteredConnections.length > 0 ? (
                     filteredConnections.map((connection) => (
@@ -242,10 +139,15 @@ const Chats = () => {
                         }`}
                       >
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={connection.avatar} alt={connection.name} />
+                          <AvatarImage
+                            src={connection.avatar}
+                            alt={connection.name}
+                          />
                           <AvatarFallback>{connection.name[0]}</AvatarFallback>
                         </Avatar>
-                        <span className="flex-1 font-medium">{connection.name}</span>
+                        <span className="flex-1 font-medium">
+                          {connection.name}
+                        </span>
                         {selectedConnections.includes(connection.id) && (
                           <Check className="w-5 h-5 text-primary" />
                         )}
@@ -257,17 +159,16 @@ const Chats = () => {
                     </p>
                   )}
                 </div>
-                
+
                 {selectedConnections.length > 0 && (
                   <Button
                     onClick={handleCreateChat}
                     className="w-full rounded-full"
                     style={{ backgroundColor: '#D8A24A' }}
                   >
-                    {isGroupChat 
-                      ? `Create Group (${selectedConnections.length} members)` 
-                      : 'Start Chat'
-                    }
+                    {isGroupChat
+                      ? `Create Group (${selectedConnections.length} members)`
+                      : 'Start Chat'}
                   </Button>
                 )}
               </div>
@@ -280,7 +181,7 @@ const Chats = () => {
             {filteredChats.map((chat) => (
               <div
                 key={chat.id}
-                onClick={() => navigate(chatDetail(chat.id))}
+                onClick={() => navigate(individualChat(chat.id))}
                 className="px-6 py-4 hover:bg-muted/50 cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-4">

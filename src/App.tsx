@@ -1,106 +1,176 @@
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from '@/lib/queryClient'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { GroupsProvider } from './contexts/GroupsContext'
 import { ROUTES } from '@/lib/routes'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { PublicRoute, ProtectedRoute, SetupRoute } from '@/components/RouteWrappers'
 
-// Pages
 import Welcome from './pages/Welcome'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import VerifyEmail from './pages/VerifyEmail'
 import ProfileSetup from './pages/ProfileSetup'
 import Match from './pages/Match'
 import Chats from './pages/Chats'
 import Chat from './pages/Chat'
 import Discover from './pages/Discover'
-import DadDetail from './pages/DadDetail'
 import Groups from './pages/Groups'
-import GroupMembers from './pages/GroupMembers'
 import CommunityDetail from './pages/CommunityDetail'
-import CommunityMembers from './pages/CommunityMembers'
-import Profile from './pages/Profile'
-import EditProfile from './pages/EditProfile'
+import Members from './pages/Members'
+import MyProfile from './pages/MyProfile'
+import ProfileDetail from './pages/ProfileDetail'
 import Connections from './pages/Connections'
 import Requests from './pages/Requests'
 import EventDetail from './pages/EventDetail'
 import NotFound from './pages/NotFound'
 
-const queryClient = new QueryClient()
-
-/**
- * Application Route Structure
- * 
- * / ........................... Welcome (landing)
- * /setup ...................... Profile Setup (onboarding)
- * /match ...................... Match Screen
- * 
- * /discover ................... Redirect to /discover/dads
- * /discover/:tab .............. Discover (dads | communities | events)
- * /discover/dads/:dadId ....... Dad Detail (from Discover)
- * 
- * /communities/:communityId ... Community Detail (members list)
- * /communities/:communityId/members ... Community Members
- * 
- * /groups ..................... Redirect to /groups/communities
- * /groups/:tab ................ My Groups (communities | events)
- * 
- * /chats ...................... Chats List
- * /chats/:chatId .............. Unified Chat (individual | private-group | community)
- *                               Query params: ?type=individual|private-group|community&from=chats|groups|discover
- * 
- * /profile .................... Own Profile
- * /profiles/:profileId ........ Other User Profile (from Connections, etc.)
- * /connections ................ Connections List
- * /requests ................... Connection Requests
- */
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const AppContent = () => {
+  return (
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <GroupsProvider>
-          <Routes>
-            {/* Auth & Onboarding */}
-            <Route path={ROUTES.WELCOME} element={<Welcome />} />
-            <Route path={ROUTES.SETUP} element={<ProfileSetup />} />
-            <Route path={ROUTES.MATCH} element={<Match />} />
+        <Routes>
+          {/* Public Routes - redirect to app if authenticated */}
+          <Route
+            path={ROUTES.WELCOME}
+            element={<PublicRoute><Welcome /></PublicRoute>}
+          />
+          <Route
+            path={ROUTES.LOGIN}
+            element={<PublicRoute><Login /></PublicRoute>}
+          />
+          <Route
+            path={ROUTES.REGISTER}
+            element={<PublicRoute><Register /></PublicRoute>}
+          />
+          <Route
+            path={ROUTES.FORGOT_PASSWORD}
+            element={<PublicRoute><ForgotPassword /></PublicRoute>}
+          />
+          {/* Auth utility pages - always accessible regardless of auth state */}
+          <Route
+            path={ROUTES.RESET_PASSWORD}
+            element={<ResetPassword />}
+          />
+          <Route
+            path={ROUTES.VERIFY_EMAIL}
+            element={<VerifyEmail />}
+          />
 
-            {/* Discover (tabbed) */}
-            <Route path={ROUTES.DISCOVER} element={<Navigate to={ROUTES.DISCOVER_DADS} replace />} />
-            <Route path="/discover/dads/:dadId" element={<DadDetail />} />
-            <Route path="/discover/:tab" element={<Discover />} />
+          {/* Profile Setup - requires token but no user profile yet */}
+          <Route
+            path={ROUTES.SETUP}
+            element={<SetupRoute><ProfileSetup /></SetupRoute>}
+          />
 
-            {/* Communities (member pages only - chat is unified) */}
-            <Route path="/communities/:communityId" element={<CommunityDetail />} />
-            <Route path="/communities/:communityId/members" element={<CommunityMembers />} />
+          {/* Protected Routes - require full authentication */}
+          <Route
+            path={ROUTES.MATCH}
+            element={<ProtectedRoute><Match /></ProtectedRoute>}
+          />
 
-            {/* Events */}
-            <Route path="/events/:eventId" element={<EventDetail />} />
+          {/* Discover (tabbed) */}
+          <Route
+            path={ROUTES.DISCOVER}
+            element={<ProtectedRoute><Navigate to={ROUTES.DISCOVER_DADS} replace /></ProtectedRoute>}
+          />
+          <Route
+            path="/discover/dads/:id"
+            element={<ProtectedRoute><ProfileDetail /></ProtectedRoute>}
+          />
+          <Route
+            path="/discover/:tab"
+            element={<ProtectedRoute><Discover /></ProtectedRoute>}
+          />
 
-            {/* My Groups (tabbed) */}
-            <Route path={ROUTES.GROUPS} element={<Navigate to={ROUTES.GROUPS_COMMUNITIES} replace />} />
-            <Route path="/groups/:tab" element={<Groups />} />
-            <Route path="/groups/members/:groupId" element={<GroupMembers />} />
+          {/* Communities */}
+          <Route
+            path="/communities/:communityId"
+            element={<ProtectedRoute><CommunityDetail /></ProtectedRoute>}
+          />
+          <Route
+            path="/communities/:communityId/members"
+            element={<ProtectedRoute><Members /></ProtectedRoute>}
+          />
 
-            {/* Chats (unified - handles individual, private-group, and community chats) */}
-            <Route path={ROUTES.CHATS} element={<Chats />} />
-            <Route path="/chats/:chatId" element={<Chat />} />
+          {/* Events */}
+          <Route
+            path="/events/:eventId"
+            element={<ProtectedRoute><EventDetail /></ProtectedRoute>}
+          />
 
-            {/* Profile */}
-            <Route path={ROUTES.PROFILE} element={<Profile />} />
-            <Route path={ROUTES.EDIT_PROFILE} element={<EditProfile />} />
-            <Route path="/profiles/:profileId" element={<Profile />} />
-            <Route path={ROUTES.CONNECTIONS} element={<Connections />} />
-            <Route path={ROUTES.REQUESTS} element={<Requests />} />
+          {/* My Groups (tabbed) */}
+          <Route
+            path={ROUTES.GROUPS}
+            element={<ProtectedRoute><Navigate to={ROUTES.GROUPS_COMMUNITIES} replace /></ProtectedRoute>}
+          />
+          <Route
+            path="/groups/:tab"
+            element={<ProtectedRoute><Groups /></ProtectedRoute>}
+          />
+          <Route
+            path="/groups/:groupId/members"
+            element={<ProtectedRoute><Members /></ProtectedRoute>}
+          />
 
-            {/* Catch-all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </GroupsProvider>
+          {/* Chats */}
+          <Route
+            path={ROUTES.CHATS}
+            element={<ProtectedRoute><Chats /></ProtectedRoute>}
+          />
+          <Route
+            path="/chats/individual/:id"
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
+          />
+          <Route
+            path="/chats/group/:id"
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
+          />
+          <Route
+            path="/chats/community/:id"
+            element={<ProtectedRoute><Chat /></ProtectedRoute>}
+          />
+
+          {/* Profile */}
+          <Route
+            path={ROUTES.PROFILE}
+            element={<ProtectedRoute><MyProfile /></ProtectedRoute>}
+          />
+          <Route
+            path="/profiles/:id"
+            element={<ProtectedRoute><ProfileDetail /></ProtectedRoute>}
+          />
+          <Route
+            path={ROUTES.CONNECTIONS}
+            element={<ProtectedRoute><Connections /></ProtectedRoute>}
+          />
+          <Route
+            path={ROUTES.REQUESTS}
+            element={<ProtectedRoute><Requests /></ProtectedRoute>}
+          />
+
+          {/* Catch-all */}
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
+  )
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   </QueryClientProvider>
 )
 

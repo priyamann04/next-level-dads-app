@@ -19,43 +19,32 @@ const Welcome = () => {
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
-      console.log('handleOAuthCallback called')
-      console.log('isLoading:', isLoading)
-      console.log('hash:', window.location.hash)
-      if (isLoading) {
-        console.log('Returning early - isLoading is true')
-        return
-      }
+      if (isLoading) return
 
       const hash = window.location.hash
-      if (!hash.includes('access_token')) {
-        console.log('Returning early - no access_token in hash')
+      if (!hash.includes('access_token')) return
+
+      // Parse tokens from hash (format: #access_token=xxx&refresh_token=xxx&...)
+      const params = new URLSearchParams(hash.substring(1))
+      const access_token = params.get('access_token')
+      const refresh_token = params.get('refresh_token')
+
+      if (!access_token || !refresh_token) {
+        toast({
+          title: 'Sign in failed',
+          description: 'Invalid OAuth response.',
+          variant: 'destructive',
+        })
         return
       }
 
       setIsLoading(true)
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        console.log('session:', session)
-        if (!session) throw new Error('No session')
-
-        console.log('Calling /oauth/session...')
-
         const res = await axiosPublic.post(
           '/api/auth/oauth/session',
-          {
-            access_token: session.access_token,
-            refresh_token: session.refresh_token,
-          },
+          { access_token, refresh_token },
           { timeout: TIMEOUT_LENGTH_MS },
         )
-
-        // clear Supabase localStorage
-        Object.keys(localStorage)
-          .filter((key) => key.startsWith('sb-'))
-          .forEach((key) => localStorage.removeItem(key))
 
         // clear hash from URL
         window.history.replaceState({}, '', '/')

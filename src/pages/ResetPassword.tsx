@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, XCircle } from 'lucide-react'
 import logo from '@/assets/logo.png'
 import { ROUTES } from '@/lib/routes'
 import { useToast } from '@/components/ui/use-toast'
@@ -19,6 +19,59 @@ const ResetPassword = () => {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionReady, setSessionReady] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
+
+  // Manually handle recovery tokens since detectSessionInUrl is disabled
+  useEffect(() => {
+    const initRecoverySession = async () => {
+      const hash = window.location.hash
+      const params = new URLSearchParams(hash.substring(1))
+
+      // Check for error from Supabase (e.g., expired link)
+      const error = params.get('error')
+
+      if (error) {
+        // Clear hash from URL
+        window.history.replaceState({}, document.title, ROUTES.RESET_PASSWORD)
+        setLinkError('This reset link is invalid or has expired. Please request a new password reset link.')
+        return
+      }
+
+      if (!hash.includes('access_token')) {
+        // No recovery tokens - user navigated here directly
+        setLinkError('No reset link detected. Please request a password reset from the login page.')
+        return
+      }
+
+      // Parse tokens from hash
+      const access_token = params.get('access_token')
+      const refresh_token = params.get('refresh_token')
+
+      // Clear hash from URL
+      window.history.replaceState({}, document.title, ROUTES.RESET_PASSWORD)
+
+      if (!access_token || !refresh_token) {
+        setLinkError('Invalid reset link. Please request a new password reset link.')
+        return
+      }
+
+      // Establish Supabase session with recovery tokens
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      })
+
+      if (sessionError) {
+        setLinkError('This reset link is invalid or has expired. Please request a new password reset link.')
+        return
+      }
+
+      setSessionReady(true)
+    }
+
+    initRecoverySession()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -93,11 +146,39 @@ const ResetPassword = () => {
 
         <Card className="shadow-md">
           <CardContent className="p-6 space-y-6">
-            <h1 className="text-2xl font-heading font-semibold text-center text-foreground">
-              Reset Password
-            </h1>
+            {linkError ? (
+              <div className="flex flex-col items-center space-y-4">
+                <XCircle className="w-16 h-16 text-red-600" />
+                <h1 className="text-2xl font-heading font-semibold text-center text-foreground">
+                  Unable to Reset Password
+                </h1>
+                <p className="text-center text-muted-foreground">{linkError}</p>
+                <Button
+                  size="lg"
+                  className="w-full rounded-full font-semibold text-base shadow-md"
+                  style={{ backgroundColor: '#D8A24A' }}
+                  onClick={() => navigate(ROUTES.FORGOT_PASSWORD)}
+                >
+                  Request New Link
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  <button
+                    type="button"
+                    onClick={() => navigate(ROUTES.LOGIN)}
+                    className="font-semibold hover:underline"
+                    style={{ color: '#D8A24A' }}
+                  >
+                    Back to Login
+                  </button>
+                </p>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-2xl font-heading font-semibold text-center text-foreground">
+                  Reset Password
+                </h1>
 
-            <form
+                <form
               onSubmit={handleSubmit}
               className="space-y-4"
             >
@@ -166,9 +247,9 @@ const ResetPassword = () => {
                 size="lg"
                 className="w-full rounded-full font-semibold text-base shadow-md"
                 style={{ backgroundColor: '#D8A24A' }}
-                disabled={isLoading}
+                disabled={isLoading || !sessionReady}
               >
-                Reset Password
+                {sessionReady ? 'Reset Password' : 'Loading...'}
               </Button>
             </form>
 
@@ -183,6 +264,8 @@ const ResetPassword = () => {
                 Back to Login
               </button>
             </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

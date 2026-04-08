@@ -19,17 +19,29 @@ const Welcome = () => {
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
-      if (isLoading) return
+      console.log('handleOAuthCallback called')
+      console.log('isLoading:', isLoading)
+      console.log('hash:', window.location.hash)
+      if (isLoading) {
+        console.log('Returning early - isLoading is true')
+        return
+      }
 
       const hash = window.location.hash
-      if (!hash.includes('access_token')) return
+      if (!hash.includes('access_token')) {
+        console.log('Returning early - no access_token in hash')
+        return
+      }
 
       setIsLoading(true)
       try {
         const {
           data: { session },
         } = await supabase.auth.getSession()
+        console.log('session:', session)
         if (!session) throw new Error('No session')
+
+        console.log('Calling /oauth/session...')
 
         const res = await axiosPublic.post(
           '/api/auth/oauth/session',
